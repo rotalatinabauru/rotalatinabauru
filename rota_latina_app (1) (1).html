@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Rota Latina — Gestão Financeira</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#1a2744;--navy2:#243058;--terra:#c0623a;--gold:#d4a853;
+  --green:#27ae60;--green-l:#d5f5e3;--red:#e74c3c;--red-l:#fadbd8;
+  --orange-l:#fdebd0;--gray:#f5f5f5;--gray2:#e0e0e0;--text:#1a1a2e;
+  --silver:#888;--radius:12px;--shadow:0 4px 20px rgba(26,39,68,0.12)
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Outfit',sans-serif;background:#f0eee8;color:var(--text);min-height:100vh;padding-bottom:80px}
+
+/* HEADER */
+.app-header{background:var(--navy);padding:14px 20px 10px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,0.3)}
+.app-header-top{display:flex;align-items:center;justify-content:space-between}
+.app-header h1{font-family:'Cormorant Garamond',serif;font-size:1.35rem;font-weight:700;letter-spacing:0.04em;color:var(--gold)}
+.app-header p{font-size:0.72rem;color:rgba(255,255,255,0.5);margin-top:2px}
+.backup-btns{display:flex;gap:6px}
+.backup-btn{padding:6px 10px;border:1px solid rgba(255,255,255,0.25);background:rgba(255,255,255,0.08);color:white;border-radius:7px;font-size:0.72rem;font-family:'Outfit',sans-serif;cursor:pointer;white-space:nowrap;transition:all 0.2s}
+.backup-btn.green{border-color:rgba(39,174,96,0.5);background:rgba(39,174,96,0.15);color:#a8e6c3}
+.backup-btn.gold{border-color:rgba(212,168,83,0.5);background:rgba(212,168,83,0.15);color:var(--gold)}
+
+/* TABS */
+.tab-bar{display:flex;overflow-x:auto;scrollbar-width:none;background:var(--navy2);border-bottom:2px solid rgba(255,255,255,0.08)}
+.tab-bar::-webkit-scrollbar{display:none}
+.tab-btn{flex-shrink:0;padding:11px 14px;background:none;border:none;color:rgba(255,255,255,0.5);font-family:'Outfit',sans-serif;font-size:0.8rem;font-weight:500;cursor:pointer;white-space:nowrap;border-bottom:3px solid transparent;transition:all 0.2s}
+.tab-btn.active{color:var(--gold);border-bottom-color:var(--gold)}
+.tab-content{display:none;padding:14px;max-width:960px;margin:0 auto}
+.tab-content.active{display:block}
+
+/* CARDS */
+.card{background:white;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin-bottom:14px}
+.card-header{padding:13px 16px;font-weight:600;font-size:0.92rem;display:flex;align-items:center;gap:8px;color:white}
+.card-body{padding:14px 16px}
+.bg-navy{background:var(--navy)}.bg-terra{background:var(--terra)}.bg-green{background:var(--green)}.bg-red{background:var(--red)}
+
+/* KPI */
+.kpi-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
+.kpi-card{background:white;border-radius:var(--radius);padding:14px;box-shadow:var(--shadow);border-left:4px solid var(--navy)}
+.kpi-card.green{border-left-color:var(--green)}.kpi-card.red{border-left-color:var(--red)}.kpi-card.terra{border-left-color:var(--terra)}.kpi-card.gold{border-left-color:var(--gold)}
+.kpi-label{font-size:0.7rem;color:var(--silver);font-weight:500;text-transform:uppercase;letter-spacing:0.05em}
+.kpi-value{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:700;margin-top:4px}
+.kpi-value.green{color:var(--green)}.kpi-value.red{color:var(--red)}.kpi-value.terra{color:var(--terra)}.kpi-value.gold{color:var(--gold)}
+
+/* FORMS */
+.form-group{margin-bottom:12px}
+.form-label{font-size:0.77rem;font-weight:600;color:var(--silver);margin-bottom:4px;display:block;text-transform:uppercase;letter-spacing:0.04em}
+.form-control{width:100%;padding:10px 13px;border:2px solid var(--gray2);border-radius:9px;font-family:'Outfit',sans-serif;font-size:0.88rem;color:var(--text);background:white;transition:border-color 0.2s;appearance:none;-webkit-appearance:none}
+.form-control:focus{outline:none;border-color:var(--navy)}
+select.form-control{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 18px;border:none;border-radius:9px;font-family:'Outfit',sans-serif;font-size:0.88rem;font-weight:600;cursor:pointer;transition:all 0.2s}
+.btn-green{background:var(--green);color:white}.btn-red{background:var(--red);color:white}.btn-terra{background:var(--terra);color:white}
+.btn-full{width:100%}.btn:active{transform:scale(0.98)}
+.btn-cancel{background:#eee;color:#333;margin-top:8px}
+
+/* TABLES */
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:0.79rem;min-width:480px}
+th{background:var(--navy);color:white;padding:9px 7px;text-align:center;font-weight:600;font-size:0.71rem;white-space:nowrap}
+td{padding:8px 7px;border-bottom:1px solid var(--gray2);text-align:center;vertical-align:middle}
+tr:hover td{background:var(--gray)}
+tr:last-child td{border-bottom:none}
+.td-green{background:var(--green-l);color:var(--green);font-weight:600}
+.td-red{background:var(--red-l);color:var(--red)}
+.td-orange{background:var(--orange-l);font-weight:600}
+.td-navy{background:var(--navy);color:white;font-weight:700}
+.td-left{text-align:left}
+
+/* BADGES */
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:0.68rem;font-weight:700;white-space:nowrap}
+.badge-airbnb{background:#ffe5e5;color:#ff5a5f}
+.badge-booking{background:#e3ecff;color:#003b95}
+.badge-particular{background:#e8f5e9;color:#2e7d32}
+.badge-pago{background:#d5f5e3;color:#1e8449;border:1px solid #27ae60}
+.badge-pendente{background:#fdebd0;color:#ca6f1e;border:1px solid #e67e22}
+
+/* SUMMARY */
+.summary-note{background:var(--green-l);border-left:4px solid var(--green);padding:9px 12px;font-size:0.78rem;color:var(--green);border-radius:0 8px 8px 0;margin-bottom:12px}
+.summary-note.red{background:var(--red-l);border-left-color:var(--red);color:var(--red)}
+
+/* CALENDAR */
+.cal-year-title{text-align:center;font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:700;color:var(--navy);margin-bottom:14px;letter-spacing:0.06em}
+.cal-month{margin-bottom:16px}
+.cal-month-title{background:var(--terra);color:white;text-align:center;padding:9px;font-weight:700;border-radius:var(--radius) var(--radius) 0 0;font-family:'Cormorant Garamond',serif;font-size:1rem;letter-spacing:0.05em}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr)}
+.cal-weekday{background:var(--navy);color:white;text-align:center;padding:6px 2px;font-size:0.68rem;font-weight:600}
+.cal-weekday.wknd{background:#8b0000}
+.cal-day{border:1px solid var(--gray2);background:white;min-height:64px;padding:3px;cursor:pointer;transition:background 0.15s;position:relative}
+.cal-day:hover{background:#f0f4ff}
+.cal-day.empty{background:#eee;cursor:default;pointer-events:none}
+.cal-day.occupied{background:#c8e6c9}
+.cal-day.reserved{background:#fff9c4}
+.cal-day.blocked{background:#ffcdd2}
+.cal-day.auto-filled{background:#bbdefb}
+.cal-day-num{font-weight:700;font-size:0.82rem;color:var(--navy)}
+.cal-day.wknd .cal-day-num{color:#8b0000}
+.cal-day-info{font-size:0.58rem;color:#333;line-height:1.4;margin-top:2px;word-break:break-word}
+.cal-auto-badge{position:absolute;top:2px;right:2px;background:#1565c0;color:white;font-size:0.48rem;padding:1px 3px;border-radius:3px;font-weight:700}
+.cal-pago-badge{position:absolute;bottom:2px;right:2px;background:#27ae60;color:white;font-size:0.48rem;padding:1px 3px;border-radius:3px;font-weight:700}
+.cal-pendente-badge{position:absolute;bottom:2px;right:2px;background:#e67e22;color:white;font-size:0.48rem;padding:1px 3px;border-radius:3px;font-weight:700}
+
+/* MODAL */
+.modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:200;align-items:flex-end;justify-content:center}
+.modal-backdrop.open{display:flex}
+.modal{background:white;width:100%;max-width:500px;border-radius:20px 20px 0 0;padding:18px;max-height:92vh;overflow-y:auto;animation:slideUp 0.3s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:40px;height:4px;background:var(--gray2);border-radius:2px;margin:0 auto 14px}
+.modal-title{font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-weight:700;color:var(--navy);margin-bottom:14px}
+
+/* INFO BOXES */
+.info-box{border-radius:9px;padding:10px 12px;margin-bottom:12px;font-size:0.78rem}
+.info-blue{background:#e3f2fd;color:#1565c0}
+.info-red{background:#ffebee;color:#c62828;border:1px solid #ef9a9a}
+.taxa-preview{background:#e3f2fd;border-radius:9px;padding:10px 13px;font-size:0.83rem;margin-bottom:12px;color:#1565c0;font-weight:500}
+
+/* CHARTS */
+.chart-bar-wrap{padding:6px 0}
+.chart-bar-row{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.chart-bar-label{font-size:0.68rem;width:82px;text-align:right;color:var(--silver);flex-shrink:0}
+.chart-bar-bg{flex:1;background:var(--gray2);border-radius:4px;height:17px;overflow:hidden}
+.chart-bar-fill{height:100%;border-radius:4px;transition:width 0.6s ease;display:flex;align-items:center;padding-left:6px}
+.chart-bar-val{font-size:0.63rem;color:white;font-weight:600}
+
+/* LEGEND */
+.legend{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.legend-item{display:flex;align-items:center;gap:4px;font-size:0.72rem}
+.legend-dot{width:13px;height:13px;border-radius:3px;flex-shrink:0}
+
+/* MISC */
+.empty-state{text-align:center;padding:36px 20px;color:var(--silver)}
+.empty-state .icon{font-size:2.2rem;margin-bottom:8px}
+.empty-state p{font-size:0.85rem}
+.del-btn{background:none;border:none;color:var(--red);font-size:0.95rem;cursor:pointer;padding:3px}
+.pago-toggle{display:inline-flex;border:2px solid var(--gray2);border-radius:9px;overflow:hidden;width:100%}
+.pago-toggle button{flex:1;padding:9px;border:none;background:white;font-family:'Outfit',sans-serif;font-size:0.85rem;font-weight:600;cursor:pointer;transition:all 0.2s;color:var(--silver)}
+.pago-toggle button.active-pago{background:var(--green);color:white}
+.pago-toggle button.active-pendente{background:#e67e22;color:white}
+
+/* TOAST */
+.toast{position:fixed;bottom:88px;left:50%;transform:translateX(-50%);background:var(--navy);color:white;padding:11px 18px;border-radius:30px;font-size:0.82rem;font-weight:500;z-index:300;opacity:0;pointer-events:none;transition:opacity 0.3s;white-space:nowrap;max-width:90vw;text-align:center}
+.toast.show{opacity:1}
+
+@media(min-width:600px){
+  .kpi-grid{grid-template-columns:repeat(4,1fr)}
+  .modal{border-radius:20px;margin-bottom:20px}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN OVERLAY -->
+<div id="loginOverlay" style="display:none;position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#1a2744 0%,#243058 100%);align-items:center;justify-content:center;flex-direction:column;padding:20px;font-family:'Outfit',sans-serif">
+  <div style="background:white;border-radius:16px;padding:32px 28px;max-width:380px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.4)">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:700;color:#1a2744;margin-bottom:6px">🏠 Rota Latina</div>
+    <div style="color:#888;font-size:0.85rem;margin-bottom:24px">Gestão Financeira</div>
+    <div id="loginMsg" style="color:#555;font-size:0.9rem;margin-bottom:20px;line-height:1.5">Faça login com sua conta Google para acessar o app.</div>
+    <button id="btnLoginGoogle" style="width:100%;padding:13px;background:#1a2744;color:white;border:none;border-radius:9px;font-family:'Outfit',sans-serif;font-size:0.95rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px">
+      <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg"><path fill="#fff" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#fff" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" opacity=".85"/><path fill="#fff" d="M3.964 10.706A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.706V4.962H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.038l3.007-2.332z" opacity=".7"/><path fill="#fff" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.962L3.964 7.294C4.672 5.167 6.656 3.58 9 3.58z" opacity=".55"/></svg>
+      Entrar com Google
+    </button>
+    <div id="loginError" style="color:#e74c3c;font-size:0.8rem;margin-top:14px;display:none"></div>
+  </div>
+</div>
+
+<!-- USER INFO BAR (topo, mostra UID e logout) -->
+<div id="userBar" style="display:none;background:#0f1830;color:#aaa;padding:6px 14px;font-size:0.7rem;font-family:'Outfit',sans-serif;display:none;align-items:center;justify-content:space-between;gap:8px;border-bottom:1px solid rgba(255,255,255,0.05)">
+  <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+    👤 <span id="userEmail">—</span>
+    <span style="color:#666"> · UID: </span><code id="userUid" style="color:#d4a853;cursor:pointer;user-select:all" onclick="copyUid()">—</code>
+  </div>
+  <button onclick="doLogout()" style="background:rgba(231,76,60,0.15);color:#ff8b80;border:1px solid rgba(231,76,60,0.3);padding:3px 9px;border-radius:6px;font-size:0.68rem;cursor:pointer;font-family:'Outfit',sans-serif;flex-shrink:0">Sair</button>
+</div>
+
+<!-- HEADER -->
+<div class="app-header">
+  <div class="app-header-top">
+    <div>
+      <h1>🏠 Rota Latina</h1>
+      <p>Gestão Financeira 2026 <span id="syncStatus" style="margin-left:6px;font-size:0.7rem;color:rgba(212,168,83,0.9)">⏳ Conectando…</span></p>
+    </div>
+    <div class="backup-btns">
+      <button class="backup-btn gold" onclick="exportarBackup()">📥 Backup</button>
+      <button class="backup-btn green" onclick="document.getElementById('importFile').click()">📤 Importar</button>
+      <input type="file" id="importFile" accept=".json" style="display:none" onchange="importarBackup(event)">
+    </div>
+  </div>
+</div>
+
+<!-- TAB BAR -->
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="showTab('dashboard',this)">📊 Dashboard</button>
+  <button class="tab-btn" onclick="showTab('calendario',this)">📅 Calendário</button>
+  <button class="tab-btn" onclick="showTab('receitas',this)">💰 Receitas</button>
+  <button class="tab-btn" onclick="showTab('despesas',this)">💸 Despesas</button>
+  <button class="tab-btn" onclick="showTab('config',this)">⚙️ Config</button>
+</div>
+
+<!-- ═══════════ DASHBOARD ═══════════ -->
+<div id="tab-dashboard" class="tab-content active">
+  <div class="kpi-grid">
+    <div class="kpi-card green"><div class="kpi-label">💰 Receita Bruta</div><div class="kpi-value green" id="kpi-rec-bruta">R$ 0,00</div></div>
+    <div class="kpi-card red"><div class="kpi-label">💸 Despesas</div><div class="kpi-value red" id="kpi-despesas">R$ 0,00</div></div>
+    <div class="kpi-card terra"><div class="kpi-label">✅ Lucro Líquido</div><div class="kpi-value terra" id="kpi-lucro">R$ 0,00</div></div>
+    <div class="kpi-card gold"><div class="kpi-label">📈 Margem</div><div class="kpi-value gold" id="kpi-margem">0%</div></div>
+  </div>
+  <div class="card">
+    <div class="card-header bg-navy">📊 Comparativo Mensal 2026</div>
+    <div class="table-wrap">
+      <table><thead><tr><th>Mês</th><th>Rec. Bruta</th><th>Rec. Líq.</th><th>Despesas</th><th>Lucro</th><th>Margem</th><th>Reservas</th><th>Hóspedes</th><th>Recebido</th><th>A Receber</th></tr></thead>
+      <tbody id="dash-tbody"></tbody></table>
+    </div>
+  </div>
+  <div class="card"><div class="card-header bg-terra">📊 Receitas por Plataforma</div><div class="card-body" id="chart-plat"></div></div>
+  <div class="card"><div class="card-header bg-red">📊 Despesas por Categoria</div><div class="card-body" id="chart-desp"></div></div>
+</div>
+
+<!-- ═══════════ CALENDÁRIO ═══════════ -->
+<div id="tab-calendario" class="tab-content">
+  <div class="cal-year-title">📅 2026</div>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#bbdefb"></div>Reserva (auto)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#c8e6c9"></div>Ocupado</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#fff9c4"></div>Reservado</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#ffcdd2"></div>Bloqueado</div>
+    <div class="legend-item"><div class="legend-dot" style="background:white;border:1px solid #ddd"></div>Livre</div>
+  </div>
+  <div id="cal-container"></div>
+</div>
+
+<!-- ═══════════ RECEITAS ═══════════ -->
+<div id="tab-receitas" class="tab-content">
+  <div class="card">
+    <div class="card-header bg-green">📊 Seção 1 — Resumo Mensal (automático)</div>
+    <div class="card-body" style="padding:10px 14px">
+      <div class="summary-note">✅ Atualizado automaticamente. Não preencha nada aqui.</div>
+      <div class="table-wrap">
+        <table><thead><tr><th>Mês</th><th>Airbnb Bruto</th><th>Airbnb Líq.</th><th>Booking Bruto</th><th>Booking Líq.</th><th>Particular Bruto</th><th>Particular Líq.</th><th>Total Bruto</th><th>Taxas</th><th>Total Líq.</th><th>Reservas</th><th>Hóspedes</th><th>Recebido</th><th>A Receber</th></tr></thead>
+        <tbody id="resumo-rec-tbody"></tbody></table>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header bg-terra">📝 Seção 2 — Lançamentos Individuais</div>
+    <div class="card-body"><button class="btn btn-green btn-full" onclick="openModal('modal-rec')">➕ Nova Hospedagem</button></div>
+    <div class="table-wrap">
+      <table><thead><tr><th>Entrada</th><th>Saída</th><th>Hóspede</th><th>Plataforma</th><th>Dias</th><th>Pessoas</th><th>Bruto</th><th>Taxa</th><th>Líquido</th><th>Pgto</th><th>Status</th><th></th></tr></thead>
+      <tbody id="rec-tbody"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ DESPESAS ═══════════ -->
+<div id="tab-despesas" class="tab-content">
+  <div class="card">
+    <div class="card-header bg-red">📊 Seção 1 — Resumo Mensal por Categoria (automático)</div>
+    <div class="card-body" style="padding:10px 14px">
+      <div class="summary-note red">✅ Atualizado automaticamente. Não preencha nada aqui.</div>
+      <div class="table-wrap">
+        <table><thead><tr><th>Mês</th><th>Condomínio</th><th>Energia</th><th>Internet</th><th>Limpeza</th><th>Manutenção</th><th>Taxas</th><th>Marketing</th><th>Material</th><th>Outros</th><th>TOTAL</th></tr></thead>
+        <tbody id="resumo-desp-tbody"></tbody></table>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header bg-terra">📝 Seção 2 — Lançamentos Individuais</div>
+    <div class="card-body"><button class="btn btn-red btn-full" onclick="openModal('modal-desp')">➕ Nova Despesa</button></div>
+    <div class="table-wrap">
+      <table><thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Fornecedor</th><th>Valor</th><th>Pgto</th><th>Comp.</th><th></th></tr></thead>
+      <tbody id="desp-tbody"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ CONFIGURAÇÕES ═══════════ -->
+<div id="tab-config" class="tab-content">
+  <div class="card">
+    <div class="card-header bg-navy">⚙️ Taxas das Plataformas</div>
+    <div class="card-body">
+      <div class="info-box info-blue">
+        💡 Defina a taxa cobrada por cada plataforma. O valor líquido das reservas é calculado automaticamente com base nessas taxas.
+      </div>
+      <div class="form-group">
+        <label class="form-label">Taxa Airbnb (%)</label>
+        <div style="display:flex;align-items:center;gap:10px">
+          <input type="number" class="form-control" id="cfg-taxa-airbnb" step="0.1" min="0" max="100" placeholder="Ex: 15">
+          <span style="font-size:0.85rem;color:var(--silver);flex-shrink:0">%</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Taxa Booking (%)</label>
+        <div style="display:flex;align-items:center;gap:10px">
+          <input type="number" class="form-control" id="cfg-taxa-booking" step="0.1" min="0" max="100" placeholder="Ex: 15">
+          <span style="font-size:0.85rem;color:var(--silver);flex-shrink:0">%</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Taxa Particular (%)</label>
+        <div style="display:flex;align-items:center;gap:10px">
+          <input type="number" class="form-control" id="cfg-taxa-particular" step="0.1" min="0" max="100" placeholder="Ex: 0">
+          <span style="font-size:0.85rem;color:var(--silver);flex-shrink:0">%</span>
+        </div>
+      </div>
+      <button class="btn btn-green btn-full" onclick="salvarConfig()">✅ Salvar Configurações</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header bg-terra">📋 Taxas Atuais</div>
+    <div class="card-body">
+      <table style="min-width:unset">
+        <thead><tr><th>Plataforma</th><th>Taxa</th><th>Exemplo R$500</th></tr></thead>
+        <tbody id="cfg-preview-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ MODAL RECEITA ═══════════ -->
+<div class="modal-backdrop" id="modal-rec" onclick="closeModalOutside(event,'modal-rec')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">💰 Nova Hospedagem</div>
+    <div id="conflito-box" class="info-box info-red" style="display:none"></div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Data Check-in *</label>
+        <input type="date" class="form-control" id="r-data" min="2026-01-01" max="2026-12-31" onchange="verificarConflito()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Data Check-out</label>
+        <input type="date" class="form-control" id="r-checkout" min="2026-01-01" max="2026-12-31" onchange="verificarConflito()">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Nome do Hóspede *</label>
+      <input type="text" class="form-control" id="r-hospede" placeholder="Ex: Maria Silva">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Plataforma *</label>
+        <select class="form-control" id="r-plat" onchange="updateTaxaPreview()">
+          <option value="">Selecione...</option>
+          <option>Airbnb</option><option>Booking</option><option>Particular</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Nº de Pessoas</label>
+        <input type="number" class="form-control" id="r-pessoas" min="1" placeholder="1">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Valor Bruto (R$) *</label>
+        <input type="tel" inputmode="numeric" class="form-control" id="r-valor" placeholder="R$ 0,00" oninput="formatCurrencyInput(this); updateTaxaPreview()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Forma de Pagamento</label>
+        <select class="form-control" id="r-pgto">
+          <option value="">Selecione...</option>
+          <option>PIX</option><option>Dinheiro</option><option>Boleto</option><option>Cartão</option>
+        </select>
+      </div>
+    </div>
+    <div class="taxa-preview" id="taxa-preview">💡 Preencha plataforma e valor para calcular a taxa</div>
+    <div class="form-group">
+      <label class="form-label">Status do Pagamento *</label>
+      <div class="pago-toggle" id="pago-toggle">
+        <button id="btn-pago" onclick="setPago('Pago')">✅ Pago</button>
+        <button id="btn-pendente" onclick="setPago('Pendente')">⏳ Pendente</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Observações</label>
+      <input type="text" class="form-control" id="r-obs" placeholder="Opcional">
+    </div>
+    <div class="info-box info-blue">📅 Os dias entre check-in e check-out serão marcados no calendário automaticamente.</div>
+    <button class="btn btn-green btn-full" id="btn-salvar-rec" onclick="saveReceita()">✅ Salvar Hospedagem</button>
+    <button class="btn btn-full btn-cancel" onclick="closeModal('modal-rec')">Cancelar</button>
+  </div>
+</div>
+
+<!-- ═══════════ MODAL DESPESA ═══════════ -->
+<div class="modal-backdrop" id="modal-desp" onclick="closeModalOutside(event,'modal-desp')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">💸 Nova Despesa</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Data *</label>
+        <input type="date" class="form-control" id="d-data">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Categoria *</label>
+        <select class="form-control" id="d-cat">
+          <option value="">Selecione...</option>
+          <option>Condomínio</option><option>Energia Elétrica</option><option>Internet</option>
+          <option>Limpeza</option><option>Manutenção</option><option>Taxas e Impostos</option>
+          <option>Marketing</option><option>Material de Reposição</option><option>Outros</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Descrição</label>
+      <input type="text" class="form-control" id="d-desc" placeholder="Ex: Conta de luz de janeiro">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Fornecedor / Empresa</label>
+      <input type="text" class="form-control" id="d-forn" placeholder="Ex: CPFL, Diarista...">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Valor (R$) *</label>
+        <input type="tel" inputmode="numeric" class="form-control" id="d-valor" placeholder="R$ 0,00" oninput="formatCurrencyInput(this)">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Forma de Pagamento</label>
+        <select class="form-control" id="d-pgto">
+          <option value="">Selecione...</option>
+          <option>PIX</option><option>Dinheiro</option><option>Boleto</option><option>Cartão</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Comprovante?</label>
+      <select class="form-control" id="d-comp"><option value="">Selecione...</option><option>Sim</option><option>Não</option></select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Observações</label>
+      <input type="text" class="form-control" id="d-obs" placeholder="Opcional">
+    </div>
+    <button class="btn btn-red btn-full" onclick="saveDespesa()">✅ Salvar Despesa</button>
+    <button class="btn btn-full btn-cancel" onclick="closeModal('modal-desp')">Cancelar</button>
+  </div>
+</div>
+
+<!-- ═══════════ MODAL EDITAR RESERVA ═══════════ -->
+<div class="modal-backdrop" id="modal-edit-rec" onclick="closeModalOutside(event,'modal-edit-rec')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">✏️ Editar Reserva</div>
+    <div class="info-box info-blue" id="edit-rec-info"></div>
+    <div class="form-group">
+      <label class="form-label">Status do Pagamento</label>
+      <div class="pago-toggle" id="edit-pago-toggle">
+        <button id="edit-btn-pago" onclick="setEditPago('Pago')">✅ Pago</button>
+        <button id="edit-btn-pendente" onclick="setEditPago('Pendente')">⏳ Pendente</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Forma de Pagamento</label>
+      <select class="form-control" id="edit-pgto">
+        <option value="">Selecione...</option>
+        <option>PIX</option><option>Dinheiro</option><option>Boleto</option><option>Cartão</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Observações</label>
+      <input type="text" class="form-control" id="edit-obs" placeholder="Opcional">
+    </div>
+    <input type="hidden" id="edit-rec-id">
+    <button class="btn btn-green btn-full" onclick="saveEditReceita()">✅ Salvar Alterações</button>
+    <button class="btn btn-full btn-cancel" onclick="closeModal('modal-edit-rec')">Cancelar</button>
+  </div>
+</div>
+
+<!-- ═══════════ MODAL CALENDÁRIO ═══════════ -->
+<div class="modal-backdrop" id="modal-cal" onclick="closeModalOutside(event,'modal-cal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="cal-modal-title">📅 Dia</div>
+    <div class="info-box info-blue" id="cal-auto-info" style="display:none"></div>
+    <div class="form-group">
+      <label class="form-label">Status do Dia</label>
+      <select class="form-control" id="cal-status">
+        <option value="">Livre</option>
+        <option value="occupied">Ocupado</option>
+        <option value="reserved">Reservado</option>
+        <option value="blocked">Bloqueado</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Nome do Hóspede</label>
+      <input type="text" class="form-control" id="cal-hospede" placeholder="Ex: Maria Silva">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Nº de Pessoas</label>
+        <input type="number" class="form-control" id="cal-pessoas" min="1" placeholder="0">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Valor Pago (R$)</label>
+        <input type="tel" inputmode="numeric" class="form-control" id="cal-valor" placeholder="R$ 0,00" oninput="formatCurrencyInput(this)">
+      </div>
+    </div>
+    <input type="hidden" id="cal-date-key">
+    <button class="btn btn-terra btn-full" onclick="saveCalDay()">✅ Salvar</button>
+    <button class="btn btn-full btn-cancel" onclick="closeModal('modal-cal')">Cancelar</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── CONSTANTS
+const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const CATS = ['Condomínio','Energia Elétrica','Internet','Limpeza','Manutenção','Taxas e Impostos','Marketing','Material de Reposição','Outros'];
+const YEAR = 2026;
+let pagoStatus = 'Pago'; // default
+
+// ── STORAGE (Firebase + cache local)
+// Mantém um cache em memória que é a fonte de verdade para a UI;
+// toda escrita atualiza o cache, salva no localStorage (offline) e envia ao Firestore.
+// O listener do Firestore mantém o cache atualizado quando outro dispositivo escreve.
+const _cache = { rec: [], desp: [], cal: {}, config: {} };
+let _firestoreReady = false;
+let _pendingWrites = 0;
+
+function setSyncStatus(state) {
+  const el = document.getElementById('syncStatus');
+  if (!el) return;
+  if (state === 'synced')   { el.textContent = '✅ Sincronizado'; el.style.color = 'rgba(168,230,195,0.9)'; }
+  if (state === 'syncing')  { el.textContent = '🔄 Sincronizando…'; el.style.color = 'rgba(212,168,83,0.9)'; }
+  if (state === 'offline')  { el.textContent = '📴 Offline (salvando local)'; el.style.color = 'rgba(231,76,60,0.9)'; }
+  if (state === 'error')    { el.textContent = '⚠️ Erro de sync'; el.style.color = 'rgba(231,76,60,0.9)'; }
+  if (state === 'connecting'){ el.textContent = '⏳ Conectando…'; el.style.color = 'rgba(212,168,83,0.9)'; }
+}
+
+function load(k) { return _cache[k] || []; }
+function loadCal() { return _cache.cal || {}; }
+function loadConfig() { return _cache.config || {}; }
+
+function save(k, d) {
+  _cache[k] = d;
+  localStorage.setItem('rl_'+k, JSON.stringify(d));
+  _pushToFirestore(k, d);
+}
+function saveCal(d) {
+  _cache.cal = d;
+  localStorage.setItem('rl_cal', JSON.stringify(d));
+  _pushToFirestore('cal', d);
+}
+function saveConfig(d) {
+  _cache.config = d;
+  localStorage.setItem('rl_config', JSON.stringify(d));
+  _pushToFirestore('config', d);
+}
+
+async function _pushToFirestore(key, data) {
+  if (!_firestoreReady) return; // será sincronizado depois (cache local já atualizado)
+  try {
+    _pendingWrites++;
+    setSyncStatus('syncing');
+    await window._fb.setDoc(window._fb.doc(window._fb.db, 'app', key), { data });
+    _pendingWrites--;
+    if (_pendingWrites === 0) setSyncStatus('synced');
+  } catch (err) {
+    console.error('Erro ao salvar no Firestore:', err);
+    _pendingWrites = Math.max(0, _pendingWrites - 1);
+    setSyncStatus('offline');
+  }
+}
+
+// Carrega cache inicial do localStorage (instantâneo, antes do Firebase responder)
+function _loadCacheFromLocal() {
+  try { _cache.rec    = JSON.parse(localStorage.getItem('rl_rec')    || '[]'); } catch { _cache.rec = []; }
+  try { _cache.desp   = JSON.parse(localStorage.getItem('rl_desp')   || '[]'); } catch { _cache.desp = []; }
+  try { _cache.cal    = JSON.parse(localStorage.getItem('rl_cal')    || '{}'); } catch { _cache.cal = {}; }
+  try { _cache.config = JSON.parse(localStorage.getItem('rl_config') || '{}'); } catch { _cache.config = {}; }
+}
+
+// ── UTILS
+function fmt(v) { return 'R$ ' + parseFloat(v||0).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+function pct(v) { return (parseFloat(v||0)*100).toFixed(1) + '%'; }
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
+function getMes(d) { if (!d) return null; return new Date(d + 'T00:00:00').getMonth() + 1; }
+
+// Formata input de moeda enquanto digita: usuário digita só números, vê "R$ 2.500,00"
+function formatCurrencyInput(el) {
+  let digits = (el.value || '').replace(/\D/g, '');
+  if (!digits) { el.value = ''; return; }
+  digits = digits.replace(/^0+/, '') || '0'; // remove zeros à esquerda mas mantém pelo menos 1
+  while (digits.length < 3) digits = '0' + digits; // garante centavos
+  const reais = digits.slice(0, -2);
+  const cents = digits.slice(-2);
+  const reaisFmt = parseInt(reais, 10).toLocaleString('pt-BR');
+  el.value = 'R$ ' + reaisFmt + ',' + cents;
+}
+
+// Converte string formatada "R$ 2.500,00" em número 2500.00
+function parseBRL(str) {
+  if (str === null || str === undefined || str === '') return 0;
+  const s = String(str).replace(/[^\d,-]/g, '').replace(/\./g, '').replace(',', '.');
+  const n = parseFloat(s);
+  return isNaN(n) ? 0 : n;
+}
+
+// Converte número em string formatada (para preencher inputs ao editar)
+function numberToBRLInput(n) {
+  if (!n && n !== 0) return '';
+  return 'R$ ' + parseFloat(n).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+
+function calcTaxa(plat, valor) {
+  const cfg = loadConfig();
+  const pct = cfg[plat] !== undefined ? cfg[plat] : (plat === 'Airbnb' || plat === 'Booking' ? 15 : 0);
+  return parseFloat(valor||0) * (pct / 100);
+}
+
+// ── CONFIG
+function getTaxa(plat) {
+  const cfg = loadConfig();
+  if (cfg[plat] !== undefined) return cfg[plat];
+  if (plat === 'Airbnb' || plat === 'Booking') return 15;
+  return 0;
+}
+
+function salvarConfig() {
+  const airbnb = parseFloat(document.getElementById('cfg-taxa-airbnb').value || 15);
+  const booking = parseFloat(document.getElementById('cfg-taxa-booking').value || 15);
+  const particular = parseFloat(document.getElementById('cfg-taxa-particular').value || 0);
+  saveConfig({ Airbnb: airbnb, Booking: booking, Particular: particular });
+  renderConfig();
+  toast('✅ Taxas salvas!');
+}
+
+function renderConfig() {
+  const plats = ['Airbnb', 'Booking', 'Particular'];
+  const cores = { Airbnb:'#ff5a5f', Booking:'#003b95', Particular:'#27ae60' };
+  const cfg = loadConfig();
+
+  // Preenche os campos
+  document.getElementById('cfg-taxa-airbnb').value = getTaxa('Airbnb');
+  document.getElementById('cfg-taxa-booking').value = getTaxa('Booking');
+  document.getElementById('cfg-taxa-particular').value = getTaxa('Particular');
+
+  // Preview table
+  document.getElementById('cfg-preview-tbody').innerHTML = plats.map(p => {
+    const t = getTaxa(p);
+    const ex500taxa = 500 * (t/100);
+    const ex500liq = 500 - ex500taxa;
+    return `<tr>
+      <td><span class="badge badge-${p.toLowerCase()}">${p}</span></td>
+      <td style="font-weight:700;color:${cores[p]}">${t}%</td>
+      <td class="td-green">${fmt(ex500liq)} <span style="color:var(--silver);font-weight:400;font-size:0.7rem">(taxa: ${fmt(ex500taxa)})</span></td>
+    </tr>`;
+  }).join('');
+}
+
+// ── TABS
+function showTab(id, btn) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+  if (id === 'dashboard') renderDashboard();
+  if (id === 'receitas') renderReceitas();
+  if (id === 'despesas') renderDespesas();
+  if (id === 'calendario') renderCalendario();
+  if (id === 'config') renderConfig();
+}
+
+// ── MODAL
+function openModal(id) { document.getElementById(id).classList.add('open'); document.body.style.overflow = 'hidden'; }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); document.body.style.overflow = ''; }
+function closeModalOutside(e, id) { if (e.target === document.getElementById(id)) closeModal(id); }
+
+// ── TOAST
+function toast(msg, dur=2500) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), dur);
+}
+
+// ── PAGO TOGGLE
+function setPago(val) {
+  pagoStatus = val;
+  const btnP = document.getElementById('btn-pago');
+  const btnPend = document.getElementById('btn-pendente');
+  btnP.className = val === 'Pago' ? 'active-pago' : '';
+  btnPend.className = val === 'Pendente' ? 'active-pendente' : '';
+}
+
+// ── TAXA PREVIEW
+function updateTaxaPreview() {
+  const plat = document.getElementById('r-plat').value;
+  const valor = parseBRL(document.getElementById('r-valor').value);
+  const t = calcTaxa(plat, valor);
+  const liq = valor - t;
+  const el = document.getElementById('taxa-preview');
+  if (!plat || !valor) {
+    el.textContent = '💡 Preencha plataforma e valor para calcular a taxa';
+    return;
+  }
+  el.innerHTML = t > 0
+    ? `💸 Taxa ${plat} (15%): <strong>${fmt(t)}</strong> &nbsp;→&nbsp; ✅ Valor Líquido: <strong style="color:var(--green)">${fmt(liq)}</strong>`
+    : `✅ Sem taxa (Particular) → Valor Líquido: <strong style="color:var(--green)">${fmt(liq)}</strong>`;
+}
+
+// ── VERIFICAR CONFLITO DE DATAS
+function getDatesInRange(d1Str, d2Str) {
+  // O dia de checkout NÃO é incluído — é dia de saída, livre para nova entrada
+  const dates = [];
+  const start = new Date(d1Str + 'T00:00:00');
+  const end = d2Str ? new Date(d2Str + 'T00:00:00') : new Date(start);
+  let cur = new Date(start);
+  while (cur < end) {
+    dates.push(cur.toISOString().split('T')[0]);
+    cur.setDate(cur.getDate() + 1);
+  }
+  // Se não há checkout (hospedagem de 1 dia), inclui o próprio dia
+  if (!d2Str || d1Str === d2Str) {
+    dates.push(d1Str);
+  }
+  return dates;
+}
+
+function verificarConflito() {
+  const d1 = document.getElementById('r-data').value;
+  const d2 = document.getElementById('r-checkout').value;
+  const box = document.getElementById('conflito-box');
+  const btnSalvar = document.getElementById('btn-salvar-rec');
+  if (!d1) { box.style.display = 'none'; return; }
+
+  const recs = load('rec');
+  const datesToCheck = getDatesInRange(d1, d2 || d1);
+  const conflitos = [];
+
+  for (const rec of recs) {
+    const recDates = getDatesInRange(rec.data, rec.checkout || rec.data);
+    const overlap = datesToCheck.filter(d => recDates.includes(d));
+    if (overlap.length > 0) {
+      conflitos.push({ hospede: rec.hospede, datas: overlap });
+    }
+  }
+
+  if (conflitos.length > 0) {
+    const msgs = conflitos.map(c => `"${c.hospede}" (${c.datas.map(d => d.split('-').reverse().join('/')).join(', ')})`).join('<br>');
+    box.style.display = 'block';
+    box.innerHTML = `⚠️ <strong>Conflito de datas!</strong> Período já ocupado por:<br>${msgs}`;
+    btnSalvar.disabled = true;
+    btnSalvar.style.opacity = '0.5';
+  } else {
+    box.style.display = 'none';
+    btnSalvar.disabled = false;
+    btnSalvar.style.opacity = '1';
+  }
+}
+
+// ── PREENCHER CALENDÁRIO AUTOMATICAMENTE
+function fillCalendar(rec) {
+  if (!rec.data) return;
+  const cal = loadCal();
+  const dates = getDatesInRange(rec.data, rec.checkout || rec.data);
+  dates.forEach((dateStr, i) => {
+    if (new Date(dateStr + 'T00:00:00').getFullYear() === YEAR) {
+      cal[dateStr] = {
+        status: 'occupied',
+        hospede: rec.hospede,
+        pessoas: rec.pessoas,
+        valor: i === 0 ? rec.valor : '',
+        pago: rec.pago,
+        autoFilled: true,
+        recId: rec.id
+      };
+    }
+  });
+  saveCal(cal);
+}
+
+function clearCalendar(recId) {
+  const cal = loadCal();
+  Object.keys(cal).forEach(k => { if (cal[k].recId === recId) delete cal[k]; });
+  saveCal(cal);
+}
+
+// ── SAVE RECEITA
+function saveReceita() {
+  const data = document.getElementById('r-data').value;
+  const checkout = document.getElementById('r-checkout').value;
+  const hospede = document.getElementById('r-hospede').value.trim();
+  const plat = document.getElementById('r-plat').value;
+  const pessoas = parseInt(document.getElementById('r-pessoas').value || 1);
+  const valor = parseBRL(document.getElementById('r-valor').value);
+  const pgto = document.getElementById('r-pgto').value;
+  const obs = document.getElementById('r-obs').value;
+
+  if (!data || !hospede || !plat || !valor) { toast('⚠️ Preencha os campos obrigatórios'); return; }
+  if (document.getElementById('btn-salvar-rec').disabled) { toast('⚠️ Resolva o conflito de datas antes de salvar'); return; }
+
+  const t = calcTaxa(plat, valor);
+  let dias = 1;
+  if (checkout && checkout > data) {
+    dias = Math.round((new Date(checkout + 'T00:00:00') - new Date(data + 'T00:00:00')) / 86400000);
+  }
+
+  const rec = { id: uid(), data, checkout, hospede, plat, dias, pessoas, valor, taxa: t, liquido: valor - t, pgto, pago: pagoStatus, obs, mes: getMes(data) };
+  const recs = load('rec');
+  recs.push(rec);
+  save('rec', recs);
+  fillCalendar(rec);
+
+  // Reset form
+  ['r-data','r-checkout','r-hospede','r-plat','r-pessoas','r-valor','r-pgto','r-obs'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  document.getElementById('taxa-preview').textContent = '💡 Preencha plataforma e valor para calcular a taxa';
+  document.getElementById('conflito-box').style.display = 'none';
+  document.getElementById('btn-salvar-rec').disabled = false;
+  document.getElementById('btn-salvar-rec').style.opacity = '1';
+  setPago('Pago');
+
+  closeModal('modal-rec');
+  toast('✅ Hospedagem salva! Calendário atualizado 📅');
+  renderReceitas(); renderDashboard();
+}
+
+// ── DELETE RECEITA
+function deleteReceita(id) {
+  if (!confirm('Excluir este lançamento e remover do calendário?')) return;
+  clearCalendar(id);
+  save('rec', load('rec').filter(r => r.id !== id));
+  renderReceitas(); renderDashboard(); renderCalendario();
+  toast('🗑️ Removido');
+}
+
+// ── SAVE DESPESA
+function saveDespesa() {
+  const data = document.getElementById('d-data').value;
+  const cat = document.getElementById('d-cat').value;
+  const desc = document.getElementById('d-desc').value.trim();
+  const forn = document.getElementById('d-forn').value.trim();
+  const valor = parseBRL(document.getElementById('d-valor').value);
+  const pgto = document.getElementById('d-pgto').value;
+  const comp = document.getElementById('d-comp').value;
+  const obs = document.getElementById('d-obs').value;
+  if (!data || !cat || !valor) { toast('⚠️ Preencha os campos obrigatórios'); return; }
+  const desps = load('desp');
+  desps.push({ id: uid(), data, cat, desc, forn, valor, pgto, comp, obs, mes: getMes(data) });
+  save('desp', desps);
+  ['d-data','d-cat','d-desc','d-forn','d-valor','d-pgto','d-comp','d-obs'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  closeModal('modal-desp');
+  toast('✅ Despesa salva!');
+  renderDespesas(); renderDashboard();
+}
+
+// ── DELETE DESPESA
+function deleteDespesa(id) {
+  if (!confirm('Excluir esta despesa?')) return;
+  save('desp', load('desp').filter(d => d.id !== id));
+  renderDespesas(); renderDashboard();
+  toast('🗑️ Removido');
+}
+
+// ── MONTHLY DATA
+function monthlyRec() {
+  const recs = load('rec');
+  return MONTHS.map((_, i) => {
+    const m = i + 1;
+    const rows = recs.filter(r => r.mes === m);
+    const ab = rows.filter(r => r.plat === 'Airbnb').reduce((a, r) => a + r.valor, 0);
+    const al = rows.filter(r => r.plat === 'Airbnb').reduce((a, r) => a + r.liquido, 0);
+    const bb = rows.filter(r => r.plat === 'Booking').reduce((a, r) => a + r.valor, 0);
+    const bl = rows.filter(r => r.plat === 'Booking').reduce((a, r) => a + r.liquido, 0);
+    const pb = rows.filter(r => r.plat === 'Particular').reduce((a, r) => a + r.valor, 0);
+    const pl = rows.filter(r => r.plat === 'Particular').reduce((a, r) => a + r.liquido, 0);
+    const tt = rows.reduce((a, r) => a + r.taxa, 0);
+    const recebido = rows.filter(r => r.pago === 'Pago').reduce((a, r) => a + r.liquido, 0);
+    const pendente = rows.filter(r => r.pago !== 'Pago').reduce((a, r) => a + r.liquido, 0);
+    return { m, ab, al, bb, bl, pb, pl, tb: ab+bb+pb, tt, tl: al+bl+pl, reservas: rows.length, hospedes: rows.reduce((a,r) => a+r.pessoas, 0), recebido, pendente };
+  });
+}
+
+function monthlyDesp() {
+  const desps = load('desp');
+  return MONTHS.map((_, i) => {
+    const m = i + 1;
+    const rows = desps.filter(d => d.mes === m);
+    const cats = {};
+    CATS.forEach(c => { cats[c] = rows.filter(d => d.cat === c).reduce((a, d) => a + d.valor, 0); });
+    return { m, cats, total: rows.reduce((a, d) => a + d.valor, 0) };
+  });
+}
+
+// ── RENDER RECEITAS
+function renderReceitas() {
+  const recs = load('rec').slice().sort((a, b) => a.data.localeCompare(b.data));
+  const tbody = document.getElementById('rec-tbody');
+  tbody.innerHTML = recs.length
+    ? recs.map(r => `
+      <tr>
+        <td>${r.data.split('-').reverse().join('/')}</td>
+        <td>${r.checkout ? r.checkout.split('-').reverse().join('/') : '-'}</td>
+        <td class="td-left">${r.hospede}</td>
+        <td><span class="badge badge-${r.plat.toLowerCase()}">${r.plat}</span></td>
+        <td>${r.dias || 1}</td>
+        <td>${r.pessoas || 1}</td>
+        <td>${fmt(r.valor)}</td>
+        <td class="td-red">${r.taxa > 0 ? fmt(r.taxa) : '-'}</td>
+        <td class="td-green">${fmt(r.liquido)}</td>
+        <td>${r.pgto || '-'}</td>
+        <td><span class="badge ${r.pago === 'Pago' ? 'badge-pago' : 'badge-pendente'}">${r.pago === 'Pago' ? '✅ Pago' : '⏳ Pendente'}</span></td>
+        <td style="white-space:nowrap">
+          <button class="del-btn" onclick="editReceita('${r.id}')" title="Editar">✏️</button>
+          <button class="del-btn" onclick="deleteReceita('${r.id}')" title="Excluir">🗑️</button>
+        </td>
+      </tr>`).join('')
+    : `<tr><td colspan="12"><div class="empty-state"><div class="icon">📋</div><p>Nenhum lançamento.<br>Clique em "Nova Hospedagem".</p></div></td></tr>`;
+
+  const mr = monthlyRec();
+  const tot = { ab:0, al:0, bb:0, bl:0, pb:0, pl:0, tb:0, tt:0, tl:0, res:0, hosp:0, rec:0, pend:0 };
+  document.getElementById('resumo-rec-tbody').innerHTML = mr.map(r => {
+    tot.ab+=r.ab; tot.al+=r.al; tot.bb+=r.bb; tot.bl+=r.bl; tot.pb+=r.pb; tot.pl+=r.pl;
+    tot.tb+=r.tb; tot.tt+=r.tt; tot.tl+=r.tl; tot.res+=r.reservas; tot.hosp+=r.hospedes;
+    tot.rec+=r.recebido; tot.pend+=r.pendente;
+    return `<tr>
+      <td class="td-left" style="background:#d6e4f0;font-weight:600">${MONTHS[r.m-1]}</td>
+      <td>${r.ab > 0 ? fmt(r.ab) : '-'}</td><td class="td-green">${r.al > 0 ? fmt(r.al) : '-'}</td>
+      <td>${r.bb > 0 ? fmt(r.bb) : '-'}</td><td class="td-green">${r.bl > 0 ? fmt(r.bl) : '-'}</td>
+      <td>${r.pb > 0 ? fmt(r.pb) : '-'}</td><td class="td-green">${r.pl > 0 ? fmt(r.pl) : '-'}</td>
+      <td class="td-orange">${fmt(r.tb)}</td>
+      <td class="td-red">${r.tt > 0 ? fmt(r.tt) : '-'}</td>
+      <td class="td-green">${fmt(r.tl)}</td>
+      <td>${r.reservas || '-'}</td><td>${r.hospedes || '-'}</td>
+      <td class="td-green">${r.recebido > 0 ? fmt(r.recebido) : '-'}</td>
+      <td class="td-red">${r.pendente > 0 ? fmt(r.pendente) : '-'}</td>
+    </tr>`;
+  }).join('') + `<tr>
+    <td class="td-navy">📌 TOTAL</td>
+    <td class="td-navy">${fmt(tot.ab)}</td><td class="td-navy">${fmt(tot.al)}</td>
+    <td class="td-navy">${fmt(tot.bb)}</td><td class="td-navy">${fmt(tot.bl)}</td>
+    <td class="td-navy">${fmt(tot.pb)}</td><td class="td-navy">${fmt(tot.pl)}</td>
+    <td class="td-navy">${fmt(tot.tb)}</td><td class="td-navy">${fmt(tot.tt)}</td>
+    <td class="td-navy">${fmt(tot.tl)}</td>
+    <td class="td-navy">${tot.res}</td><td class="td-navy">${tot.hosp}</td>
+    <td class="td-navy">${fmt(tot.rec)}</td><td class="td-navy">${fmt(tot.pend)}</td>
+  </tr>`;
+}
+
+// ── RENDER DESPESAS
+function renderDespesas() {
+  const desps = load('desp').slice().sort((a, b) => a.data.localeCompare(b.data));
+  document.getElementById('desp-tbody').innerHTML = desps.length
+    ? desps.map(d => `
+      <tr>
+        <td>${d.data.split('-').reverse().join('/')}</td>
+        <td class="td-left">${d.desc || '-'}</td>
+        <td>${d.cat}</td>
+        <td class="td-left">${d.forn || '-'}</td>
+        <td class="td-red">${fmt(d.valor)}</td>
+        <td>${d.pgto || '-'}</td>
+        <td>${d.comp || '-'}</td>
+        <td><button class="del-btn" onclick="deleteDespesa('${d.id}')">🗑️</button></td>
+      </tr>`).join('')
+    : `<tr><td colspan="8"><div class="empty-state"><div class="icon">📋</div><p>Nenhum lançamento.<br>Clique em "Nova Despesa".</p></div></td></tr>`;
+
+  const md = monthlyDesp();
+  const totC = {}; CATS.forEach(c => totC[c] = 0); let totT = 0;
+  document.getElementById('resumo-desp-tbody').innerHTML = md.map(d => {
+    CATS.forEach(c => totC[c] += d.cats[c]); totT += d.total;
+    return `<tr>
+      <td class="td-left" style="background:#d6e4f0;font-weight:600">${MONTHS[d.m-1]}</td>
+      ${CATS.map(c => `<td class="${d.cats[c] > 0 ? 'td-red' : ''}">${d.cats[c] > 0 ? fmt(d.cats[c]) : '-'}</td>`).join('')}
+      <td class="td-orange">${fmt(d.total)}</td>
+    </tr>`;
+  }).join('') + `<tr><td class="td-navy">📌 TOTAL</td>${CATS.map(c => `<td class="td-navy">${fmt(totC[c])}</td>`).join('')}<td class="td-navy">${fmt(totT)}</td></tr>`;
+}
+
+// ── RENDER DASHBOARD
+function renderDashboard() {
+  const mr = monthlyRec(), md = monthlyDesp();
+  const tRB = mr.reduce((a,r) => a+r.tb, 0);
+  const tRL = mr.reduce((a,r) => a+r.tl, 0);
+  const tD = md.reduce((a,d) => a+d.total, 0);
+  const lucro = tRL - tD;
+  document.getElementById('kpi-rec-bruta').textContent = fmt(tRB);
+  document.getElementById('kpi-despesas').textContent = fmt(tD);
+  document.getElementById('kpi-lucro').textContent = fmt(lucro);
+  document.getElementById('kpi-margem').textContent = tRB > 0 ? pct(lucro/tRB) : '0%';
+
+  document.getElementById('dash-tbody').innerHTML = mr.map((r, i) => {
+    const d = md[i], l = r.tl - d.total, marg = r.tb > 0 ? l/r.tb : 0;
+    return `<tr>
+      <td class="td-left" style="background:#d6e4f0;font-weight:600">${MONTHS[r.m-1]}</td>
+      <td class="td-orange">${fmt(r.tb)}</td>
+      <td class="td-green">${fmt(r.tl)}</td>
+      <td class="td-red">${fmt(d.total)}</td>
+      <td style="${l>=0?'color:var(--green)':'color:var(--red)'};font-weight:600">${fmt(l)}</td>
+      <td>${pct(marg)}</td>
+      <td>${r.reservas || '-'}</td>
+      <td>${r.hospedes || '-'}</td>
+      <td class="td-green">${r.recebido > 0 ? fmt(r.recebido) : '-'}</td>
+      <td class="td-red">${r.pendente > 0 ? fmt(r.pendente) : '-'}</td>
+    </tr>`;
+  }).join('');
+
+  // Charts
+  const pd = { Airbnb: mr.reduce((a,r) => a+r.ab, 0), Booking: mr.reduce((a,r) => a+r.bb, 0), Particular: mr.reduce((a,r) => a+r.pb, 0) };
+  const maxP = Math.max(...Object.values(pd), 1);
+  const pc = { Airbnb:'#ff5a5f', Booking:'#003b95', Particular:'#27ae60' };
+  document.getElementById('chart-plat').innerHTML = '<div class="chart-bar-wrap">' +
+    Object.entries(pd).map(([k,v]) => `
+      <div class="chart-bar-row">
+        <div class="chart-bar-label">${k}</div>
+        <div class="chart-bar-bg"><div class="chart-bar-fill" style="width:${(v/maxP*100).toFixed(1)}%;background:${pc[k]}">
+          <span class="chart-bar-val">${v > 0 ? fmt(v) : ''}</span>
+        </div></div>
+      </div>`).join('') + '</div>';
+
+  const totC = {}; CATS.forEach(c => { totC[c] = md.reduce((a,d) => a+d.cats[c], 0); });
+  const maxD = Math.max(...Object.values(totC), 1);
+  const dc = ['#e74c3c','#e67e22','#f39c12','#27ae60','#2980b9','#8e44ad','#16a085','#d35400','#7f8c8d'];
+  document.getElementById('chart-desp').innerHTML = '<div class="chart-bar-wrap">' +
+    CATS.map((c,i) => `
+      <div class="chart-bar-row">
+        <div class="chart-bar-label" style="font-size:0.64rem">${c.replace(' Elétrica','').replace(' e Impostos','').replace(' de Reposição','')}</div>
+        <div class="chart-bar-bg"><div class="chart-bar-fill" style="width:${(totC[c]/maxD*100).toFixed(1)}%;background:${dc[i]}">
+          <span class="chart-bar-val">${totC[c] > 0 ? fmt(totC[c]) : ''}</span>
+        </div></div>
+      </div>`).join('') + '</div>';
+}
+
+// ── EDIT RECEITA
+let editPagoStatus = 'Pago';
+
+function setEditPago(val) {
+  editPagoStatus = val;
+  document.getElementById('edit-btn-pago').className = val === 'Pago' ? 'active-pago' : '';
+  document.getElementById('edit-btn-pendente').className = val === 'Pendente' ? 'active-pendente' : '';
+}
+
+function editReceita(id) {
+  const rec = load('rec').find(r => r.id === id);
+  if (!rec) return;
+  document.getElementById('edit-rec-id').value = id;
+  document.getElementById('edit-rec-info').innerHTML =
+    `<strong>👤 ${rec.hospede}</strong> — ${rec.plat}<br>` +
+    `📅 ${rec.data.split('-').reverse().join('/')}${rec.checkout ? ' → ' + rec.checkout.split('-').reverse().join('/') : ''}<br>` +
+    `💰 ${fmt(rec.liquido)}`;
+  document.getElementById('edit-pgto').value = rec.pgto || '';
+  document.getElementById('edit-obs').value = rec.obs || '';
+  editPagoStatus = rec.pago || 'Pendente';
+  setEditPago(editPagoStatus);
+  openModal('modal-edit-rec');
+}
+
+function saveEditReceita() {
+  const id = document.getElementById('edit-rec-id').value;
+  const recs = load('rec');
+  const idx = recs.findIndex(r => r.id === id);
+  if (idx === -1) return;
+  recs[idx].pago = editPagoStatus;
+  recs[idx].pgto = document.getElementById('edit-pgto').value;
+  recs[idx].obs = document.getElementById('edit-obs').value;
+  save('rec', recs);
+  // Atualiza o calendário com novo status de pagamento
+  const cal = loadCal();
+  Object.keys(cal).forEach(k => {
+    if (cal[k].recId === id) cal[k].pago = editPagoStatus;
+  });
+  saveCal(cal);
+  closeModal('modal-edit-rec');
+  toast('✅ Reserva atualizada!');
+  renderReceitas(); renderDashboard(); renderCalendario();
+}
+
+// ── RENDER CALENDÁRIO
+function renderCalendario() {
+  const cal = loadCal();
+  const container = document.getElementById('cal-container');
+  container.innerHTML = MONTHS.map((mn, m) => {
+    const firstDay = new Date(YEAR, m, 1).getDay();
+    const daysInMonth = new Date(YEAR, m+1, 0).getDate();
+    let h = `<div class="cal-month card">
+      <div class="cal-month-title">📅 ${mn.toUpperCase()} ${YEAR}</div>
+      <div class="cal-grid">`;
+    ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].forEach((d, i) =>
+      h += `<div class="cal-weekday${i===0||i===6?' wknd':''}">${d}</div>`);
+    for (let e = 0; e < firstDay; e++) h += `<div class="cal-day empty"></div>`;
+    for (let day = 1; day <= daysInMonth; day++) {
+      const key = `${YEAR}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+      const info = cal[key] || {};
+      const status = info.status || '';
+      const dow = (firstDay + day - 1) % 7;
+      const isWknd = dow === 0 || dow === 6;
+      const isAuto = info.autoFilled;
+      const isPago = info.pago === 'Pago';
+      const isPendente = info.pago === 'Pendente';
+      h += `<div class="cal-day ${isAuto ? 'auto-filled' : status}${isWknd ? ' wknd' : ''}" onclick="openCalDay('${key}','${mn} ${day}')">
+        ${isAuto ? '<div class="cal-auto-badge">AUTO</div>' : ''}
+        ${isAuto && isPago ? '<div class="cal-pago-badge">PAGO</div>' : ''}
+        ${isAuto && isPendente ? '<div class="cal-pendente-badge">A REC.</div>' : ''}
+        <div class="cal-day-num">${day}</div>
+        <div class="cal-day-info">
+          ${info.hospede ? `👤 ${info.hospede}` : ''}
+          ${info.pessoas ? `<br>👥 ${info.pessoas}` : ''}
+          ${info.valor ? `<br>${fmt(info.valor)}` : ''}
+        </div>
+      </div>`;
+    }
+    h += '</div></div>';
+    return h;
+  }).join('');
+}
+
+// ── CALENDAR DAY MODAL
+function openCalDay(key, label) {
+  const cal = loadCal();
+  const info = cal[key] || {};
+  document.getElementById('cal-modal-title').textContent = `📅 ${label}`;
+  document.getElementById('cal-date-key').value = key;
+  document.getElementById('cal-status').value = info.status || '';
+  document.getElementById('cal-hospede').value = info.hospede || '';
+  document.getElementById('cal-pessoas').value = info.pessoas || '';
+  document.getElementById('cal-valor').value = numberToBRLInput(info.valor);
+  const ai = document.getElementById('cal-auto-info');
+  if (info.autoFilled) {
+    ai.style.display = 'block';
+    const pagoStr = info.pago ? ` — ${info.pago === 'Pago' ? '✅ Pago' : '⏳ A Receber'}` : '';
+    ai.innerHTML = `🔄 <strong>Reserva automática</strong>: ${info.hospede}${pagoStr}. Você pode editar manualmente.`;
+  } else {
+    ai.style.display = 'none';
+  }
+  openModal('modal-cal');
+}
+
+function saveCalDay() {
+  const key = document.getElementById('cal-date-key').value;
+  const cal = loadCal();
+  const ex = cal[key] || {};
+  const entry = {
+    ...ex,
+    status: document.getElementById('cal-status').value,
+    hospede: document.getElementById('cal-hospede').value,
+    pessoas: document.getElementById('cal-pessoas').value,
+    valor: parseBRL(document.getElementById('cal-valor').value),
+    autoFilled: false
+  };
+  if (!entry.status && !entry.hospede && !entry.valor) delete cal[key];
+  else cal[key] = entry;
+  saveCal(cal);
+  closeModal('modal-cal');
+  renderCalendario();
+  toast('✅ Dia atualizado!');
+}
+
+// ── BACKUP & RESTORE
+function exportarBackup() {
+  const data = {
+    versao: '2.0',
+    data: new Date().toLocaleDateString('pt-BR'),
+    receitas: load('rec'),
+    despesas: load('desp'),
+    calendario: loadCal(),
+    config: loadConfig()
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `rota-latina-backup-${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('📥 Backup gerado! Salve no Google Drive.', 3500);
+}
+
+function importarBackup(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  if (!confirm('Isso vai substituir todos os dados atuais pelo backup. Continuar?')) { event.target.value = ''; return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (data.receitas) save('rec', data.receitas);
+      if (data.despesas) save('desp', data.despesas);
+      if (data.calendario) saveCal(data.calendario);
+      if (data.config) saveConfig(data.config);
+      toast(`✅ Backup restaurado! (${data.data || ''})`, 3000);
+      renderDashboard(); renderReceitas(); renderDespesas(); renderCalendario();
+    } catch { toast('❌ Arquivo inválido.'); }
+    event.target.value = '';
+  };
+  reader.readAsText(file);
+}
+
+// ── INIT
+_loadCacheFromLocal(); // primeiro renderiza com cache local (instantâneo)
+setPago('Pago');
+renderDashboard();
+renderReceitas();
+renderDespesas();
+renderCalendario();
+renderConfig();
+
+function copyUid() {
+  const uid = document.getElementById('userUid').textContent;
+  if (navigator.clipboard) navigator.clipboard.writeText(uid);
+  toast('📋 UID copiado!');
+}
+
+async function doLogout() {
+  if (!confirm('Deseja sair da conta?')) return;
+  try { await window._fb.signOut(window._fb.auth); location.reload(); }
+  catch(e) { console.error(e); toast('❌ Erro ao sair'); }
+}
+
+function _showLogin() {
+  document.getElementById('loginOverlay').style.display = 'flex';
+}
+function _hideLogin() {
+  document.getElementById('loginOverlay').style.display = 'none';
+}
+function _showUserBar(email, uid) {
+  const bar = document.getElementById('userBar');
+  bar.style.display = 'flex';
+  document.getElementById('userEmail').textContent = email || '';
+  document.getElementById('userUid').textContent = uid || '';
+}
+
+// Conecta no Firestore + Auth e configura sincronização em tempo real
+async function _initFirebase() {
+  setSyncStatus('connecting');
+  try {
+    const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js');
+    const { getFirestore, doc, setDoc, getDoc, onSnapshot, enableIndexedDbPersistence }
+      = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js');
+    const { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut, browserLocalPersistence, setPersistence }
+      = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js');
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyB6iYW3vdrjQJ5v4745db1WNvToNPgWnu8",
+      authDomain: "rota-latina.firebaseapp.com",
+      projectId: "rota-latina",
+      storageBucket: "rota-latina.firebasestorage.app",
+      messagingSenderId: "918944629567",
+      appId: "1:918944629567:web:2e05905a2ba8d99816898a"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    await setPersistence(auth, browserLocalPersistence); // mantém logado entre sessões
+
+    // Habilita persistência offline (funciona sem internet)
+    try { await enableIndexedDbPersistence(db); } catch(e) { /* já habilitado ou outro tab aberto */ }
+
+    window._fb = { db, doc, setDoc, getDoc, onSnapshot, auth, signOut };
+
+    // Configura botão de login
+    const provider = new GoogleAuthProvider();
+    document.getElementById('btnLoginGoogle').onclick = async () => {
+      try {
+        document.getElementById('loginError').style.display = 'none';
+        await signInWithPopup(auth, provider);
+      } catch (err) {
+        console.error('Erro login:', err);
+        const errEl = document.getElementById('loginError');
+        errEl.style.display = 'block';
+        errEl.textContent = '❌ ' + (err.code === 'auth/popup-closed-by-user' ? 'Login cancelado.' : err.message);
+      }
+    };
+
+    // Detecta estado de login
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        _showLogin();
+        setSyncStatus('connecting');
+        document.getElementById('loginMsg').textContent = 'Faça login com sua conta Google para acessar o app.';
+        return;
+      }
+      _hideLogin();
+      _showUserBar(user.email, user.uid);
+      await _afterLogin(db);
+    });
+
+    // Detecta perda/recuperação de conexão
+    window.addEventListener('online',  () => { if (_firestoreReady) setSyncStatus('synced'); });
+    window.addEventListener('offline', () => setSyncStatus('offline'));
+  } catch (err) {
+    console.error('Erro inicializando Firebase:', err);
+    setSyncStatus('error');
+    toast('⚠️ Sem conexão com a nuvem. Dados salvos localmente.', 4000);
+    _showLogin();
+    document.getElementById('loginError').style.display = 'block';
+    document.getElementById('loginError').textContent = '❌ Erro de conexão: ' + err.message;
+  }
+}
+
+async function _afterLogin(db) {
+  setSyncStatus('syncing');
+  const { doc, setDoc, getDoc, onSnapshot } = window._fb;
+  try {
+    const keys = ['rec', 'desp', 'cal', 'config'];
+    for (const key of keys) {
+      const snap = await getDoc(doc(db, 'app', key));
+      if (snap.exists()) {
+        const remoteData = snap.data().data;
+        _cache[key] = remoteData;
+        localStorage.setItem('rl_'+key, JSON.stringify(remoteData));
+      } else {
+        const localData = _cache[key];
+        const isEmpty = Array.isArray(localData) ? localData.length === 0 : Object.keys(localData).length === 0;
+        if (!isEmpty) {
+          await setDoc(doc(db, 'app', key), { data: localData });
+        }
+      }
+    }
+
+    _firestoreReady = true;
+    setSyncStatus('synced');
+    renderDashboard(); renderReceitas(); renderDespesas(); renderCalendario(); renderConfig();
+
+    keys.forEach(key => {
+      onSnapshot(doc(db, 'app', key), (snap) => {
+        if (!snap.exists()) return;
+        if (snap.metadata.hasPendingWrites) return;
+        const remoteData = snap.data().data;
+        _cache[key] = remoteData;
+        localStorage.setItem('rl_'+key, JSON.stringify(remoteData));
+        renderDashboard(); renderReceitas(); renderDespesas(); renderCalendario(); renderConfig();
+      });
+    });
+  } catch (err) {
+    console.error('Erro sincronizando após login:', err);
+    setSyncStatus('error');
+    toast('⚠️ Erro ao sincronizar: ' + err.message, 5000);
+  }
+}
+
+_initFirebase();
+</script>
+</body>
+</html>
