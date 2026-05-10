@@ -1,0 +1,3529 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Rota Latina — Gestão Financeira</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#1a2744;--navy2:#243058;--terra:#c0623a;--gold:#d4a853;
+  --green:#27ae60;--green-l:#d5f5e3;--red:#e74c3c;--red-l:#fadbd8;
+  --orange-l:#fdebd0;--gray:#f5f5f5;--gray2:#e0e0e0;--text:#1a1a2e;
+  --silver:#888;--radius:12px;--shadow:0 4px 20px rgba(26,39,68,0.12)
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Outfit',sans-serif;background:#f0eee8;color:var(--text);min-height:100vh;padding-bottom:80px}
+
+/* HEADER */
+.app-header{background:var(--navy);padding:14px 20px 10px;box-shadow:0 2px 12px rgba(0,0,0,0.3)}
+.app-header-top{display:flex;align-items:center;justify-content:space-between}
+.app-header h1{font-family:'Cormorant Garamond',serif;font-size:1.35rem;font-weight:700;letter-spacing:0.04em;color:var(--gold)}
+.app-header p{font-size:0.72rem;color:rgba(255,255,255,0.5);margin-top:2px}
+.backup-btns{display:flex;gap:6px}
+.backup-btn{padding:6px 10px;border:1px solid rgba(255,255,255,0.25);background:rgba(255,255,255,0.08);color:white;border-radius:7px;font-size:0.72rem;font-family:'Outfit',sans-serif;cursor:pointer;white-space:nowrap;transition:all 0.2s}
+.backup-btn.green{border-color:rgba(39,174,96,0.5);background:rgba(39,174,96,0.15);color:#a8e6c3}
+.backup-btn.gold{border-color:rgba(212,168,83,0.5);background:rgba(212,168,83,0.15);color:var(--gold)}
+.year-switcher{display:flex;align-items:center;gap:4px;background:rgba(212,168,83,0.1);border:1px solid rgba(212,168,83,0.4);border-radius:7px;padding:2px}
+.year-btn{background:transparent;border:none;color:var(--gold);font-size:0.85rem;width:24px;height:26px;border-radius:5px;cursor:pointer;transition:background 0.15s;font-family:'Outfit',sans-serif}
+.year-btn:hover{background:rgba(212,168,83,0.2)}
+.year-label{font-family:'Cormorant Garamond',serif;font-size:0.95rem;font-weight:700;color:var(--gold);min-width:42px;text-align:center;letter-spacing:0.02em}
+
+/* Seletor de mês no card Este Mês */
+.mes-nav-btn{background:rgba(45,52,86,0.1);border:1px solid rgba(45,52,86,0.3);color:var(--navy);font-size:0.8rem;width:26px;height:28px;border-radius:5px;cursor:pointer;font-family:'Outfit',sans-serif;font-weight:600;transition:background 0.15s}
+.mes-nav-btn:hover{background:rgba(45,52,86,0.2)}
+.mes-select{background:rgba(255,255,255,0.6);border:1px solid rgba(45,52,86,0.3);color:var(--navy);font-size:0.85rem;font-weight:700;padding:4px 6px;border-radius:5px;cursor:pointer;font-family:'Outfit',sans-serif}
+.mes-hoje-btn{background:var(--navy);border:none;color:var(--gold);font-size:0.7rem;font-weight:600;padding:5px 10px;border-radius:5px;cursor:pointer;font-family:'Outfit',sans-serif;letter-spacing:0.02em}
+.mes-hoje-btn:hover{background:var(--navy2)}
+
+/* WRAPPER STICKY (userBar + header + tabbar grudados juntos no topo) */
+.topo-fixo{position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,0.3)}
+
+/* TABS */
+.tab-bar{display:flex;overflow-x:auto;scrollbar-width:none;background:var(--navy2);border-bottom:2px solid rgba(255,255,255,0.08);box-shadow:0 2px 8px rgba(0,0,0,0.15)}
+.tab-bar::-webkit-scrollbar{display:none}
+.tab-btn{flex-shrink:0;padding:11px 14px;background:none;border:none;color:rgba(255,255,255,0.5);font-family:'Outfit',sans-serif;font-size:0.8rem;font-weight:500;cursor:pointer;white-space:nowrap;border-bottom:3px solid transparent;transition:all 0.2s}
+.tab-btn.active{color:var(--gold);border-bottom-color:var(--gold)}
+.tab-content{display:none;padding:14px;max-width:960px;margin:0 auto}
+.tab-content.active{display:block}
+
+/* FILTROS (acima das listas) */
+.filters{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.filters .form-control{padding:8px 10px;font-size:0.82rem}
+.filters-search{grid-column:1 / -1}
+.filters-clear{font-size:0.7rem;color:var(--silver);text-align:right;cursor:pointer;text-decoration:underline;margin-bottom:6px;display:inline-block}
+@media(min-width:600px){.filters{grid-template-columns:1fr 1fr 2fr}.filters-search{grid-column:auto}}
+
+/* HÓSPEDES (CRM) */
+.hospede-card{background:white;border-radius:var(--radius);padding:13px 15px;box-shadow:var(--shadow);margin-bottom:10px;border-left:4px solid var(--gold)}
+.hospede-card.recorrente{border-left-color:var(--green)}
+.hospede-row1{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap}
+.hospede-nome{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:700;color:var(--navy)}
+.hospede-tel{font-size:0.78rem;color:var(--silver);margin-top:2px}
+.hospede-stats{display:flex;gap:12px;margin-top:8px;flex-wrap:wrap;font-size:0.78rem}
+.hospede-stat{display:flex;flex-direction:column}
+.hospede-stat-label{font-size:0.65rem;color:var(--silver);text-transform:uppercase;letter-spacing:0.04em}
+.hospede-stat-value{font-weight:700;color:var(--text)}
+.hospede-plats{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap}
+.hospede-actions{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.hospede-actions button{padding:6px 10px;font-size:0.74rem;border:none;border-radius:6px;cursor:pointer;font-family:'Outfit',sans-serif;font-weight:600}
+.btn-mini-green{background:var(--green-l);color:var(--green)}
+.btn-mini-blue{background:#e3f2fd;color:#1565c0}
+.btn-mini-red{background:var(--red-l);color:var(--red)}
+.hospede-recorrente-tag{background:var(--green);color:white;font-size:0.62rem;padding:2px 7px;border-radius:10px;font-weight:700;letter-spacing:0.04em}
+
+/* ALERTA VENCIDOS */
+.alert-vencidos{background:#ffebee;border:1px solid #ef9a9a;border-left:4px solid var(--red);border-radius:9px;padding:10px 13px;margin-bottom:12px;font-size:0.82rem;color:#c62828;display:none}
+.alert-vencidos.show{display:block}
+.alert-vencidos strong{color:#b71c1c}
+tr.row-vencida td{background:#ffebee !important}
+tr.row-vencida td:first-child{position:relative}
+tr.row-vencida td:first-child::before{content:'⚠️';margin-right:3px}
+
+/* DESPESAS FIXAS (templates) */
+.tpl-row{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--gray2);border-radius:8px;margin-bottom:6px;background:white}
+.tpl-row .tpl-info{flex:1;font-size:0.82rem}
+.tpl-row .tpl-cat{font-size:0.7rem;color:var(--silver)}
+.tpl-row .tpl-val{font-weight:700;color:var(--red)}
+.tpl-add-form{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px;background:var(--gray);border-radius:8px;margin-top:8px}
+.tpl-add-form .full{grid-column:1 / -1}
+
+/* HISTÓRICO HÓSPEDE (modal) */
+.hist-row{padding:8px 10px;border-bottom:1px solid var(--gray2);font-size:0.82rem;display:flex;justify-content:space-between;gap:8px}
+.hist-row:last-child{border-bottom:none}
+.hist-data{color:var(--silver);font-size:0.76rem}
+
+/* CARDS */
+.card{background:white;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin-bottom:14px}
+.card-header{padding:13px 16px;font-weight:600;font-size:0.92rem;display:flex;align-items:center;gap:8px;color:white}
+.card-body{padding:14px 16px}
+.bg-navy{background:var(--navy)}.bg-terra{background:var(--terra)}.bg-green{background:var(--green)}.bg-red{background:var(--red)}
+.bg-gold{background:var(--gold);color:var(--navy)}
+
+/* KPI */
+.kpi-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
+.kpi-card{background:white;border-radius:var(--radius);padding:14px;box-shadow:var(--shadow);border-left:4px solid var(--navy)}
+.kpi-card.green{border-left-color:var(--green)}.kpi-card.red{border-left-color:var(--red)}.kpi-card.terra{border-left-color:var(--terra)}.kpi-card.gold{border-left-color:var(--gold)}
+.kpi-label{font-size:0.7rem;color:var(--silver);font-weight:500;text-transform:uppercase;letter-spacing:0.05em}
+.kpi-value{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:700;margin-top:4px}
+.kpi-value.green{color:var(--green)}.kpi-value.red{color:var(--red)}.kpi-value.terra{color:var(--terra)}.kpi-value.gold{color:var(--gold)}
+
+/* FORMS */
+.form-group{margin-bottom:12px}
+.form-label{font-size:0.77rem;font-weight:600;color:var(--silver);margin-bottom:4px;display:block;text-transform:uppercase;letter-spacing:0.04em}
+.form-control{width:100%;padding:10px 13px;border:2px solid var(--gray2);border-radius:9px;font-family:'Outfit',sans-serif;font-size:0.88rem;color:var(--text);background:white;transition:border-color 0.2s;appearance:none;-webkit-appearance:none}
+.form-control:focus{outline:none;border-color:var(--navy)}
+select.form-control{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 18px;border:none;border-radius:9px;font-family:'Outfit',sans-serif;font-size:0.88rem;font-weight:600;cursor:pointer;transition:all 0.2s}
+.btn-green{background:var(--green);color:white}.btn-red{background:var(--red);color:white}.btn-terra{background:var(--terra);color:white}
+.btn-full{width:100%}.btn:active{transform:scale(0.98)}
+.btn-cancel{background:#eee;color:#333;margin-top:8px}
+
+/* TABLES */
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:0.79rem;min-width:480px}
+th{background:var(--navy);color:white;padding:9px 7px;text-align:center;font-weight:600;font-size:0.71rem;white-space:nowrap}
+td{padding:8px 7px;border-bottom:1px solid var(--gray2);text-align:center;vertical-align:middle}
+tr:hover td{background:var(--gray)}
+tr:last-child td{border-bottom:none}
+.td-green{background:var(--green-l);color:var(--green);font-weight:600}
+.td-red{background:var(--red-l);color:var(--red)}
+.td-orange{background:var(--orange-l);font-weight:600}
+.td-navy{background:var(--navy);color:white;font-weight:700}
+.td-left{text-align:left}
+
+/* BADGES */
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:0.68rem;font-weight:700;white-space:nowrap}
+.badge-airbnb{background:#ffe5e5;color:#ff5a5f}
+.badge-booking{background:#e3ecff;color:#003b95}
+.badge-particular{background:#e8f5e9;color:#2e7d32}
+.badge-pago{background:#d5f5e3;color:#1e8449;border:1px solid #27ae60}
+.badge-pendente{background:#fdebd0;color:#ca6f1e;border:1px solid #e67e22}
+
+/* SUMMARY */
+.summary-note{background:var(--green-l);border-left:4px solid var(--green);padding:9px 12px;font-size:0.78rem;color:var(--green);border-radius:0 8px 8px 0;margin-bottom:12px}
+.summary-note.red{background:var(--red-l);border-left-color:var(--red);color:var(--red)}
+
+/* CALENDAR */
+.cal-year-title{text-align:center;font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:700;color:var(--navy);margin-bottom:14px;letter-spacing:0.06em}
+.cal-quick-nav{display:flex;gap:8px;justify-content:center;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+.cal-quick-btn{background:var(--navy);color:var(--gold);border:none;padding:6px 14px;border-radius:6px;cursor:pointer;font-family:'Outfit',sans-serif;font-size:0.78rem;font-weight:600;letter-spacing:0.02em}
+.cal-quick-btn:hover{background:var(--navy2)}
+.cal-quick-sel{background:white;border:1px solid #ccc;color:var(--navy);padding:6px 10px;border-radius:6px;cursor:pointer;font-family:'Outfit',sans-serif;font-size:0.78rem;font-weight:600}
+.cal-month{margin-bottom:16px}
+.cal-month-title{background:var(--terra);color:white;text-align:center;padding:9px;font-weight:700;border-radius:var(--radius) var(--radius) 0 0;font-family:'Cormorant Garamond',serif;font-size:1rem;letter-spacing:0.05em}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr)}
+.cal-weekday{background:var(--navy);color:white;text-align:center;padding:6px 2px;font-size:0.68rem;font-weight:600}
+.cal-weekday.wknd{background:#8b0000}
+.cal-day{border:1px solid var(--gray2);background:white;min-height:64px;padding:3px;cursor:pointer;transition:background 0.15s;position:relative}
+.cal-day:hover{background:#f0f4ff}
+.cal-day.empty{background:#eee;cursor:default;pointer-events:none}
+.cal-day.occupied{background:#c8e6c9}
+.cal-day.reserved{background:#fff9c4}
+.cal-day.blocked{background:#ffcdd2}
+.cal-day.auto-filled{background:#bbdefb}
+.cal-day-num{font-weight:700;font-size:0.82rem;color:var(--navy)}
+.cal-day.wknd .cal-day-num{color:#8b0000}
+.cal-day-info{font-size:0.58rem;color:#333;line-height:1.4;margin-top:2px;word-break:break-word}
+.cal-auto-badge{position:absolute;top:2px;right:2px;background:#1565c0;color:white;font-size:0.48rem;padding:1px 3px;border-radius:3px;font-weight:700}
+.cal-pago-badge{position:absolute;bottom:2px;right:2px;background:#27ae60;color:white;font-size:0.48rem;padding:1px 3px;border-radius:3px;font-weight:700}
+.cal-pendente-badge{position:absolute;bottom:2px;right:2px;background:#e67e22;color:white;font-size:0.48rem;padding:1px 3px;border-radius:3px;font-weight:700}
+
+/* MODAL */
+.modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:200;align-items:flex-end;justify-content:center}
+.modal-backdrop.open{display:flex}
+.modal{background:white;width:100%;max-width:500px;border-radius:20px 20px 0 0;padding:18px;max-height:92vh;overflow-y:auto;animation:slideUp 0.3s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:40px;height:4px;background:var(--gray2);border-radius:2px;margin:0 auto 14px}
+.modal-title{font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-weight:700;color:var(--navy);margin-bottom:14px}
+
+/* INFO BOXES */
+.info-box{border-radius:9px;padding:10px 12px;margin-bottom:12px;font-size:0.78rem}
+.info-blue{background:#e3f2fd;color:#1565c0}
+.info-red{background:#ffebee;color:#c62828;border:1px solid #ef9a9a}
+.taxa-preview{background:#e3f2fd;border-radius:9px;padding:10px 13px;font-size:0.83rem;margin-bottom:12px;color:#1565c0;font-weight:500}
+
+/* CHARTS */
+.chart-bar-wrap{padding:6px 0}
+.chart-bar-row{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.chart-bar-label{font-size:0.68rem;width:82px;text-align:right;color:var(--silver);flex-shrink:0}
+.chart-bar-bg{flex:1;background:var(--gray2);border-radius:4px;height:17px;overflow:hidden}
+.chart-bar-fill{height:100%;border-radius:4px;transition:width 0.6s ease;display:flex;align-items:center;padding-left:6px}
+.chart-bar-val{font-size:0.63rem;color:white;font-weight:600}
+
+/* Chart Receita vs Despesa (par de barras por mês) */
+.rd-month-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid rgba(0,0,0,0.04)}
+.rd-label{font-size:0.72rem;width:34px;text-align:right;color:var(--silver);font-weight:600;flex-shrink:0}
+.rd-bars{flex:1;display:flex;flex-direction:column;gap:2px}
+.rd-bar-bg{background:var(--gray2);border-radius:3px;height:14px;overflow:hidden}
+.rd-bar-fill{height:100%;border-radius:3px;transition:width 0.6s ease;display:flex;align-items:center;padding-left:6px;min-width:2px}
+.rd-rec{background:var(--green)}
+.rd-desp{background:var(--red)}
+
+/* LEGEND */
+.legend{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.legend-item{display:flex;align-items:center;gap:4px;font-size:0.72rem}
+.legend-dot{width:13px;height:13px;border-radius:3px;flex-shrink:0}
+
+/* MISC */
+.empty-state{text-align:center;padding:36px 20px;color:var(--silver)}
+.empty-state .icon{font-size:2.2rem;margin-bottom:8px}
+.empty-state p{font-size:0.85rem}
+.del-btn{background:none;border:none;color:var(--red);font-size:0.95rem;cursor:pointer;padding:3px}
+.pago-toggle{display:inline-flex;border:2px solid var(--gray2);border-radius:9px;overflow:hidden;width:100%}
+.pago-toggle button{flex:1;padding:9px;border:none;background:white;font-family:'Outfit',sans-serif;font-size:0.85rem;font-weight:600;cursor:pointer;transition:all 0.2s;color:var(--silver)}
+.pago-toggle button.active-pago{background:var(--green);color:white}
+.pago-toggle button.active-pendente{background:#e67e22;color:white}
+
+/* TOAST */
+.toast{position:fixed;bottom:88px;left:50%;transform:translateX(-50%);background:var(--navy);color:white;padding:11px 18px;border-radius:30px;font-size:0.82rem;font-weight:500;z-index:300;opacity:0;pointer-events:none;transition:opacity 0.3s;white-space:nowrap;max-width:90vw;text-align:center}
+.toast.show{opacity:1}
+
+@media(min-width:600px){
+  .kpi-grid{grid-template-columns:repeat(4,1fr)}
+  .modal{border-radius:20px;margin-bottom:20px}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN OVERLAY -->
+<div id="loginOverlay" style="display:none;position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#1a2744 0%,#243058 100%);align-items:center;justify-content:center;flex-direction:column;padding:20px;font-family:'Outfit',sans-serif">
+  <div style="background:white;border-radius:16px;padding:32px 28px;max-width:380px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.4)">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:700;color:#1a2744;margin-bottom:6px">🏠 Rota Latina</div>
+    <div style="color:#888;font-size:0.85rem;margin-bottom:24px">Gestão Financeira</div>
+    <div id="loginMsg" style="color:#555;font-size:0.9rem;margin-bottom:20px;line-height:1.5">Faça login com sua conta Google para acessar o app.</div>
+    <button id="btnLoginGoogle" style="width:100%;padding:13px;background:#1a2744;color:white;border:none;border-radius:9px;font-family:'Outfit',sans-serif;font-size:0.95rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px">
+      <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg"><path fill="#fff" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#fff" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" opacity=".85"/><path fill="#fff" d="M3.964 10.706A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.706V4.962H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.038l3.007-2.332z" opacity=".7"/><path fill="#fff" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.962L3.964 7.294C4.672 5.167 6.656 3.58 9 3.58z" opacity=".55"/></svg>
+      Entrar com Google
+    </button>
+    <div id="loginError" style="color:#e74c3c;font-size:0.8rem;margin-top:14px;display:none"></div>
+  </div>
+</div>
+
+<!-- TOPO FIXO (userBar + header + tab-bar agrupados num único bloco sticky) -->
+<div class="topo-fixo">
+<!-- USER INFO BAR (topo, mostra UID e logout) -->
+<div id="userBar" style="display:none;background:#0f1830;color:#aaa;padding:6px 14px;font-size:0.7rem;font-family:'Outfit',sans-serif;align-items:center;justify-content:space-between;gap:8px;border-bottom:1px solid rgba(255,255,255,0.05)">
+  <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+    👤 <span id="userEmail">—</span>
+    <span style="color:#666"> · UID: </span><code id="userUid" style="color:#d4a853;cursor:pointer;user-select:all" onclick="copyUid()">—</code>
+  </div>
+  <button onclick="doLogout()" style="background:rgba(231,76,60,0.15);color:#ff8b80;border:1px solid rgba(231,76,60,0.3);padding:3px 9px;border-radius:6px;font-size:0.68rem;cursor:pointer;font-family:'Outfit',sans-serif;flex-shrink:0">Sair</button>
+</div>
+
+<!-- HEADER -->
+<div class="app-header">
+  <div class="app-header-top">
+    <div>
+      <h1>🏠 Rota Latina</h1>
+      <p>Gestão Financeira <span id="syncStatus" style="margin-left:6px;font-size:0.7rem;color:rgba(212,168,83,0.9)">⏳ Conectando…</span></p>
+    </div>
+    <div class="backup-btns">
+      <div class="year-switcher">
+        <button class="year-btn" onclick="changeYear(-1)" title="Ano anterior">◀</button>
+        <span class="year-label" id="year-label">2026</span>
+        <button class="year-btn" onclick="changeYear(1)" title="Próximo ano">▶</button>
+      </div>
+      <button class="backup-btn gold" onclick="exportarBackup()">📥 Backup</button>
+      <button class="backup-btn green" onclick="document.getElementById('importFile').click()">📤 Importar</button>
+      <input type="file" id="importFile" accept=".json" style="display:none" onchange="importarBackup(event)">
+    </div>
+  </div>
+</div>
+
+<!-- TAB BAR -->
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="showTab('dashboard',this)">📊 Dashboard</button>
+  <button class="tab-btn" onclick="showTab('calendario',this)">📅 Calendário</button>
+  <button class="tab-btn" onclick="showTab('receitas',this)">💰 Receitas</button>
+  <button class="tab-btn" onclick="showTab('despesas',this)">💸 Despesas</button>
+  <button class="tab-btn" onclick="showTab('hospedes',this)">👥 Hóspedes</button>
+  <button class="tab-btn" onclick="showTab('config',this)">⚙️ Config</button>
+</div>
+</div><!-- /topo-fixo -->
+
+<!-- ═══════════ DASHBOARD ═══════════ -->
+<div id="tab-dashboard" class="tab-content active">
+  <div id="banner-backup" style="display:none;background:#fff8e1;border:1px solid #ffd54f;border-left:4px solid var(--gold);border-radius:9px;padding:10px 13px;margin-bottom:12px;font-size:0.82rem;color:#5d4037"></div>
+  <div id="banner-df-pendentes" style="display:none;background:#fff8e1;border:1px solid #ffd54f;border-left:4px solid var(--gold);border-radius:9px;padding:10px 13px;margin-bottom:12px;font-size:0.82rem;color:#5d4037"></div>
+  <div class="alert-vencidos" id="alert-vencidos"></div>
+  <div class="card" id="card-proximos" style="display:none">
+    <div class="card-header bg-navy">⏰ Próximos 7 dias</div>
+    <div class="card-body" id="proximos-list" style="font-size:0.85rem"></div>
+  </div>
+  <div class="card">
+    <div class="card-header bg-gold" style="background:var(--gold);color:var(--navy);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px">
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+        <span>📅</span>
+        <button class="mes-nav-btn" onclick="mudarMes(-1)" title="Mês anterior">◀</button>
+        <select id="mes-sel" class="mes-select" onchange="setMes(parseInt(this.value))">
+          <option value="1">Janeiro</option><option value="2">Fevereiro</option><option value="3">Março</option>
+          <option value="4">Abril</option><option value="5">Maio</option><option value="6">Junho</option>
+          <option value="7">Julho</option><option value="8">Agosto</option><option value="9">Setembro</option>
+          <option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option>
+        </select>
+        <span style="font-size:0.85rem">/ <span id="mes-sel-ano">2026</span></span>
+        <button class="mes-nav-btn" onclick="mudarMes(1)" title="Próximo mês">▶</button>
+      </div>
+      <button class="mes-hoje-btn" onclick="irParaMesAtual()" title="Ir pro mês atual">📌 Hoje</button>
+    </div>
+    <div class="card-body">
+      <div class="kpi-grid" style="margin-bottom:0">
+        <div class="kpi-card green"><div class="kpi-label">💰 Receita</div><div class="kpi-value green" id="mes-receita">R$ 0,00</div></div>
+        <div class="kpi-card red"><div class="kpi-label">💸 Despesas</div><div class="kpi-value red" id="mes-despesas">R$ 0,00</div></div>
+        <div class="kpi-card terra"><div class="kpi-label">✅ Lucro</div><div class="kpi-value terra" id="mes-lucro">R$ 0,00</div></div>
+        <div class="kpi-card gold"><div class="kpi-label">🛏️ Ocupação</div><div class="kpi-value gold" id="mes-ocupacao">0%</div></div>
+        <div class="kpi-card terra"><div class="kpi-label">💵 Diária Média</div><div class="kpi-value terra" id="mes-diaria">R$ 0,00</div></div>
+        <div class="kpi-card gold"><div class="kpi-label">📊 Reservas</div><div class="kpi-value gold" id="mes-reservas">0</div></div>
+      </div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px;margin:14px 0 6px;flex-wrap:wrap">
+    <div style="font-size:0.78rem;font-weight:600;color:var(--silver);text-transform:uppercase;letter-spacing:0.04em">📊 Resumo Anual</div>
+    <span id="ytd-badge" style="display:none;background:var(--gold);color:var(--navy);font-size:0.62rem;font-weight:700;padding:3px 8px;border-radius:4px;letter-spacing:0.03em">YTD</span>
+    <span id="ytd-help" style="font-size:0.7rem;color:#888">YTD = ano até o mês atual (parciais)</span>
+  </div>
+  <div class="kpi-grid">
+    <div class="kpi-card green"><div class="kpi-label">💰 Receita Bruta</div><div class="kpi-value green" id="kpi-rec-bruta">R$ 0,00</div></div>
+    <div class="kpi-card red"><div class="kpi-label">💸 Despesas</div><div class="kpi-value red" id="kpi-despesas">R$ 0,00</div></div>
+    <div class="kpi-card terra"><div class="kpi-label">✅ Lucro Líquido</div><div class="kpi-value terra" id="kpi-lucro">R$ 0,00</div></div>
+    <div class="kpi-card gold"><div class="kpi-label">📈 Margem</div><div class="kpi-value gold" id="kpi-margem">0%</div></div>
+    <div class="kpi-card terra"><div class="kpi-label">🛏️ Diária Média</div><div class="kpi-value terra" id="kpi-diaria-media">R$ 0,00</div></div>
+  </div>
+  <div class="card">
+    <div class="card-header bg-navy">📊 Comparativo Mensal <span id="dash-year">2026</span></div>
+    <div class="table-wrap">
+      <table><thead><tr><th>Mês</th><th>Rec. Bruta</th><th>Rec. Líq.</th><th>Despesas</th><th>Lucro</th><th>Margem</th><th>Ocupação</th><th>Reservas</th><th>Hóspedes</th><th>Recebido</th><th>A Receber</th></tr></thead>
+      <tbody id="dash-tbody"></tbody></table>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header bg-navy">📊 Receita vs Despesa por Mês</div>
+    <div class="card-body" id="chart-rec-vs-desp"></div>
+  </div>
+  <div class="card" id="card-comp-ano" style="display:none">
+    <div class="card-header bg-terra">📊 Comparativo Ano vs Ano <span id="comp-ano-label" style="font-weight:400;font-size:0.85rem;opacity:0.85"></span></div>
+    <div class="table-wrap">
+      <table><thead><tr><th>Métrica</th><th id="comp-ano-atual">Atual</th><th id="comp-ano-ant">Anterior</th><th>Variação</th></tr></thead>
+      <tbody id="comp-ano-tbody"></tbody></table>
+    </div>
+  </div>
+  <div class="card"><div class="card-header bg-terra">📊 Receitas por Plataforma</div><div class="card-body" id="chart-plat"></div></div>
+  <div class="card"><div class="card-header bg-red">📊 Despesas por Categoria</div><div class="card-body" id="chart-desp"></div></div>
+</div>
+
+<!-- ═══════════ CALENDÁRIO ═══════════ -->
+<div id="tab-calendario" class="tab-content">
+  <div class="cal-year-title">📅 <span id="cal-year-num">2026</span></div>
+  <div class="cal-quick-nav">
+    <button class="cal-quick-btn" onclick="scrollCalendarioParaHoje()" title="Ir para o mês atual">📌 Hoje</button>
+    <select class="cal-quick-sel" id="cal-jump-mes" onchange="scrollCalendarioParaMes(parseInt(this.value));this.value=''">
+      <option value="">Pular para...</option>
+      <option value="1">Janeiro</option><option value="2">Fevereiro</option><option value="3">Março</option>
+      <option value="4">Abril</option><option value="5">Maio</option><option value="6">Junho</option>
+      <option value="7">Julho</option><option value="8">Agosto</option><option value="9">Setembro</option>
+      <option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option>
+    </select>
+  </div>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#bbdefb"></div>Reserva (auto)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#c8e6c9"></div>Ocupado</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#fff9c4"></div>Reservado</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#ffcdd2"></div>Bloqueado</div>
+    <div class="legend-item"><div class="legend-dot" style="background:white;border:1px solid #ddd"></div>Livre</div>
+  </div>
+  <div id="cal-container"></div>
+</div>
+
+<!-- ═══════════ RECEITAS ═══════════ -->
+<div id="tab-receitas" class="tab-content">
+  <div class="card">
+    <div class="card-header bg-green">📊 Seção 1 — Resumo Mensal (automático)</div>
+    <div class="card-body" style="padding:10px 14px">
+      <div class="summary-note">✅ Atualizado automaticamente. Não preencha nada aqui.</div>
+      <div class="table-wrap">
+        <table><thead><tr><th>Mês</th><th>Airbnb Bruto</th><th>Airbnb Líq.</th><th>Booking Bruto</th><th>Booking Líq.</th><th>Particular Bruto</th><th>Particular Líq.</th><th>Total Bruto</th><th>Taxas</th><th>Total Líq.</th><th>Reservas</th><th>Hóspedes</th><th>Recebido</th><th>A Receber</th></tr></thead>
+        <tbody id="resumo-rec-tbody"></tbody></table>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header bg-terra">📝 Seção 2 — Lançamentos Individuais</div>
+    <div class="card-body">
+      <button class="btn btn-green btn-full" onclick="openModal('modal-rec')">➕ Nova Hospedagem</button>
+      <div style="margin-top:10px">
+        <div class="filters">
+          <select class="form-control" id="filtro-rec-mes" onchange="renderReceitas()">
+            <option value="">Todos os meses (entrada)</option>
+            <option value="1">Janeiro</option><option value="2">Fevereiro</option><option value="3">Março</option>
+            <option value="4">Abril</option><option value="5">Maio</option><option value="6">Junho</option>
+            <option value="7">Julho</option><option value="8">Agosto</option><option value="9">Setembro</option>
+            <option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option>
+          </select>
+          <select class="form-control" id="filtro-rec-plat" onchange="renderReceitas()">
+            <option value="">Todas plataformas</option>
+            <option>Airbnb</option><option>Booking</option><option>Particular</option>
+          </select>
+          <input type="text" class="form-control filters-search" id="filtro-rec-busca" placeholder="🔍 Buscar por nome do hóspede..." oninput="renderReceitasDebounced()">
+        </div>
+        <span class="filters-clear" onclick="limparFiltrosRec()">Limpar filtros</span>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table><thead><tr><th>Entrada</th><th>Saída</th><th>Hóspede</th><th>Plataforma</th><th>Dias</th><th>Pessoas</th><th>Bruto</th><th>Taxa</th><th>Líquido</th><th>Pgto</th><th>Status</th><th></th></tr></thead>
+      <tbody id="rec-tbody"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ DESPESAS ═══════════ -->
+<div id="tab-despesas" class="tab-content">
+  <div class="card">
+    <div class="card-header bg-red">📊 Seção 1 — Resumo Mensal por Categoria (automático)</div>
+    <div class="card-body" style="padding:10px 14px">
+      <div class="summary-note red">✅ Atualizado automaticamente. Não preencha nada aqui.</div>
+      <div class="table-wrap">
+        <table><thead><tr><th>Mês</th><th>Condomínio</th><th>Energia</th><th>Internet</th><th>Limpeza</th><th>Manutenção</th><th>Móveis</th><th>Taxas</th><th>Marketing</th><th>Material</th><th>Outros</th><th>TOTAL</th></tr></thead>
+        <tbody id="resumo-desp-tbody"></tbody></table>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header bg-terra">📝 Seção 2 — Lançamentos Individuais</div>
+    <div class="card-body">
+      <button class="btn btn-red btn-full" onclick="openModal('modal-desp')">➕ Nova Despesa</button>
+      <div style="margin-top:10px">
+        <div class="filters">
+          <select class="form-control" id="filtro-desp-mes" onchange="renderDespesas()">
+            <option value="">Todos os meses</option>
+            <option value="1">Janeiro</option><option value="2">Fevereiro</option><option value="3">Março</option>
+            <option value="4">Abril</option><option value="5">Maio</option><option value="6">Junho</option>
+            <option value="7">Julho</option><option value="8">Agosto</option><option value="9">Setembro</option>
+            <option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option>
+          </select>
+          <select class="form-control" id="filtro-desp-cat" onchange="renderDespesas()">
+            <option value="">Todas categorias</option>
+            <option>Condomínio</option><option>Energia Elétrica</option><option>Internet</option>
+            <option>Limpeza</option><option>Manutenção</option><option>Móveis</option>
+            <option>Taxas e Impostos</option><option>Marketing</option><option>Material de Reposição</option><option>Outros</option>
+          </select>
+          <input type="text" class="form-control filters-search" id="filtro-desp-busca" placeholder="🔍 Buscar por descrição/fornecedor..." oninput="renderDespesasDebounced()">
+        </div>
+        <span class="filters-clear" onclick="limparFiltrosDesp()">Limpar filtros</span>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table><thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Fornecedor</th><th>Valor</th><th>Pgto</th><th>Comp.</th><th></th></tr></thead>
+      <tbody id="desp-tbody"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ CONFIGURAÇÕES ═══════════ -->
+<div id="tab-config" class="tab-content">
+  <div class="card">
+    <div class="card-header bg-navy">⚙️ Taxas das Plataformas</div>
+    <div class="card-body">
+      <div class="info-box info-blue">
+        💡 Defina a taxa cobrada por cada plataforma. O valor líquido das reservas é calculado automaticamente com base nessas taxas.
+      </div>
+      <div class="form-group">
+        <label class="form-label">Taxa Airbnb (%)</label>
+        <div style="display:flex;align-items:center;gap:10px">
+          <input type="number" class="form-control" id="cfg-taxa-airbnb" step="0.1" min="0" max="100" placeholder="Ex: 15">
+          <span style="font-size:0.85rem;color:var(--silver);flex-shrink:0">%</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Taxa Booking (%)</label>
+        <div style="display:flex;align-items:center;gap:10px">
+          <input type="number" class="form-control" id="cfg-taxa-booking" step="0.1" min="0" max="100" placeholder="Ex: 15">
+          <span style="font-size:0.85rem;color:var(--silver);flex-shrink:0">%</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Taxa Particular (%)</label>
+        <div style="display:flex;align-items:center;gap:10px">
+          <input type="number" class="form-control" id="cfg-taxa-particular" step="0.1" min="0" max="100" placeholder="Ex: 0">
+          <span style="font-size:0.85rem;color:var(--silver);flex-shrink:0">%</span>
+        </div>
+      </div>
+      <button class="btn btn-green btn-full" onclick="salvarConfig()">✅ Salvar Configurações</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header bg-terra">📋 Taxas Atuais</div>
+    <div class="card-body">
+      <table style="min-width:unset">
+        <thead><tr><th>Plataforma</th><th>Taxa</th><th>Exemplo R$500</th></tr></thead>
+        <tbody id="cfg-preview-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header bg-red">💸 Despesas Fixas</div>
+    <div class="card-body">
+      <div class="info-box info-blue">
+        💡 Cadastre despesas que se repetem todo mês. Use o botão <strong>Lançar</strong> em cada uma quando o boleto chegar (ajuste o valor se variou). O sistema avisa quando algo está pra vencer ou ficou pendente.
+      </div>
+      <div id="df-list"></div>
+      <div style="background:#f5f5f5;padding:10px 13px;border-radius:9px;margin-top:10px;display:flex;justify-content:space-between;align-items:center;font-size:0.84rem">
+        <span>Total fixo mensal (referência):</span>
+        <strong id="df-total" style="color:var(--red)">R$ 0,00</strong>
+      </div>
+      <button class="btn btn-red btn-full" id="df-lancar-btn" style="margin-top:10px" onclick="lancarTodasPendentes()">📅 Lançar todas as pendentes deste mês</button>
+
+      <div style="font-size:0.78rem;font-weight:600;color:var(--silver);text-transform:uppercase;letter-spacing:0.04em;margin:18px 0 8px">➕ Adicionar nova despesa fixa</div>
+      <div class="tpl-add-form">
+        <select class="form-control full" id="df-cat">
+          <option value="">Categoria *</option>
+          <option>Condomínio</option><option>Energia Elétrica</option><option>Internet</option>
+          <option>Limpeza</option><option>Manutenção</option><option>Móveis</option>
+          <option>Taxas e Impostos</option><option>Marketing</option><option>Material de Reposição</option><option>Outros</option>
+        </select>
+        <input type="text" class="form-control full" id="df-desc" placeholder="Descrição (ex: Condomínio do prédio)">
+        <input type="text" class="form-control" id="df-forn" placeholder="Fornecedor">
+        <select class="form-control" id="df-pgto">
+          <option value="">Forma pgto.</option>
+          <option>PIX</option><option>Dinheiro</option><option>Boleto</option><option>Cartão</option>
+        </select>
+        <input type="tel" inputmode="numeric" class="form-control" id="df-valor" placeholder="R$ 0,00 (referência) *" oninput="formatCurrencyInput(this)">
+        <input type="number" min="1" max="31" class="form-control" id="df-dia" placeholder="Dia venc. (1-31)">
+        <button class="btn btn-red full" onclick="addDespFixa()">➕ Cadastrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ HÓSPEDES (CRM) ═══════════ -->
+<div id="tab-hospedes" class="tab-content">
+  <div class="kpi-grid">
+    <div class="kpi-card gold"><div class="kpi-label">👥 Total</div><div class="kpi-value gold" id="hosp-kpi-total">0</div></div>
+    <div class="kpi-card green"><div class="kpi-label">🌟 Recorrentes</div><div class="kpi-value green" id="hosp-kpi-recorrentes">0</div></div>
+    <div class="kpi-card terra"><div class="kpi-label">💰 Receita Total</div><div class="kpi-value terra" id="hosp-kpi-receita">R$ 0,00</div></div>
+    <div class="kpi-card red"><div class="kpi-label">📈 Tx. Recorrência</div><div class="kpi-value red" id="hosp-kpi-tx">0%</div></div>
+  </div>
+  <div class="card">
+    <div class="card-header bg-navy">👥 Cadastro de Hóspedes</div>
+    <div class="card-body">
+      <div class="info-box info-blue">💡 O cadastro é alimentado automaticamente pelas reservas. Hóspedes com 2+ visitas aparecem como recorrentes.</div>
+      <div class="filters" style="margin-bottom:10px">
+        <select class="form-control" id="filtro-hosp-tipo" onchange="renderHospedes()">
+          <option value="">Todos</option>
+          <option value="recorrente">🌟 Apenas recorrentes</option>
+          <option value="primeiravez">🆕 Apenas primeira vez</option>
+        </select>
+        <select class="form-control" id="filtro-hosp-ord" onchange="renderHospedes()">
+          <option value="visitas">Mais visitas</option>
+          <option value="recente">Visita mais recente</option>
+          <option value="gasto">Maior valor gasto</option>
+          <option value="nome">Nome (A-Z)</option>
+        </select>
+        <input type="text" class="form-control filters-search" id="filtro-hosp-busca" placeholder="🔍 Buscar por nome ou telefone..." oninput="renderHospedesDebounced()">
+      </div>
+      <div style="text-align:right;margin-bottom:8px">
+        <button class="btn btn-terra" style="padding:7px 14px;font-size:0.78rem" onclick="rebuildHospedesUI()">🔄 Reconstruir do histórico</button>
+      </div>
+      <div id="hosp-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ MODAL HISTÓRICO HÓSPEDE ═══════════ -->
+<div class="modal-backdrop" id="modal-hospede-detail" onclick="closeModalOutside(event,'modal-hospede-detail')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="hosp-detail-title">👤 Hóspede</div>
+    <div id="hosp-detail-info"></div>
+    <div style="font-size:0.78rem;font-weight:600;color:var(--silver);text-transform:uppercase;letter-spacing:0.04em;margin:14px 0 6px">📅 Histórico de Reservas</div>
+    <div id="hosp-detail-historico"></div>
+    <button class="btn btn-green btn-full" style="margin-top:14px" onclick="novaReservaPraHospedeDoModal()">➕ Nova Reserva</button>
+    <button class="btn btn-full btn-cancel" onclick="closeModal('modal-hospede-detail')">Fechar</button>
+  </div>
+</div>
+
+<!-- ═══════════ MODAL EDITAR HÓSPEDE ═══════════ -->
+<div class="modal-backdrop" id="modal-edit-hosp" onclick="closeModalOutside(event,'modal-edit-hosp')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">✏️ Editar Hóspede</div>
+    <div class="info-box info-blue">Alterar nome ou telefone aqui também atualiza todas as reservas associadas.</div>
+    <div class="form-group">
+      <label class="form-label">Nome *</label>
+      <input type="text" class="form-control" id="eh-nome">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Telefone</label>
+      <input type="tel" inputmode="numeric" class="form-control" id="eh-telefone" placeholder="(14) 99999-9999" oninput="formatPhone(this)">
+      <small style="color:#888;font-size:0.7rem;display:block;margin-top:3px">Adicionar um telefone que faltava também é permitido.</small>
+    </div>
+    <input type="hidden" id="eh-key">
+    <button class="btn btn-green btn-full" onclick="saveEditHospede()">✅ Salvar Alterações</button>
+    <button class="btn btn-full btn-cancel" onclick="closeModal('modal-edit-hosp')">Cancelar</button>
+  </div>
+</div>
+
+<!-- ═══════════ MODAL MESCLAR HÓSPEDES ═══════════ -->
+<div class="modal-backdrop" id="modal-mesclar" onclick="closeModalOutside(event,'modal-mesclar')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">🔗 Mesclar Hóspedes</div>
+    <div class="info-box info-blue" id="mesclar-origem-info"></div>
+    <div class="form-group">
+      <label class="form-label">Mesclar em qual outro hóspede?</label>
+      <select class="form-control" id="mesclar-destino">
+        <option value="">Selecione...</option>
+      </select>
+      <small style="color:#888;font-size:0.7rem;display:block;margin-top:3px">As reservas do hóspede atual serão migradas pro destino. O atual será removido.</small>
+    </div>
+    <div class="info-box" style="background:rgba(212,168,83,0.1);border-left:3px solid var(--gold);font-size:0.75rem;color:#bbb">
+      ⚠️ Operação não pode ser desfeita. Recomenda-se fazer backup antes.
+    </div>
+    <input type="hidden" id="mesclar-origem">
+    <button class="btn btn-red btn-full" onclick="confirmarMesclar()">🔗 Confirmar Mesclagem</button>
+    <button class="btn btn-full btn-cancel" onclick="closeModal('modal-mesclar')">Cancelar</button>
+  </div>
+</div>
+
+<!-- ═══════════ MODAL RECEITA ═══════════ -->
+<div class="modal-backdrop" id="modal-rec" onclick="closeModalOutside(event,'modal-rec')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">💰 Nova Hospedagem</div>
+    <div id="conflito-box" class="info-box info-red" style="display:none"></div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Data Check-in *</label>
+        <input type="date" class="form-control" id="r-data" onchange="verificarConflito()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Data Check-out</label>
+        <input type="date" class="form-control" id="r-checkout" onchange="verificarConflito()">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Nome do Hóspede *</label>
+      <input type="text" class="form-control" id="r-hospede" placeholder="Ex: Maria Silva" oninput="lookupHospede()">
+      <div id="hospede-hint" style="display:none;font-size:0.72rem;color:#27ae60;margin-top:5px;padding:6px 10px;background:rgba(39,174,96,0.08);border-radius:6px"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">📱 Telefone do Hóspede</label>
+      <input type="tel" class="form-control" id="r-telefone" placeholder="Ex: 14 99999-9999" oninput="formatPhone(this); lookupHospedePorTel()">
+      <small style="color:#888;font-size:0.7rem">Opcional. Ajuda a identificar hóspedes recorrentes mesmo com nomes parecidos.</small>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Plataforma *</label>
+        <select class="form-control" id="r-plat" onchange="updateTaxaPreview()">
+          <option value="">Selecione...</option>
+          <option>Airbnb</option><option>Booking</option><option>Particular</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Nº de Pessoas</label>
+        <input type="number" class="form-control" id="r-pessoas" min="1" placeholder="1">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Valor Bruto (R$) *</label>
+        <input type="tel" inputmode="numeric" class="form-control" id="r-valor" placeholder="R$ 0,00" oninput="formatCurrencyInput(this); updateTaxaPreview()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Forma de Pagamento</label>
+        <select class="form-control" id="r-pgto">
+          <option value="">Selecione...</option>
+          <option>PIX</option><option>Dinheiro</option><option>Boleto</option><option>Cartão</option>
+        </select>
+      </div>
+    </div>
+    <div class="taxa-preview" id="taxa-preview">💡 Preencha plataforma e valor para calcular a taxa</div>
+    <div class="form-group">
+      <label class="form-label">Status do Pagamento *</label>
+      <div class="pago-toggle" id="pago-toggle">
+        <button id="btn-pago" onclick="setPago('Pago')">✅ Pago</button>
+        <button id="btn-pendente" onclick="setPago('Pendente')">⏳ Pendente</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Observações</label>
+      <input type="text" class="form-control" id="r-obs" placeholder="Opcional">
+    </div>
+    <div class="info-box info-blue">📅 Os dias entre check-in e check-out serão marcados no calendário automaticamente.</div>
+    <button class="btn btn-green btn-full" id="btn-salvar-rec" onclick="saveReceita()">✅ Salvar Hospedagem</button>
+    <button class="btn btn-full btn-cancel" onclick="closeModal('modal-rec')">Cancelar</button>
+  </div>
+</div>
+
+<!-- ═══════════ MODAL DESPESA ═══════════ -->
+<div class="modal-backdrop" id="modal-desp" onclick="closeModalOutside(event,'modal-desp')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">💸 Nova Despesa</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Data *</label>
+        <input type="date" class="form-control" id="d-data">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Categoria *</label>
+        <select class="form-control" id="d-cat">
+          <option value="">Selecione...</option>
+          <option>Condomínio</option><option>Energia Elétrica</option><option>Internet</option>
+          <option>Limpeza</option><option>Manutenção</option><option>Móveis</option>
+          <option>Taxas e Impostos</option>
+          <option>Marketing</option><option>Material de Reposição</option><option>Outros</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Descrição</label>
+      <input type="text" class="form-control" id="d-desc" placeholder="Ex: Conta de luz de janeiro">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Fornecedor / Empresa</label>
+      <input type="text" class="form-control" id="d-forn" placeholder="Ex: CPFL, Diarista...">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Valor (R$) *</label>
+        <input type="tel" inputmode="numeric" class="form-control" id="d-valor" placeholder="R$ 0,00" oninput="formatCurrencyInput(this)">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Forma de Pagamento</label>
+        <select class="form-control" id="d-pgto">
+          <option value="">Selecione...</option>
+          <option>PIX</option><option>Dinheiro</option><option>Boleto</option><option>Cartão</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Comprovante?</label>
+      <select class="form-control" id="d-comp"><option value="">Selecione...</option><option>Sim</option><option>Não</option></select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">📅 Mês de Referência</label>
+      <select class="form-control" id="d-mes-ref">
+        <option value="">Mesmo mês do pagamento (padrão)</option>
+        <option value="1">Janeiro</option><option value="2">Fevereiro</option><option value="3">Março</option>
+        <option value="4">Abril</option><option value="5">Maio</option><option value="6">Junho</option>
+        <option value="7">Julho</option><option value="8">Agosto</option><option value="9">Setembro</option>
+        <option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option>
+      </select>
+      <small style="color:#888;font-size:0.7rem;display:block;margin-top:3px">Use quando pagar em um mês uma despesa que se refere a outro (ex: pagar em fev a luz de jan).</small>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Observações</label>
+      <input type="text" class="form-control" id="d-obs" placeholder="Opcional">
+    </div>
+    <button class="btn btn-red btn-full" onclick="saveDespesa()">✅ Salvar Despesa</button>
+    <button class="btn btn-full btn-cancel" onclick="closeModal('modal-desp')">Cancelar</button>
+  </div>
+</div>
+
+<!-- ═══════════ MODAL EDITAR DESPESA ═══════════ -->
+<div class="modal-backdrop" id="modal-edit-desp" onclick="closeModalOutside(event,'modal-edit-desp')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">✏️ Editar Despesa</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Data *</label>
+        <input type="date" class="form-control" id="ed-data">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Categoria *</label>
+        <select class="form-control" id="ed-cat">
+          <option value="">Selecione...</option>
+          <option>Condomínio</option><option>Energia Elétrica</option><option>Internet</option>
+          <option>Limpeza</option><option>Manutenção</option><option>Móveis</option>
+          <option>Taxas e Impostos</option>
+          <option>Marketing</option><option>Material de Reposição</option><option>Outros</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Descrição</label>
+      <input type="text" class="form-control" id="ed-desc" placeholder="Ex: Conta de luz de janeiro">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Fornecedor / Empresa</label>
+      <input type="text" class="form-control" id="ed-forn" placeholder="Ex: CPFL, Diarista...">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Valor (R$) *</label>
+        <input type="tel" inputmode="numeric" class="form-control" id="ed-valor" placeholder="R$ 0,00" oninput="formatCurrencyInput(this)">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Forma de Pagamento</label>
+        <select class="form-control" id="ed-pgto">
+          <option value="">Selecione...</option>
+          <option>PIX</option><option>Dinheiro</option><option>Boleto</option><option>Cartão</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Comprovante?</label>
+      <select class="form-control" id="ed-comp"><option value="">Selecione...</option><option>Sim</option><option>Não</option></select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">📅 Mês de Referência</label>
+      <select class="form-control" id="ed-mes-ref">
+        <option value="">Mesmo mês do pagamento (padrão)</option>
+        <option value="1">Janeiro</option><option value="2">Fevereiro</option><option value="3">Março</option>
+        <option value="4">Abril</option><option value="5">Maio</option><option value="6">Junho</option>
+        <option value="7">Julho</option><option value="8">Agosto</option><option value="9">Setembro</option>
+        <option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option>
+      </select>
+      <small style="color:#888;font-size:0.7rem;display:block;margin-top:3px">Use quando pagar em um mês uma despesa que se refere a outro.</small>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Observações</label>
+      <input type="text" class="form-control" id="ed-obs" placeholder="Opcional">
+    </div>
+    <input type="hidden" id="ed-id">
+    <button class="btn btn-red btn-full" onclick="saveEditDespesa()">✅ Salvar Alterações</button>
+    <button class="btn btn-full btn-cancel" onclick="closeModal('modal-edit-desp')">Cancelar</button>
+  </div>
+</div>
+
+<!-- ═══════════ MODAL LANÇAR DESPESA FIXA ═══════════ -->
+<div class="modal-backdrop" id="modal-lancar-df" onclick="closeModalOutside(event,'modal-lancar-df')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">📅 Lançar Despesa Fixa</div>
+    <div class="info-box info-blue" id="lancar-df-info"></div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Data do pagamento *</label>
+        <input type="date" class="form-control" id="lancar-df-data">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Mês de referência</label>
+        <select class="form-control" id="lancar-df-mes-ref">
+          <option value="">Mesmo mês do pagamento</option>
+          <option value="1">Janeiro</option><option value="2">Fevereiro</option><option value="3">Março</option>
+          <option value="4">Abril</option><option value="5">Maio</option><option value="6">Junho</option>
+          <option value="7">Julho</option><option value="8">Agosto</option><option value="9">Setembro</option>
+          <option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Valor pago (R$) *</label>
+      <input type="tel" inputmode="numeric" class="form-control" id="lancar-df-valor" placeholder="R$ 0,00" oninput="formatCurrencyInput(this);updateLancarDFDelta()">
+      <div id="lancar-df-delta" style="font-size:0.78rem;margin-top:6px;color:#666"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Comprovante?</label>
+      <select class="form-control" id="lancar-df-comp">
+        <option value="">Selecione...</option><option>Sim</option><option>Não</option>
+      </select>
+    </div>
+    <input type="hidden" id="lancar-df-id">
+    <button class="btn btn-red btn-full" onclick="confirmarLancarDF()">✅ Lançar Despesa</button>
+    <button class="btn btn-full btn-cancel" onclick="closeModal('modal-lancar-df')">Cancelar</button>
+  </div>
+</div>
+
+<!-- ═══════════ MODAL EDITAR RESERVA ═══════════ -->
+<div class="modal-backdrop" id="modal-edit-rec" onclick="closeModalOutside(event,'modal-edit-rec')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">✏️ Editar Reserva</div>
+    <div class="info-box info-blue" id="edit-rec-info"></div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Check-in *</label>
+        <input type="date" class="form-control" id="edit-r-data">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Check-out</label>
+        <input type="date" class="form-control" id="edit-r-checkout">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Hóspede *</label>
+      <input type="text" class="form-control" id="edit-r-hospede" placeholder="Nome completo">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Telefone</label>
+      <input type="tel" inputmode="numeric" class="form-control" id="edit-r-telefone" placeholder="(14) 99999-9999" oninput="formatPhone(this)">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Plataforma *</label>
+        <select class="form-control" id="edit-r-plat" onchange="updateEditTaxaPreview()">
+          <option value="">Selecione...</option>
+          <option>Airbnb</option><option>Booking</option><option>Particular</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Pessoas</label>
+        <input type="number" class="form-control" id="edit-r-pessoas" min="1" placeholder="2">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Valor Bruto (R$) *</label>
+        <input type="tel" inputmode="numeric" class="form-control" id="edit-r-valor" placeholder="R$ 0,00" oninput="formatCurrencyInput(this);updateEditTaxaPreview()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Status do Pagamento</label>
+        <div class="pago-toggle" id="edit-pago-toggle">
+          <button id="edit-btn-pago" onclick="setEditPago('Pago')">✅ Pago</button>
+          <button id="edit-btn-pendente" onclick="setEditPago('Pendente')">⏳ Pendente</button>
+        </div>
+      </div>
+    </div>
+    <div class="info-box info-blue" id="edit-taxa-preview" style="display:none"></div>
+    <div class="form-group" style="background:rgba(45,52,86,0.04);border:1px solid rgba(45,52,86,0.1);border-radius:9px;padding:10px 12px">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.82rem;color:var(--navy);font-weight:600">
+        <input type="checkbox" id="edit-liq-manual-toggle" onchange="toggleLiquidoManual()" style="width:auto;margin:0">
+        <span>🔓 Ajustar líquido manualmente</span>
+      </label>
+      <div id="edit-liq-manual-box" style="display:none;margin-top:10px">
+        <label class="form-label">Valor Líquido recebido (R$)</label>
+        <input type="tel" inputmode="numeric" class="form-control" id="edit-r-liquido" placeholder="R$ 0,00" oninput="formatCurrencyInput(this);updateEditTaxaEfetiva()">
+        <div id="edit-taxa-efetiva" style="font-size:0.78rem;margin-top:6px;color:#666"></div>
+        <small style="color:#888;font-size:0.7rem;display:block;margin-top:4px">Use somente quando o valor recebido foi diferente do calculado automaticamente (ex: taxa extra do Booking, conversão de moeda).</small>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Forma de Pagamento</label>
+      <select class="form-control" id="edit-pgto">
+        <option value="">Selecione...</option>
+        <option>PIX</option><option>Dinheiro</option><option>Boleto</option><option>Cartão</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Observações</label>
+      <input type="text" class="form-control" id="edit-obs" placeholder="Opcional">
+    </div>
+    <div class="info-box" style="background:rgba(212,168,83,0.1);border-left:3px solid var(--gold);font-size:0.75rem;color:#bbb">
+      ⚠️ Mudar datas, hóspede ou valor recalcula calendário, taxa e CRM.
+    </div>
+    <input type="hidden" id="edit-rec-id">
+    <button class="btn btn-green btn-full" onclick="saveEditReceita()">✅ Salvar Alterações</button>
+    <button class="btn btn-full btn-cancel" onclick="closeModal('modal-edit-rec')">Cancelar</button>
+  </div>
+</div>
+
+<!-- ═══════════ MODAL CALENDÁRIO ═══════════ -->
+<div class="modal-backdrop" id="modal-cal" onclick="closeModalOutside(event,'modal-cal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="cal-modal-title">📅 Dia</div>
+    <div class="info-box info-blue" id="cal-auto-info" style="display:none"></div>
+    <div class="form-group">
+      <label class="form-label">Status do Dia</label>
+      <select class="form-control" id="cal-status">
+        <option value="">Livre</option>
+        <option value="occupied">Ocupado</option>
+        <option value="reserved">Reservado</option>
+        <option value="blocked">Bloqueado</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Nome do Hóspede</label>
+      <input type="text" class="form-control" id="cal-hospede" placeholder="Ex: Maria Silva">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Nº de Pessoas</label>
+        <input type="number" class="form-control" id="cal-pessoas" min="1" placeholder="0">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Valor Pago (R$)</label>
+        <input type="tel" inputmode="numeric" class="form-control" id="cal-valor" placeholder="R$ 0,00" oninput="formatCurrencyInput(this)">
+      </div>
+    </div>
+    <input type="hidden" id="cal-date-key">
+    <button class="btn btn-terra btn-full" onclick="saveCalDay()">✅ Salvar</button>
+    <button class="btn btn-full btn-cancel" onclick="closeModal('modal-cal')">Cancelar</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── CONSTANTS
+const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const CATS = ['Condomínio','Energia Elétrica','Internet','Limpeza','Manutenção','Móveis','Taxas e Impostos','Marketing','Material de Reposição','Outros'];
+let YEAR = (new Date()).getFullYear(); // ano corrente; pode ser alterado pelo seletor
+let MES_SEL = (new Date()).getMonth() + 1; // mês selecionado no card "Este Mês"
+if (YEAR < 2026) YEAR = 2026; // primeiro ano de operação
+let pagoStatus = 'Pago'; // default
+
+// ── STORAGE (Firebase + cache local), com suporte a múltiplos anos
+// Estrutura no Firestore:
+//   app/rec_2026, app/desp_2026, app/cal_2026  (e analogamente para 2027, 2028, ...)
+//   app/config                                 (sem ano, é global)
+//   app/hospedes                               (sem ano, é o "CRM" de hóspedes recorrentes)
+//   app/despFixas                              (sem ano, são templates de despesas recorrentes)
+// Cache em memória: _cache[ano][rec|desp|cal] e _cache.config, _cache.hospedes, _cache.despFixas
+const _cache = { config: {}, hospedes: {}, despFixas: [] };
+let _firestoreReady = false;
+let _pendingWrites = 0;
+
+function _ensureYear(y) {
+  if (!_cache[y]) _cache[y] = { rec: [], desp: [], cal: {} };
+  return _cache[y];
+}
+
+function setSyncStatus(state) {
+  const el = document.getElementById('syncStatus');
+  if (!el) return;
+  if (state === 'synced')   { el.textContent = '✅ Sincronizado'; el.style.color = 'rgba(168,230,195,0.9)'; }
+  if (state === 'syncing')  { el.textContent = '🔄 Sincronizando…'; el.style.color = 'rgba(212,168,83,0.9)'; }
+  if (state === 'offline')  { el.textContent = '📴 Offline (salvando local)'; el.style.color = 'rgba(231,76,60,0.9)'; }
+  if (state === 'error')    { el.textContent = '⚠️ Erro de sync'; el.style.color = 'rgba(231,76,60,0.9)'; }
+  if (state === 'connecting'){ el.textContent = '⏳ Conectando…'; el.style.color = 'rgba(212,168,83,0.9)'; }
+}
+
+function load(k) { return _ensureYear(YEAR)[k] || []; }
+function loadCal() { return _ensureYear(YEAR).cal || {}; }
+function loadConfig() { return _cache.config || {}; }
+function loadHospedes() { return _cache.hospedes || {}; }
+function loadDespFixas() { return _cache.despFixas || []; }
+
+// Versões "any year" para acessar dados de outros anos (ex: histórico de hóspedes recorrentes)
+function loadAny(year, k) { return (_cache[year] && _cache[year][k]) || (Array.isArray((_cache[year]||{})[k]) ? [] : {}); }
+
+function save(k, d) {
+  _ensureYear(YEAR)[k] = d;
+  localStorage.setItem('rl_'+k+'_'+YEAR, JSON.stringify(d));
+  _pushToFirestore(k+'_'+YEAR, d);
+}
+function saveCal(d) {
+  _ensureYear(YEAR).cal = d;
+  localStorage.setItem('rl_cal_'+YEAR, JSON.stringify(d));
+  _pushToFirestore('cal_'+YEAR, d);
+}
+function saveConfig(d) {
+  _cache.config = d;
+  localStorage.setItem('rl_config', JSON.stringify(d));
+  _pushToFirestore('config', d);
+}
+function saveHospedes(d) {
+  _cache.hospedes = d;
+  localStorage.setItem('rl_hospedes', JSON.stringify(d));
+  _pushToFirestore('hospedes', d);
+}
+function saveDespFixas(d) {
+  _cache.despFixas = d;
+  localStorage.setItem('rl_despFixas', JSON.stringify(d));
+  _pushToFirestore('despFixas', d);
+}
+
+async function _pushToFirestore(key, data) {
+  if (!_firestoreReady) return; // será sincronizado depois (cache local já atualizado)
+  try {
+    _pendingWrites++;
+    setSyncStatus('syncing');
+    await window._fb.setDoc(window._fb.doc(window._fb.db, 'app', key), { data });
+    _pendingWrites--;
+    if (_pendingWrites === 0) setSyncStatus('synced');
+  } catch (err) {
+    console.error('Erro ao salvar no Firestore:', err);
+    _pendingWrites = Math.max(0, _pendingWrites - 1);
+    setSyncStatus('offline');
+  }
+}
+
+// Carrega cache inicial do localStorage (instantâneo, antes do Firebase responder)
+function _loadCacheFromLocal() {
+  // Globais (sem ano)
+  try { _cache.config    = JSON.parse(localStorage.getItem('rl_config')    || '{}'); } catch { _cache.config = {}; }
+  try { _cache.hospedes  = JSON.parse(localStorage.getItem('rl_hospedes')  || '{}'); } catch { _cache.hospedes = {}; }
+  try { _cache.despFixas = JSON.parse(localStorage.getItem('rl_despFixas') || '[]'); } catch { _cache.despFixas = []; }
+  // Por ano: varre o localStorage atrás de chaves rl_rec_2026, rl_desp_2026, rl_cal_2026 etc.
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    const m = k && k.match(/^rl_(rec|desp|cal)_(\d{4})$/);
+    if (m) {
+      const [_, kind, y] = m;
+      _ensureYear(parseInt(y));
+      try { _cache[parseInt(y)][kind] = JSON.parse(localStorage.getItem(k)); }
+      catch { _cache[parseInt(y)][kind] = (kind === 'cal') ? {} : []; }
+    }
+  }
+  // MIGRAÇÃO: dados antigos sem ano (chaves rl_rec, rl_desp, rl_cal) viram do ano corrente
+  ['rec','desp','cal'].forEach(k => {
+    const old = localStorage.getItem('rl_'+k);
+    if (old !== null && !localStorage.getItem('rl_'+k+'_'+YEAR)) {
+      localStorage.setItem('rl_'+k+'_'+YEAR, old);
+      _ensureYear(YEAR);
+      try { _cache[YEAR][k] = JSON.parse(old); } catch { _cache[YEAR][k] = (k === 'cal') ? {} : []; }
+      // mantém o original também (não remove ainda - será limpo após confirmarmos sync)
+    }
+  });
+  _ensureYear(YEAR); // garante que o ano corrente exista no cache
+}
+
+// ── UTILS
+function fmt(v) { return 'R$ ' + parseFloat(v||0).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+function pct(v) { return (parseFloat(v||0)*100).toFixed(1) + '%'; }
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
+function getMes(d) { if (!d) return null; return new Date(d + 'T00:00:00').getMonth() + 1; }
+
+// Escapa HTML pra evitar XSS quando inserir texto via innerHTML
+function esc(s) {
+  if (s === null || s === undefined) return '';
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+// Debounce simples — reaproveitado pelos campos de busca
+const _debounceTimers = {};
+function debounce(fn, key, ms = 200) {
+  return function(...args) {
+    if (_debounceTimers[key]) clearTimeout(_debounceTimers[key]);
+    _debounceTimers[key] = setTimeout(() => fn.apply(this, args), ms);
+  };
+}
+const renderReceitasDebounced = debounce(() => renderReceitas(), 'rec', 200);
+const renderDespesasDebounced = debounce(() => renderDespesas(), 'desp', 200);
+const renderHospedesDebounced = debounce(() => renderHospedes(), 'hosp', 200);
+
+// Formata input de moeda enquanto digita: usuário digita só números, vê "R$ 2.500,00"
+function formatCurrencyInput(el) {
+  let digits = (el.value || '').replace(/\D/g, '');
+  if (!digits) { el.value = ''; return; }
+  digits = digits.replace(/^0+/, '') || '0'; // remove zeros à esquerda mas mantém pelo menos 1
+  while (digits.length < 3) digits = '0' + digits; // garante centavos
+  const reais = digits.slice(0, -2);
+  const cents = digits.slice(-2);
+  const reaisFmt = parseInt(reais, 10).toLocaleString('pt-BR');
+  el.value = 'R$ ' + reaisFmt + ',' + cents;
+}
+
+// Converte string formatada "R$ 2.500,00" em número 2500.00
+function parseBRL(str) {
+  if (str === null || str === undefined || str === '') return 0;
+  const s = String(str).replace(/[^\d,-]/g, '').replace(/\./g, '').replace(',', '.');
+  const n = parseFloat(s);
+  return isNaN(n) ? 0 : n;
+}
+
+// Converte número em string formatada (para preencher inputs ao editar)
+function numberToBRLInput(n) {
+  if (!n && n !== 0) return '';
+  return 'R$ ' + parseFloat(n).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+
+// ── HÓSPEDES (CRM com telefone como chave única)
+function normalizePhone(s) {
+  if (!s) return '';
+  return String(s).replace(/\D/g, ''); // só dígitos
+}
+
+function formatPhone(el) {
+  const d = normalizePhone(el.value);
+  if (!d) { el.value = ''; return; }
+  let out;
+  if (d.length <= 2) out = '(' + d;
+  else if (d.length <= 6) out = '(' + d.slice(0,2) + ') ' + d.slice(2);
+  else if (d.length <= 10) out = '(' + d.slice(0,2) + ') ' + d.slice(2,6) + '-' + d.slice(6);
+  else out = '(' + d.slice(0,2) + ') ' + d.slice(2,7) + '-' + d.slice(7,11);
+  el.value = out;
+}
+
+// Registra ou atualiza hóspede no CRM, indexado por telefone (ou nome se não houver tel)
+function registrarHospede(rec) {
+  const hosp = {...loadHospedes()};
+  const key = rec.telefone || ('nome:' + rec.hospede.toLowerCase().trim());
+  if (!key || key === 'nome:') return;
+  const existente = hosp[key] || { nome: rec.hospede, telefone: rec.telefone || '', visitas: 0, primeiraVisita: rec.data, ultimaVisita: rec.data, totalGasto: 0, plataformasUsadas: [] };
+  existente.nome = rec.hospede; // atualiza com nome mais recente
+  if (rec.telefone) existente.telefone = rec.telefone;
+  existente.visitas = (existente.visitas || 0) + 1;
+  existente.ultimaVisita = rec.data > (existente.ultimaVisita || '') ? rec.data : existente.ultimaVisita;
+  existente.primeiraVisita = (!existente.primeiraVisita || rec.data < existente.primeiraVisita) ? rec.data : existente.primeiraVisita;
+  existente.totalGasto = (existente.totalGasto || 0) + (rec.valor || 0);
+  if (rec.plat && !existente.plataformasUsadas.includes(rec.plat)) existente.plataformasUsadas.push(rec.plat);
+  hosp[key] = existente;
+  saveHospedes(hosp);
+}
+
+// Procura hóspede pelo telefone digitado e mostra dica se for recorrente
+function lookupHospedePorTel() {
+  const tel = normalizePhone((document.getElementById('r-telefone') || {value:''}).value);
+  if (!tel || tel.length < 8) return; // ignora telefones incompletos
+  const hosp = loadHospedes();
+  const found = hosp[tel];
+  const hint = document.getElementById('hospede-hint');
+  if (found && hint) {
+    hint.style.display = 'block';
+    hint.innerHTML = `🌟 <strong>Hóspede recorrente!</strong> ${esc(found.nome)} já se hospedou ${found.visitas}x. Última: ${found.ultimaVisita.split('-').reverse().join('/')}`;
+    // Auto-preenche o nome se ainda estiver vazio
+    const nomeEl = document.getElementById('r-hospede');
+    if (nomeEl && !nomeEl.value.trim()) nomeEl.value = found.nome;
+  } else if (hint) {
+    hint.style.display = 'none';
+  }
+}
+
+// Procura hóspede pelo nome (busca aproximada)
+function lookupHospede() {
+  const nome = (document.getElementById('r-hospede') || {value:''}).value.trim().toLowerCase();
+  if (!nome || nome.length < 3) return;
+  const hosp = loadHospedes();
+  // Procura matches por nome
+  const matches = Object.values(hosp).filter(h => h.nome.toLowerCase().includes(nome));
+  const hint = document.getElementById('hospede-hint');
+  if (!hint) return;
+  if (matches.length === 1) {
+    const h = matches[0];
+    hint.style.display = 'block';
+    hint.innerHTML = `🌟 <strong>${esc(h.nome)}</strong> já se hospedou ${h.visitas}x ${h.telefone ? '(' + formatPhoneDisplay(h.telefone) + ')' : ''}. Última: ${h.ultimaVisita.split('-').reverse().join('/')}`;
+  } else if (matches.length > 1) {
+    hint.style.display = 'block';
+    hint.innerHTML = `⚠️ <strong>${matches.length} hóspedes</strong> com nome parecido. Preencha o telefone para identificar.`;
+  } else {
+    hint.style.display = 'none';
+  }
+}
+
+function formatPhoneDisplay(d) {
+  if (!d) return '';
+  if (d.length === 11) return '(' + d.slice(0,2) + ') ' + d.slice(2,7) + '-' + d.slice(7);
+  if (d.length === 10) return '(' + d.slice(0,2) + ') ' + d.slice(2,6) + '-' + d.slice(6);
+  return d;
+}
+
+// Reconstrói o CRM a partir das reservas existentes (útil após importar backup antigo)
+function rebuildHospedes() {
+  const hosp = {};
+  Object.keys(_cache).forEach(k => {
+    const yr = parseInt(k);
+    if (isNaN(yr) || !Array.isArray(_cache[yr].rec)) return;
+    _cache[yr].rec.forEach(rec => {
+      const key = rec.telefone || ('nome:' + (rec.hospede||'').toLowerCase().trim());
+      if (!key || key === 'nome:') return;
+      const ex = hosp[key] || { nome: rec.hospede, telefone: rec.telefone || '', visitas: 0, primeiraVisita: rec.data, ultimaVisita: rec.data, totalGasto: 0, plataformasUsadas: [] };
+      ex.nome = rec.hospede;
+      if (rec.telefone) ex.telefone = rec.telefone;
+      ex.visitas++;
+      if (!ex.primeiraVisita || rec.data < ex.primeiraVisita) ex.primeiraVisita = rec.data;
+      if (!ex.ultimaVisita || rec.data > ex.ultimaVisita) ex.ultimaVisita = rec.data;
+      ex.totalGasto += (rec.valor || 0);
+      if (rec.plat && !ex.plataformasUsadas.includes(rec.plat)) ex.plataformasUsadas.push(rec.plat);
+      hosp[key] = ex;
+    });
+  });
+  saveHospedes(hosp);
+}
+
+function calcTaxa(plat, valor) {
+  const cfg = loadConfig();
+  const taxaPct = cfg[plat] !== undefined ? cfg[plat] : (plat === 'Airbnb' || plat === 'Booking' ? 15 : 0);
+  return parseFloat(valor||0) * (taxaPct / 100);
+}
+
+// ── HELPERS GERAIS
+function confirmar(msg) { return confirm(msg); }
+
+function todayStr() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+function diasEntre(d1, d2) {
+  return Math.round((new Date(d2 + 'T00:00:00') - new Date(d1 + 'T00:00:00')) / 86400000);
+}
+
+// Reserva é "vencida" se: pago != Pago E checkout (ou data) < hoje-30 dias
+function isVencida(rec) {
+  if (rec.pago === 'Pago') return false;
+  const ref = rec.checkout || rec.data;
+  if (!ref) return false;
+  return diasEntre(ref, todayStr()) > 30;
+}
+
+function getReservasVencidas() {
+  const all = [];
+  Object.keys(_cache).forEach(k => {
+    const yr = parseInt(k);
+    if (isNaN(yr) || !Array.isArray(_cache[yr].rec)) return;
+    _cache[yr].rec.forEach(r => { if (isVencida(r)) all.push(r); });
+  });
+  return all;
+}
+
+// ── FILTROS
+function applyFiltrosRec(recs) {
+  const mes = (document.getElementById('filtro-rec-mes') || {value:''}).value;
+  const plat = (document.getElementById('filtro-rec-plat') || {value:''}).value;
+  const busca = ((document.getElementById('filtro-rec-busca') || {value:''}).value || '').toLowerCase().trim();
+  return recs.filter(r => {
+    if (mes && String(r.mes) !== mes) return false;
+    if (plat && r.plat !== plat) return false;
+    if (busca) {
+      const hay = (r.hospede || '').toLowerCase() + ' ' + (r.telefone || '');
+      if (!hay.includes(busca)) return false;
+    }
+    return true;
+  });
+}
+
+function limparFiltrosRec() {
+  ['filtro-rec-mes','filtro-rec-plat','filtro-rec-busca'].forEach(id => { const el=document.getElementById(id); if (el) el.value=''; });
+  renderReceitas();
+}
+
+function applyFiltrosDesp(desps) {
+  const mes = (document.getElementById('filtro-desp-mes') || {value:''}).value;
+  const cat = (document.getElementById('filtro-desp-cat') || {value:''}).value;
+  const busca = ((document.getElementById('filtro-desp-busca') || {value:''}).value || '').toLowerCase().trim();
+  return desps.filter(d => {
+    if (mes && String(d.mes) !== mes) return false;
+    if (cat && d.cat !== cat) return false;
+    if (busca) {
+      const hay = ((d.desc||'') + ' ' + (d.forn||'') + ' ' + (d.obs||'')).toLowerCase();
+      if (!hay.includes(busca)) return false;
+    }
+    return true;
+  });
+}
+
+function limparFiltrosDesp() {
+  ['filtro-desp-mes','filtro-desp-cat','filtro-desp-busca'].forEach(id => { const el=document.getElementById(id); if (el) el.value=''; });
+  renderDespesas();
+}
+
+// ── DUPLICAR RESERVA
+function duplicarReceita(id) {
+  const rec = load('rec').find(r => r.id === id);
+  if (!rec) return;
+  // Abre o modal de nova hospedagem com nome/telefone/plataforma/pessoas pré-preenchidos
+  document.getElementById('r-data').value = '';
+  document.getElementById('r-checkout').value = '';
+  document.getElementById('r-hospede').value = rec.hospede || '';
+  const telEl = document.getElementById('r-telefone');
+  if (telEl) {
+    telEl.value = rec.telefone ? formatPhoneDisplay(rec.telefone) : '';
+  }
+  document.getElementById('r-plat').value = rec.plat || '';
+  document.getElementById('r-pessoas').value = rec.pessoas || '';
+  document.getElementById('r-valor').value = '';
+  document.getElementById('r-pgto').value = rec.pgto || '';
+  document.getElementById('r-obs').value = '';
+  document.getElementById('taxa-preview').textContent = '💡 Preencha as datas e o valor';
+  document.getElementById('conflito-box').style.display = 'none';
+  document.getElementById('btn-salvar-rec').disabled = false;
+  document.getElementById('btn-salvar-rec').style.opacity = '1';
+  setPago('Pago');
+  const hint = document.getElementById('hospede-hint');
+  if (hint) {
+    hint.style.display = 'block';
+    hint.innerHTML = `🌟 Reserva duplicada de <strong>${esc(rec.hospede)}</strong>. Preencha as novas datas e valor.`;
+  }
+  openModal('modal-rec');
+  toast('📋 Dados copiados — preencha as datas');
+}
+
+// ── OCUPAÇÃO POR MÊS (do calendário do ano corrente)
+function diasOcupadosPorMes() {
+  const cal = loadCal();
+  const out = MONTHS.map(() => 0);
+  Object.keys(cal).forEach(k => {
+    const info = cal[k];
+    if (!info || (!info.status && !info.autoFilled)) return;
+    if (info.status === '' && !info.autoFilled) return;
+    const m = parseInt(k.slice(5,7));
+    if (m >= 1 && m <= 12) out[m-1]++;
+  });
+  return out;
+}
+
+function diasNoMes(year, mes1a12) {
+  return new Date(year, mes1a12, 0).getDate();
+}
+
+// ── HÓSPEDES (UI)
+let _hospedeAtualKey = null;
+
+function renderHospedes() {
+  const hosp = loadHospedes();
+  const all = Object.entries(hosp).map(([k, v]) => ({ key: k, ...v }));
+  // Filtros
+  const tipo = (document.getElementById('filtro-hosp-tipo') || {value:''}).value;
+  const ord = (document.getElementById('filtro-hosp-ord') || {value:'visitas'}).value;
+  const busca = ((document.getElementById('filtro-hosp-busca') || {value:''}).value || '').toLowerCase().trim();
+
+  let lista = all.filter(h => {
+    if (tipo === 'recorrente' && (h.visitas || 0) < 2) return false;
+    if (tipo === 'primeiravez' && (h.visitas || 0) > 1) return false;
+    if (busca) {
+      const hay = (h.nome || '').toLowerCase() + ' ' + (h.telefone || '');
+      if (!hay.includes(busca)) return false;
+    }
+    return true;
+  });
+
+  // Ordenação
+  if (ord === 'visitas') lista.sort((a,b) => (b.visitas||0) - (a.visitas||0) || (a.nome||'').localeCompare(b.nome||''));
+  else if (ord === 'recente') lista.sort((a,b) => (b.ultimaVisita||'').localeCompare(a.ultimaVisita||''));
+  else if (ord === 'gasto') lista.sort((a,b) => (b.totalGasto||0) - (a.totalGasto||0));
+  else if (ord === 'nome') lista.sort((a,b) => (a.nome||'').localeCompare(b.nome||''));
+
+  // KPIs
+  const total = all.length;
+  const recorrentes = all.filter(h => (h.visitas||0) >= 2).length;
+  const receitaTot = all.reduce((a,h) => a + (h.totalGasto||0), 0);
+  const tx = total > 0 ? recorrentes/total : 0;
+  const elT = document.getElementById('hosp-kpi-total'); if (elT) elT.textContent = total;
+  const elR = document.getElementById('hosp-kpi-recorrentes'); if (elR) elR.textContent = recorrentes;
+  const elRec = document.getElementById('hosp-kpi-receita'); if (elRec) elRec.textContent = fmt(receitaTot);
+  const elTx = document.getElementById('hosp-kpi-tx'); if (elTx) elTx.textContent = pct(tx);
+
+  const cont = document.getElementById('hosp-list');
+  if (!cont) return;
+  if (!lista.length) {
+    cont.innerHTML = total === 0
+      ? `<div class="empty-state"><div class="icon">👥</div><p>Nenhum hóspede ainda.<br>Cadastre uma reserva pra ver aparecer aqui.</p></div>`
+      : `<div class="empty-state"><div class="icon">🔍</div><p>Nenhum hóspede com esses filtros.</p></div>`;
+    return;
+  }
+  cont.innerHTML = lista.map(h => {
+    const isRec = (h.visitas||0) >= 2;
+    const platBadges = (h.plataformasUsadas||[]).map(p => `<span class="badge badge-${p.toLowerCase()}">${p}</span>`).join('');
+    const ultStr = h.ultimaVisita ? h.ultimaVisita.split('-').reverse().join('/') : '-';
+    const priStr = h.primeiraVisita ? h.primeiraVisita.split('-').reverse().join('/') : '-';
+    const tel = h.telefone ? formatPhoneDisplay(h.telefone) : '— sem telefone —';
+    const safeKey = encodeURIComponent(h.key);
+    return `<div class="hospede-card ${isRec ? 'recorrente' : ''}">
+      <div class="hospede-row1">
+        <div>
+          <div class="hospede-nome">👤 ${esc(h.nome)}</div>
+          <div class="hospede-tel">📱 ${tel}</div>
+        </div>
+        ${isRec ? '<span class="hospede-recorrente-tag">🌟 RECORRENTE</span>' : ''}
+      </div>
+      <div class="hospede-stats">
+        <div class="hospede-stat"><span class="hospede-stat-label">Visitas</span><span class="hospede-stat-value">${h.visitas||0}x</span></div>
+        <div class="hospede-stat"><span class="hospede-stat-label">Total Gasto</span><span class="hospede-stat-value">${fmt(h.totalGasto||0)}</span></div>
+        <div class="hospede-stat"><span class="hospede-stat-label">Primeira</span><span class="hospede-stat-value">${priStr}</span></div>
+        <div class="hospede-stat"><span class="hospede-stat-label">Última</span><span class="hospede-stat-value">${ultStr}</span></div>
+      </div>
+      <div class="hospede-plats">${platBadges}</div>
+      <div class="hospede-actions">
+        <button class="btn-mini-blue" onclick="verHistoricoHospede('${safeKey}')">📅 Ver histórico</button>
+        <button class="btn-mini-green" onclick="novaReservaPraHospede('${safeKey}')">➕ Nova reserva</button>
+        <button class="btn-mini-blue" onclick="editHospede('${safeKey}')">✏️ Editar</button>
+        <button class="btn-mini-blue" onclick="abrirMesclar('${safeKey}')">🔗 Mesclar</button>
+        <button class="btn-mini-red" onclick="deleteHospede('${safeKey}')">🗑️ Remover</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function rebuildHospedesUI() {
+  if (!confirmar('Reconstruir o cadastro de hóspedes a partir das reservas existentes?\n\nIsso recalcula visitas, total gasto e plataformas usadas. Útil após importar um backup antigo.')) return;
+  rebuildHospedes();
+  renderHospedes();
+  toast('✅ Cadastro reconstruído!');
+}
+
+function verHistoricoHospede(safeKey) {
+  const key = decodeURIComponent(safeKey);
+  const hosp = loadHospedes();
+  const h = hosp[key];
+  if (!h) return;
+  _hospedeAtualKey = key;
+  // Acha todas as reservas desse hóspede em todos os anos
+  const matches = [];
+  Object.keys(_cache).forEach(k => {
+    const yr = parseInt(k);
+    if (isNaN(yr) || !Array.isArray(_cache[yr].rec)) return;
+    _cache[yr].rec.forEach(r => {
+      const recKey = r.telefone || ('nome:' + (r.hospede||'').toLowerCase().trim());
+      if (recKey === key) matches.push({...r, _ano: yr});
+    });
+  });
+  matches.sort((a,b) => (b.data||'').localeCompare(a.data||''));
+
+  document.getElementById('hosp-detail-title').textContent = '👤 ' + h.nome;
+  const tel = h.telefone ? formatPhoneDisplay(h.telefone) : '— sem telefone —';
+  const platBadges = (h.plataformasUsadas||[]).map(p => `<span class="badge badge-${p.toLowerCase()}">${p}</span>`).join(' ');
+  document.getElementById('hosp-detail-info').innerHTML = `
+    <div style="background:var(--gray);border-radius:9px;padding:10px 13px;font-size:0.84rem">
+      <div>📱 ${tel}</div>
+      <div style="margin-top:4px">🛏️ <strong>${h.visitas||0}</strong> ${h.visitas===1?'visita':'visitas'} · 💰 <strong>${fmt(h.totalGasto||0)}</strong></div>
+      <div style="margin-top:6px">${platBadges}</div>
+    </div>`;
+
+  const histEl = document.getElementById('hosp-detail-historico');
+  histEl.innerHTML = matches.length
+    ? matches.map(r => {
+      const venc = isVencida(r);
+      return `<div class="hist-row">
+        <div>
+          <div><span class="badge badge-${r.plat.toLowerCase()}">${r.plat}</span> ${venc ? '⚠️' : ''}</div>
+          <div class="hist-data">${r.data.split('-').reverse().join('/')}${r.checkout ? ' → ' + r.checkout.split('-').reverse().join('/') : ''} (${r.dias||1}d)</div>
+        </div>
+        <div style="text-align:right">
+          <div style="color:var(--green);font-weight:700">${fmt(r.liquido)}</div>
+          <div style="font-size:0.7rem"><span class="badge ${r.pago === 'Pago' ? 'badge-pago' : 'badge-pendente'}">${r.pago}</span></div>
+        </div>
+      </div>`;
+    }).join('')
+    : `<div class="empty-state"><p>Nenhuma reserva encontrada.</p></div>`;
+  openModal('modal-hospede-detail');
+}
+
+function novaReservaPraHospedeDoModal() {
+  if (_hospedeAtualKey) {
+    closeModal('modal-hospede-detail');
+    novaReservaPraHospede(encodeURIComponent(_hospedeAtualKey));
+  }
+}
+
+function novaReservaPraHospede(safeKey) {
+  const key = decodeURIComponent(safeKey);
+  const h = loadHospedes()[key];
+  if (!h) return;
+  // Pré-preenche nome e telefone
+  document.getElementById('r-data').value = '';
+  document.getElementById('r-checkout').value = '';
+  document.getElementById('r-hospede').value = h.nome || '';
+  const telEl = document.getElementById('r-telefone');
+  if (telEl) telEl.value = h.telefone ? formatPhoneDisplay(h.telefone) : '';
+  document.getElementById('r-plat').value = (h.plataformasUsadas && h.plataformasUsadas[0]) || '';
+  document.getElementById('r-pessoas').value = '';
+  document.getElementById('r-valor').value = '';
+  document.getElementById('r-pgto').value = '';
+  document.getElementById('r-obs').value = '';
+  document.getElementById('taxa-preview').textContent = '💡 Preencha as datas e o valor';
+  document.getElementById('conflito-box').style.display = 'none';
+  document.getElementById('btn-salvar-rec').disabled = false;
+  document.getElementById('btn-salvar-rec').style.opacity = '1';
+  setPago('Pago');
+  const hint = document.getElementById('hospede-hint');
+  if (hint) {
+    hint.style.display = 'block';
+    hint.innerHTML = `🌟 <strong>Hóspede recorrente:</strong> ${esc(h.nome)} (${h.visitas||0}x). Preencha as datas e o valor.`;
+  }
+  openModal('modal-rec');
+}
+
+function deleteHospede(safeKey) {
+  const key = decodeURIComponent(safeKey);
+  const h = loadHospedes()[key];
+  if (!h) return;
+  if (!confirmar(`Remover ${h.nome} do cadastro de hóspedes?\n\nIsto NÃO apaga as reservas — só remove o registro do CRM.\nO hóspede será readicionado se você cadastrar uma nova reserva com o mesmo nome/telefone.`)) return;
+  const hosp = {...loadHospedes()};
+  delete hosp[key];
+  saveHospedes(hosp);
+  renderHospedes();
+  toast('🗑️ Hóspede removido');
+}
+
+// ── EDITAR HÓSPEDE
+function editHospede(safeKey) {
+  const key = decodeURIComponent(safeKey);
+  const h = loadHospedes()[key];
+  if (!h) return;
+  document.getElementById('eh-key').value = key;
+  document.getElementById('eh-nome').value = h.nome || '';
+  document.getElementById('eh-telefone').value = h.telefone ? formatPhoneDisplay(h.telefone) : '';
+  openModal('modal-edit-hosp');
+}
+
+function saveEditHospede() {
+  const key = document.getElementById('eh-key').value;
+  const novoNome = document.getElementById('eh-nome').value.trim();
+  const novoTel = normalizePhone(document.getElementById('eh-telefone').value);
+  if (!novoNome) { toast('⚠️ Nome obrigatório'); return; }
+
+  const hospAtual = loadHospedes()[key];
+  if (!hospAtual) { toast('⚠️ Hóspede não encontrado'); return; }
+
+  // Determina nova chave
+  const novaChave = novoTel ? novoTel : ('nome:' + novoNome.toLowerCase());
+
+  // Se nova chave já existe e é diferente, isso é um conflito (sugere mesclar)
+  const hosp = loadHospedes();
+  if (novaChave !== key && hosp[novaChave]) {
+    toast('⚠️ Já existe um hóspede com esse nome/telefone. Use Mesclar.');
+    return;
+  }
+
+  // Atualiza todas as reservas associadas (em todos os anos)
+  Object.keys(_cache).forEach(yk => {
+    const yr = parseInt(yk);
+    if (isNaN(yr) || !Array.isArray(_cache[yr].rec)) return;
+    let mudou = false;
+    _cache[yr].rec = _cache[yr].rec.map(r => {
+      const recKey = r.telefone ? r.telefone : ('nome:' + (r.hospede || '').toLowerCase());
+      if (recKey === key) {
+        mudou = true;
+        return { ...r, hospede: novoNome, telefone: novoTel };
+      }
+      return r;
+    });
+    if (mudou) {
+      localStorage.setItem('rl_rec_' + yr, JSON.stringify(_cache[yr].rec));
+      _pushToFirestore('rec_' + yr, _cache[yr].rec);
+    }
+  });
+
+  // Atualiza calendário (campo .hospede do dia) em todos os anos
+  Object.keys(_cache).forEach(yk => {
+    const yr = parseInt(yk);
+    if (isNaN(yr) || !_cache[yr].cal) return;
+    let mudou = false;
+    Object.keys(_cache[yr].cal).forEach(d => {
+      const info = _cache[yr].cal[d];
+      // Se a reserva existe e o nome bate, atualiza
+      if (info && info.recId) {
+        const recOrig = _cache[yr].rec.find(r => r.id === info.recId);
+        if (recOrig && recOrig.hospede === novoNome) {
+          info.hospede = novoNome;
+          mudou = true;
+        }
+      }
+    });
+    if (mudou) {
+      localStorage.setItem('rl_cal_' + yr, JSON.stringify(_cache[yr].cal));
+      _pushToFirestore('cal_' + yr, _cache[yr].cal);
+    }
+  });
+
+  // Atualiza CRM: remove chave antiga, cria nova
+  const novoHosp = {
+    ...hospAtual,
+    nome: novoNome,
+    telefone: novoTel
+  };
+  delete hosp[key];
+  hosp[novaChave] = novoHosp;
+  saveHospedes(hosp);
+
+  closeModal('modal-edit-hosp');
+  toast('✅ Hóspede atualizado em todas as reservas');
+  renderHospedes(); renderReceitas(); renderCalendario();
+}
+
+// ── MESCLAR HÓSPEDES
+function abrirMesclar(safeKey) {
+  const key = decodeURIComponent(safeKey);
+  const hosp = loadHospedes();
+  const h = hosp[key];
+  if (!h) return;
+  document.getElementById('mesclar-origem').value = key;
+  document.getElementById('mesclar-origem-info').innerHTML =
+    `Mesclando: <strong>${esc(h.nome)}</strong> ${h.telefone ? '(' + formatPhoneDisplay(h.telefone) + ')' : '(sem tel)'}<br>` +
+    `${h.visitas||0} visita${(h.visitas||0)===1?'':'s'} · ${fmt(h.totalGasto||0)}`;
+
+  // Popula select com todos os outros hóspedes
+  const sel = document.getElementById('mesclar-destino');
+  const outros = Object.entries(hosp).filter(([k,_]) => k !== key);
+  outros.sort((a,b) => (a[1].nome||'').localeCompare(b[1].nome||''));
+  sel.innerHTML = '<option value="">Selecione...</option>' +
+    outros.map(([k, v]) => {
+      const tel = v.telefone ? formatPhoneDisplay(v.telefone) : 'sem tel';
+      return `<option value="${esc(k)}">${esc(v.nome)} — ${tel} (${v.visitas||0}x)</option>`;
+    }).join('');
+  openModal('modal-mesclar');
+}
+
+function confirmarMesclar() {
+  const origemKey = document.getElementById('mesclar-origem').value;
+  const destinoKey = document.getElementById('mesclar-destino').value;
+  if (!destinoKey) { toast('⚠️ Selecione um hóspede destino'); return; }
+  if (origemKey === destinoKey) { toast('⚠️ Não pode mesclar consigo mesmo'); return; }
+  const hosp = loadHospedes();
+  const origem = hosp[origemKey];
+  const destino = hosp[destinoKey];
+  if (!origem || !destino) { toast('⚠️ Hóspede não encontrado'); return; }
+  if (!confirmar(`Mesclar "${origem.nome}" em "${destino.nome}"?\n\nTodas as reservas serão atribuídas ao destino e o hóspede atual será removido.\n\nNão pode ser desfeito.`)) return;
+
+  // Atualiza todas as reservas em todos os anos
+  let totalMigradas = 0;
+  Object.keys(_cache).forEach(yk => {
+    const yr = parseInt(yk);
+    if (isNaN(yr) || !Array.isArray(_cache[yr].rec)) return;
+    let mudou = false;
+    _cache[yr].rec = _cache[yr].rec.map(r => {
+      const recKey = r.telefone ? r.telefone : ('nome:' + (r.hospede || '').toLowerCase());
+      if (recKey === origemKey) {
+        mudou = true; totalMigradas++;
+        return { ...r, hospede: destino.nome, telefone: destino.telefone || '' };
+      }
+      return r;
+    });
+    if (mudou) {
+      localStorage.setItem('rl_rec_' + yr, JSON.stringify(_cache[yr].rec));
+      _pushToFirestore('rec_' + yr, _cache[yr].rec);
+    }
+  });
+
+  // Atualiza calendário (.hospede do dia)
+  Object.keys(_cache).forEach(yk => {
+    const yr = parseInt(yk);
+    if (isNaN(yr) || !_cache[yr].cal) return;
+    let mudou = false;
+    Object.values(_cache[yr].cal).forEach(info => {
+      if (info && info.recId) {
+        const recOrig = _cache[yr].rec.find(r => r.id === info.recId);
+        if (recOrig && recOrig.hospede === destino.nome) {
+          info.hospede = destino.nome;
+          mudou = true;
+        }
+      }
+    });
+    if (mudou) {
+      localStorage.setItem('rl_cal_' + yr, JSON.stringify(_cache[yr].cal));
+      _pushToFirestore('cal_' + yr, _cache[yr].cal);
+    }
+  });
+
+  // Reconstroi o CRM do zero pra refletir a mesclagem corretamente
+  saveHospedes({});
+  rebuildHospedes();
+
+  closeModal('modal-mesclar');
+  toast(`🔗 Mesclagem concluída — ${totalMigradas} reserva${totalMigradas===1?'':'s'} migrada${totalMigradas===1?'':'s'}`);
+  renderHospedes(); renderReceitas(); renderCalendario();
+}
+
+// ── DESPESAS FIXAS (templates)
+// ── DESPESAS FIXAS (templates + lançamentos)
+// Helper: identifica se um template já foi lançado num determinado mês/ano (procura nas despesas)
+function tplJaLancadoEm(tplId, mes, ano) {
+  if (!_cache[ano] || !Array.isArray(_cache[ano].desp)) return false;
+  return _cache[ano].desp.some(d => d.tplId === tplId && (d.mesRef || d.mes) === mes);
+}
+
+// Pega a despesa lançada por um template em um mês/ano (ou null)
+function tplLancamentoEm(tplId, mes, ano) {
+  if (!_cache[ano] || !Array.isArray(_cache[ano].desp)) return null;
+  return _cache[ano].desp.find(d => d.tplId === tplId && (d.mesRef || d.mes) === mes) || null;
+}
+
+// Calcula data sugerida pra um template no mês/ano: dia do venc se houver, senão hoje (limitado)
+function dataSugeridaTpl(t, mes, ano) {
+  const hoje = new Date();
+  if (mes === hoje.getMonth() + 1 && ano === hoje.getFullYear() && !t.dia) {
+    return todayStr();
+  }
+  const dia = t.dia ? Math.min(parseInt(t.dia), diasNoMes(ano, mes)) : 1;
+  const mm = String(mes).padStart(2, '0');
+  const dd = String(dia).padStart(2, '0');
+  return `${ano}-${mm}-${dd}`;
+}
+
+// Abre modal pra lançar UMA despesa fixa específica
+function abrirLancarDF(tplId) {
+  const t = loadDespFixas().find(x => x.id === tplId);
+  if (!t) return;
+  const hoje = new Date();
+  const mes = hoje.getMonth() + 1;
+  const ano = hoje.getFullYear();
+
+  // Bloqueia se já foi lançada este mês
+  if (tplJaLancadoEm(tplId, mes, ano)) {
+    toast('⚠️ Esta despesa já foi lançada em ' + MONTHS[mes-1] + '/' + ano);
+    return;
+  }
+
+  document.getElementById('lancar-df-id').value = tplId;
+  document.getElementById('lancar-df-info').innerHTML =
+    `<strong>${esc(t.desc || t.cat)}</strong> ${t.forn ? '· ' + esc(t.forn) : ''}<br>` +
+    `${esc(t.cat)}${t.pgto ? ' · ' + esc(t.pgto) : ''}${t.dia ? ' · vence dia ' + t.dia : ''}<br>` +
+    `<span style="color:#888">Valor de referência: ${fmt(t.valor)}</span>`;
+  document.getElementById('lancar-df-data').value = dataSugeridaTpl(t, mes, ano);
+  document.getElementById('lancar-df-valor').value = numberToBRLInput(t.valor);
+  document.getElementById('lancar-df-mes-ref').value = '';
+  document.getElementById('lancar-df-comp').value = '';
+  updateLancarDFDelta();
+  openModal('modal-lancar-df');
+}
+
+// Mostra a diferença % entre valor digitado e valor de referência
+function updateLancarDFDelta() {
+  const id = document.getElementById('lancar-df-id').value;
+  const t = loadDespFixas().find(x => x.id === id);
+  const el = document.getElementById('lancar-df-delta');
+  if (!t || !el) return;
+  const v = parseBRL(document.getElementById('lancar-df-valor').value);
+  if (!v) { el.textContent = ''; return; }
+  if (!t.valor) { el.textContent = ''; return; }
+  const dif = v - t.valor;
+  const pct = (dif / t.valor) * 100;
+  if (Math.abs(pct) < 0.5) {
+    el.innerHTML = '<span style="color:#888">✅ Igual ao valor de referência</span>';
+  } else if (dif > 0) {
+    el.innerHTML = `<span style="color:var(--red)">⚠️ ${fmt(dif)} a mais (+${pct.toFixed(1)}%) que a referência</span>`;
+  } else {
+    el.innerHTML = `<span style="color:var(--green)">✅ ${fmt(Math.abs(dif))} a menos (${pct.toFixed(1)}%) que a referência</span>`;
+  }
+}
+
+// Confirma o lançamento da despesa fixa específica
+function confirmarLancarDF() {
+  const tplId = document.getElementById('lancar-df-id').value;
+  const t = loadDespFixas().find(x => x.id === tplId);
+  if (!t) { toast('⚠️ Template não encontrado'); return; }
+
+  const data = document.getElementById('lancar-df-data').value;
+  const valor = parseBRL(document.getElementById('lancar-df-valor').value);
+  const mesRefRaw = document.getElementById('lancar-df-mes-ref').value;
+  const comp = document.getElementById('lancar-df-comp').value;
+
+  if (!data) { toast('⚠️ Informe a data'); return; }
+  if (!valor || valor <= 0) { toast('⚠️ Valor precisa ser maior que zero'); return; }
+
+  const ano = parseInt(data.slice(0,4));
+  const mesPgto = parseInt(data.slice(5,7));
+  const mes = mesRefRaw ? parseInt(mesRefRaw) : mesPgto;
+
+  // Bloqueia duplicação no mesmo mês de referência
+  if (tplJaLancadoEm(tplId, mes, ano)) {
+    toast('⚠️ Já existe lançamento desta despesa em ' + MONTHS[mes-1] + '/' + ano);
+    return;
+  }
+
+  _ensureYear(ano);
+  const desps = (_cache[ano].desp || []).slice();
+  desps.push({
+    id: uid(),
+    tplId: tplId, // ← rastreia origem
+    data, cat: t.cat,
+    desc: t.desc || ('[Fixa] ' + t.cat),
+    forn: t.forn || '', valor,
+    pgto: t.pgto || '',
+    comp: comp,
+    obs: '[Lançada via despesa fixa]',
+    mes: mesPgto,
+    mesRef: mesRefRaw ? parseInt(mesRefRaw) : null
+  });
+  _cache[ano].desp = desps;
+  localStorage.setItem('rl_desp_' + ano, JSON.stringify(desps));
+  _pushToFirestore('desp_' + ano, desps);
+
+  closeModal('modal-lancar-df');
+  toast(`✅ ${t.desc || t.cat} lançada em ${MONTHS[mes-1]}/${ano}`);
+  renderDespFixas();
+  renderDespesas();
+  renderDashboard();
+}
+
+// "Lançar todas pendentes deste mês" — só lança templates ainda não lançados
+function lancarTodasPendentes() {
+  const tpls = loadDespFixas();
+  if (!tpls.length) { toast('⚠️ Nenhuma despesa fixa cadastrada'); return; }
+  const hoje = new Date();
+  const mes = hoje.getMonth() + 1;
+  const ano = hoje.getFullYear();
+
+  const pendentes = tpls.filter(t => !tplJaLancadoEm(t.id, mes, ano));
+  if (!pendentes.length) {
+    toast(`✅ Todas as despesas fixas já foram lançadas em ${MONTHS[mes-1]}/${ano}`);
+    return;
+  }
+
+  if (!confirmar(`Lançar ${pendentes.length} despesa${pendentes.length>1?'s':''} pendente${pendentes.length>1?'s':''} de ${MONTHS[mes-1]}/${ano}?\n\nUsará o valor de referência de cada uma. Pra ajustar valores diferentes, lance individualmente.`)) return;
+
+  _ensureYear(ano);
+  const desps = (_cache[ano].desp || []).slice();
+  pendentes.forEach(t => {
+    const dataSug = dataSugeridaTpl(t, mes, ano);
+    desps.push({
+      id: uid(),
+      tplId: t.id,
+      data: dataSug, cat: t.cat,
+      desc: t.desc || ('[Fixa] ' + t.cat),
+      forn: t.forn || '', valor: t.valor || 0,
+      pgto: t.pgto || '',
+      comp: '',
+      obs: '[Lançada via despesa fixa - lote]',
+      mes, mesRef: null
+    });
+  });
+  _cache[ano].desp = desps;
+  localStorage.setItem('rl_desp_' + ano, JSON.stringify(desps));
+  _pushToFirestore('desp_' + ano, desps);
+  toast(`✅ ${pendentes.length} despesa${pendentes.length>1?'s lançadas':' lançada'}`);
+  renderDespFixas();
+  renderDespesas();
+  renderDashboard();
+}
+
+function addDespFixa() {
+  const cat = document.getElementById('df-cat').value;
+  const desc = document.getElementById('df-desc').value.trim();
+  const forn = document.getElementById('df-forn').value.trim();
+  const valor = parseBRL(document.getElementById('df-valor').value);
+  const pgto = document.getElementById('df-pgto').value;
+  const diaRaw = document.getElementById('df-dia') ? document.getElementById('df-dia').value : '';
+  const dia = diaRaw ? parseInt(diaRaw) : null;
+  if (!cat || !valor) { toast('⚠️ Preencha categoria e valor'); return; }
+  if (valor <= 0) { toast('⚠️ Valor precisa ser maior que zero'); return; }
+  if (dia !== null && (dia < 1 || dia > 31)) { toast('⚠️ Dia deve ser entre 1 e 31'); return; }
+  const tpls = loadDespFixas().slice();
+  tpls.push({ id: uid(), cat, desc, forn, valor, pgto, dia });
+  saveDespFixas(tpls);
+  ['df-cat','df-desc','df-forn','df-valor','df-pgto','df-dia'].forEach(id => { const el=document.getElementById(id); if (el) el.value=''; });
+  renderDespFixas();
+  toast('✅ Despesa fixa cadastrada');
+}
+
+function removeDespFixa(id) {
+  if (!confirmar('Remover esta despesa fixa? (não apaga lançamentos já feitos)')) return;
+  const tpls = loadDespFixas().filter(t => t.id !== id);
+  saveDespFixas(tpls);
+  renderDespFixas();
+  toast('🗑️ Removido');
+}
+
+function renderDespFixas() {
+  const cont = document.getElementById('df-list');
+  if (!cont) return;
+  const tpls = loadDespFixas();
+  const hoje = new Date();
+  const mes = hoje.getMonth() + 1;
+  const ano = hoje.getFullYear();
+  const diaHoje = hoje.getDate();
+
+  cont.innerHTML = tpls.length
+    ? tpls.map(t => {
+        const lancada = tplJaLancadoEm(t.id, mes, ano);
+        const lanc = tplLancamentoEm(t.id, mes, ano);
+        let statusBadge, btnAction;
+        if (lancada) {
+          const valLan = lanc.valor;
+          const dif = valLan - (t.valor || 0);
+          const difStr = (Math.abs(dif) > 0.01 && t.valor) ? ` <span style="color:${dif>0?'var(--red)':'var(--green)'};font-size:0.7rem">(${dif>0?'+':''}${fmt(dif)})</span>` : '';
+          statusBadge = `<span style="background:rgba(39,174,96,0.15);color:var(--green);padding:2px 7px;border-radius:4px;font-size:0.7rem;font-weight:600">✅ Lançada · ${fmt(valLan)}${difStr}</span>`;
+          btnAction = `<button class="del-btn" onclick="removeDespFixa('${t.id}')" title="Remover template">🗑️</button>`;
+        } else {
+          // Pendente — verifica se está atrasada (passou do dia)
+          let statusTxt = '⏳ Pendente';
+          let statusCor = 'rgba(212,168,83,0.15)';
+          let statusFg = '#a07248';
+          if (t.dia && diaHoje > parseInt(t.dia)) {
+            statusTxt = '⚠️ Atrasada (dia ' + t.dia + ')';
+            statusCor = 'rgba(231,76,60,0.15)';
+            statusFg = 'var(--red)';
+          } else if (t.dia) {
+            const faltam = parseInt(t.dia) - diaHoje;
+            if (faltam <= 3 && faltam >= 0) {
+              statusTxt = faltam === 0 ? '⏰ Vence hoje' : `⏰ Vence em ${faltam}d`;
+              statusCor = 'rgba(212,168,83,0.25)';
+              statusFg = '#8b6914';
+            }
+          }
+          statusBadge = `<span style="background:${statusCor};color:${statusFg};padding:2px 7px;border-radius:4px;font-size:0.7rem;font-weight:600">${statusTxt}</span>`;
+          btnAction =
+            `<button class="btn btn-red" style="padding:4px 9px;font-size:0.72rem;border-radius:5px" onclick="abrirLancarDF('${t.id}')" title="Lançar no mês atual">📅 Lançar</button>` +
+            ` <button class="del-btn" onclick="removeDespFixa('${t.id}')" title="Remover template">🗑️</button>`;
+        }
+        const diaInfo = t.dia ? `<span style="color:#888">· venc. dia ${t.dia}</span>` : '';
+        return `<div class="tpl-row">
+          <div class="tpl-info">
+            <div><strong>${esc(t.desc || t.cat)}</strong> ${t.forn ? '· ' + esc(t.forn) : ''} ${diaInfo}</div>
+            <div class="tpl-cat">${esc(t.cat)}${t.pgto ? ' · ' + esc(t.pgto) : ''} · ${statusBadge}</div>
+          </div>
+          <div class="tpl-val">${fmt(t.valor)}</div>
+          ${btnAction}
+        </div>`;
+      }).join('')
+    : `<div style="color:var(--silver);font-size:0.8rem;text-align:center;padding:14px">Nenhuma despesa fixa cadastrada.<br>Adicione abaixo as que se repetem todo mês (ex: condomínio, internet).</div>`;
+
+  const total = tpls.reduce((a,t) => a + (t.valor||0), 0);
+  const elTot = document.getElementById('df-total');
+  if (elTot) elTot.textContent = fmt(total);
+  const btn = document.getElementById('df-lancar-btn');
+  if (btn) btn.disabled = tpls.length === 0;
+}
+
+// ── CONFIG
+function getTaxa(plat) {
+  const cfg = loadConfig();
+  if (cfg[plat] !== undefined) return cfg[plat];
+  if (plat === 'Airbnb' || plat === 'Booking') return 15;
+  return 0;
+}
+
+function salvarConfig() {
+  const airbnb = parseFloat(document.getElementById('cfg-taxa-airbnb').value || 15);
+  const booking = parseFloat(document.getElementById('cfg-taxa-booking').value || 15);
+  const particular = parseFloat(document.getElementById('cfg-taxa-particular').value || 0);
+  saveConfig({ Airbnb: airbnb, Booking: booking, Particular: particular });
+  renderConfig();
+  toast('✅ Taxas salvas!');
+}
+
+function renderConfig() {
+  const plats = ['Airbnb', 'Booking', 'Particular'];
+  const cores = { Airbnb:'#ff5a5f', Booking:'#003b95', Particular:'#27ae60' };
+  const cfg = loadConfig();
+
+  // Preenche os campos
+  document.getElementById('cfg-taxa-airbnb').value = getTaxa('Airbnb');
+  document.getElementById('cfg-taxa-booking').value = getTaxa('Booking');
+  document.getElementById('cfg-taxa-particular').value = getTaxa('Particular');
+
+  // Preview table
+  document.getElementById('cfg-preview-tbody').innerHTML = plats.map(p => {
+    const t = getTaxa(p);
+    const ex500taxa = 500 * (t/100);
+    const ex500liq = 500 - ex500taxa;
+    return `<tr>
+      <td><span class="badge badge-${p.toLowerCase()}">${p}</span></td>
+      <td style="font-weight:700;color:${cores[p]}">${t}%</td>
+      <td class="td-green">${fmt(ex500liq)} <span style="color:var(--silver);font-weight:400;font-size:0.7rem">(taxa: ${fmt(ex500taxa)})</span></td>
+    </tr>`;
+  }).join('');
+}
+
+// ── TABS
+function showTab(id, btn) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+  if (id === 'dashboard') renderDashboard();
+  if (id === 'receitas') renderReceitas();
+  if (id === 'despesas') renderDespesas();
+  if (id === 'calendario') { renderCalendario(); scrollCalendarioParaHoje(); }
+  if (id === 'config') { renderConfig(); renderDespFixas(); }
+  if (id === 'hospedes') renderHospedes();
+}
+
+function scrollCalendarioParaHoje() {
+  // Se ano selecionado != ano atual, troca o ano antes
+  const hoje = new Date();
+  const anoHoje = hoje.getFullYear();
+  if (YEAR !== anoHoje && anoHoje >= 2026 && anoHoje <= 2099) {
+    YEAR = anoHoje;
+    _ensureYear(YEAR);
+    rerenderAll();
+  }
+  scrollCalendarioParaMes(hoje.getMonth() + 1);
+}
+
+function scrollCalendarioParaMes(mes1a12) {
+  if (!mes1a12 || mes1a12 < 1 || mes1a12 > 12) return;
+  setTimeout(() => {
+    const cont = document.getElementById('cal-container');
+    if (!cont) return;
+    const meses = cont.querySelectorAll('.cal-month');
+    const idx = mes1a12 - 1;
+    if (meses[idx]) {
+      meses[idx].scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, 80);
+}
+
+// ── MODAL
+function openModal(id) { document.getElementById(id).classList.add('open'); document.body.style.overflow = 'hidden'; }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); document.body.style.overflow = ''; }
+function closeModalOutside(e, id) { if (e.target === document.getElementById(id)) closeModal(id); }
+
+// ── TOAST
+function toast(msg, dur=2500) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), dur);
+}
+
+// ── PAGO TOGGLE
+function setPago(val) {
+  pagoStatus = val;
+  const btnP = document.getElementById('btn-pago');
+  const btnPend = document.getElementById('btn-pendente');
+  if (!btnP || !btnPend) return; // DOM ainda não pronto, sem problema
+  btnP.className = val === 'Pago' ? 'active-pago' : '';
+  btnPend.className = val === 'Pendente' ? 'active-pendente' : '';
+}
+
+// ── TAXA PREVIEW
+function updateTaxaPreview() {
+  const plat = document.getElementById('r-plat').value;
+  const valor = parseBRL(document.getElementById('r-valor').value);
+  const t = calcTaxa(plat, valor);
+  const liq = valor - t;
+  const el = document.getElementById('taxa-preview');
+  if (!plat || !valor) {
+    el.textContent = '💡 Preencha plataforma e valor para calcular a taxa';
+    return;
+  }
+  el.innerHTML = t > 0
+    ? `💸 Taxa ${plat} (${getTaxa(plat)}%): <strong>${fmt(t)}</strong> &nbsp;→&nbsp; ✅ Valor Líquido: <strong style="color:var(--green)">${fmt(liq)}</strong>`
+    : `✅ Sem taxa (Particular) → Valor Líquido: <strong style="color:var(--green)">${fmt(liq)}</strong>`;
+}
+
+// ── VERIFICAR CONFLITO DE DATAS
+function getDatesInRange(d1Str, d2Str) {
+  // O dia de checkout NÃO é incluído — é dia de saída, livre para nova entrada
+  const dates = [];
+  const start = new Date(d1Str + 'T00:00:00');
+  const end = d2Str ? new Date(d2Str + 'T00:00:00') : new Date(start);
+  let cur = new Date(start);
+  while (cur < end) {
+    dates.push(cur.toISOString().split('T')[0]);
+    cur.setDate(cur.getDate() + 1);
+  }
+  // Se não há checkout (hospedagem de 1 dia), inclui o próprio dia
+  if (!d2Str || d1Str === d2Str) {
+    dates.push(d1Str);
+  }
+  return dates;
+}
+
+function verificarConflito() {
+  const d1 = document.getElementById('r-data').value;
+  const d2 = document.getElementById('r-checkout').value;
+  const box = document.getElementById('conflito-box');
+  const btnSalvar = document.getElementById('btn-salvar-rec');
+  if (!d1) { box.style.display = 'none'; return; }
+
+  // Une reservas de todos os anos no cache (reservas podem cruzar ano)
+  const recs = [];
+  Object.keys(_cache).forEach(k => {
+    const yr = parseInt(k);
+    if (isNaN(yr)) return;
+    if (Array.isArray(_cache[yr].rec)) recs.push(..._cache[yr].rec);
+  });
+  const datesToCheck = getDatesInRange(d1, d2 || d1);
+  const conflitos = [];
+
+  for (const rec of recs) {
+    const recDates = getDatesInRange(rec.data, rec.checkout || rec.data);
+    const overlap = datesToCheck.filter(d => recDates.includes(d));
+    if (overlap.length > 0) {
+      conflitos.push({ hospede: rec.hospede, datas: overlap });
+    }
+  }
+
+  if (conflitos.length > 0) {
+    const msgs = conflitos.map(c => `"${esc(c.hospede)}" (${c.datas.map(d => d.split('-').reverse().join('/')).join(', ')})`).join('<br>');
+    box.style.display = 'block';
+    box.innerHTML = `⚠️ <strong>Conflito de datas!</strong> Período já ocupado por:<br>${msgs}`;
+    btnSalvar.disabled = true;
+    btnSalvar.style.opacity = '0.5';
+  } else {
+    box.style.display = 'none';
+    btnSalvar.disabled = false;
+    btnSalvar.style.opacity = '1';
+  }
+}
+
+// ── PREENCHER CALENDÁRIO AUTOMATICAMENTE
+function fillCalendar(rec) {
+  if (!rec.data) return;
+  const dates = getDatesInRange(rec.data, rec.checkout || rec.data);
+  // Agrupa datas por ano (uma reserva pode cruzar a virada de ano)
+  const byYear = {};
+  dates.forEach((dateStr, i) => {
+    const y = new Date(dateStr + 'T00:00:00').getFullYear();
+    if (!byYear[y]) byYear[y] = [];
+    byYear[y].push({ dateStr, i });
+  });
+  Object.keys(byYear).forEach(y => {
+    const yr = parseInt(y);
+    _ensureYear(yr);
+    const cal = (_cache[yr].cal && Object.keys(_cache[yr].cal).length) ? {..._cache[yr].cal} : {};
+    byYear[y].forEach(({dateStr, i}) => {
+      cal[dateStr] = {
+        status: 'occupied',
+        hospede: rec.hospede,
+        pessoas: rec.pessoas,
+        valor: i === 0 ? rec.valor : '',
+        pago: rec.pago,
+        autoFilled: true,
+        recId: rec.id
+      };
+    });
+    // Salva direto no ano correspondente (sem usar saveCal, que só serve pro YEAR atual)
+    _cache[yr].cal = cal;
+    localStorage.setItem('rl_cal_' + yr, JSON.stringify(cal));
+    _pushToFirestore('cal_' + yr, cal);
+  });
+}
+
+function clearCalendar(recId) {
+  // A reserva pode ter espalhado dias em mais de um ano (virada de ano)
+  Object.keys(_cache).forEach(k => {
+    const yr = parseInt(k);
+    if (isNaN(yr) || !_cache[yr] || !_cache[yr].cal) return;
+    const cal = {..._cache[yr].cal};
+    let changed = false;
+    Object.keys(cal).forEach(d => { if (cal[d].recId === recId) { delete cal[d]; changed = true; } });
+    if (changed) {
+      _cache[yr].cal = cal;
+      localStorage.setItem('rl_cal_' + yr, JSON.stringify(cal));
+      _pushToFirestore('cal_' + yr, cal);
+    }
+  });
+}
+
+// ── SAVE RECEITA
+function saveReceita() {
+  const data = document.getElementById('r-data').value;
+  const checkout = document.getElementById('r-checkout').value;
+  const hospede = document.getElementById('r-hospede').value.trim();
+  const telefoneRaw = (document.getElementById('r-telefone') || {value:''}).value;
+  const telefone = normalizePhone(telefoneRaw);
+  const plat = document.getElementById('r-plat').value;
+  const pessoas = parseInt(document.getElementById('r-pessoas').value || 1);
+  const valor = parseBRL(document.getElementById('r-valor').value);
+  const pgto = document.getElementById('r-pgto').value;
+  const obs = document.getElementById('r-obs').value;
+
+  if (!data || !hospede || !plat || !valor) { toast('⚠️ Preencha os campos obrigatórios'); return; }
+  if (valor <= 0) { toast('⚠️ Valor precisa ser maior que zero'); return; }
+  if (checkout && checkout < data) { toast('⚠️ Check-out não pode ser antes do check-in'); return; }
+  if (document.getElementById('btn-salvar-rec').disabled) { toast('⚠️ Resolva o conflito de datas antes de salvar'); return; }
+
+  const t = calcTaxa(plat, valor);
+  let dias = 1;
+  if (checkout && checkout > data) {
+    dias = Math.round((new Date(checkout + 'T00:00:00') - new Date(data + 'T00:00:00')) / 86400000);
+  }
+
+  const rec = { id: uid(), data, checkout, hospede, telefone, plat, dias, pessoas, valor, taxa: t, liquido: valor - t, pgto, pago: pagoStatus, obs, mes: getMes(data) };
+  const recs = load('rec');
+  recs.push(rec);
+  save('rec', recs);
+  fillCalendar(rec);
+  registrarHospede(rec);
+
+  // Reset form
+  ['r-data','r-checkout','r-hospede','r-telefone','r-plat','r-pessoas','r-valor','r-pgto','r-obs'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  document.getElementById('taxa-preview').textContent = '💡 Preencha plataforma e valor para calcular a taxa';
+  document.getElementById('conflito-box').style.display = 'none';
+  document.getElementById('btn-salvar-rec').disabled = false;
+  document.getElementById('btn-salvar-rec').style.opacity = '1';
+  const hint = document.getElementById('hospede-hint'); if (hint) hint.style.display = 'none';
+  setPago('Pago');
+
+  closeModal('modal-rec');
+  toast('✅ Hospedagem salva! Calendário atualizado 📅');
+  renderReceitas(); renderDashboard();
+}
+
+// ── DELETE RECEITA
+function deleteReceita(id) {
+  const rec = load('rec').find(r => r.id === id);
+  if (!rec) return;
+  if (!confirmar(`Excluir a reserva de "${rec.hospede}" (${rec.data.split('-').reverse().join('/')})?\n\nIsso também remove os dias do calendário.`)) return;
+  clearCalendar(id);
+  save('rec', load('rec').filter(r => r.id !== id));
+  renderReceitas(); renderDashboard(); renderCalendario();
+  toast('🗑️ Removido');
+}
+
+// ── SAVE DESPESA
+function saveDespesa() {
+  const data = document.getElementById('d-data').value;
+  const cat = document.getElementById('d-cat').value;
+  const desc = document.getElementById('d-desc').value.trim();
+  const forn = document.getElementById('d-forn').value.trim();
+  const valor = parseBRL(document.getElementById('d-valor').value);
+  const pgto = document.getElementById('d-pgto').value;
+  const comp = document.getElementById('d-comp').value;
+  const obs = document.getElementById('d-obs').value;
+  const mesRefRaw = document.getElementById('d-mes-ref') ? document.getElementById('d-mes-ref').value : '';
+  if (!data || !cat || !valor) { toast('⚠️ Preencha os campos obrigatórios'); return; }
+  if (valor <= 0) { toast('⚠️ Valor precisa ser maior que zero'); return; }
+  const mes = mesRefRaw ? parseInt(mesRefRaw) : getMes(data);
+  const desps = load('desp');
+  desps.push({ id: uid(), data, cat, desc, forn, valor, pgto, comp, obs, mes, mesRef: mesRefRaw ? parseInt(mesRefRaw) : null });
+  save('desp', desps);
+  ['d-data','d-cat','d-desc','d-forn','d-valor','d-pgto','d-comp','d-obs','d-mes-ref'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  closeModal('modal-desp');
+  toast('✅ Despesa salva!');
+  renderDespesas(); renderDashboard();
+}
+
+// ── DELETE DESPESA
+function deleteDespesa(id) {
+  const desp = load('desp').find(d => d.id === id);
+  if (!desp) return;
+  if (!confirmar(`Excluir despesa "${desp.desc || desp.cat}" de ${fmt(desp.valor)}?`)) return;
+  save('desp', load('desp').filter(d => d.id !== id));
+  renderDespesas(); renderDashboard();
+  toast('🗑️ Removido');
+}
+
+// ── EDIT DESPESA
+function editDespesa(id) {
+  const desp = load('desp').find(d => d.id === id);
+  if (!desp) return;
+  document.getElementById('ed-id').value = id;
+  document.getElementById('ed-data').value = desp.data || '';
+  document.getElementById('ed-cat').value = desp.cat || '';
+  document.getElementById('ed-desc').value = desp.desc || '';
+  document.getElementById('ed-forn').value = desp.forn || '';
+  document.getElementById('ed-valor').value = numberToBRLInput(desp.valor);
+  document.getElementById('ed-pgto').value = desp.pgto || '';
+  document.getElementById('ed-comp').value = desp.comp || '';
+  document.getElementById('ed-obs').value = desp.obs || '';
+  document.getElementById('ed-mes-ref').value = desp.mesRef ? String(desp.mesRef) : '';
+  openModal('modal-edit-desp');
+}
+
+function saveEditDespesa() {
+  const id = document.getElementById('ed-id').value;
+  const recs = load('desp');
+  const idx = recs.findIndex(d => d.id === id);
+  if (idx === -1) { toast('⚠️ Despesa não encontrada'); return; }
+
+  const data = document.getElementById('ed-data').value;
+  const cat = document.getElementById('ed-cat').value;
+  const desc = document.getElementById('ed-desc').value.trim();
+  const forn = document.getElementById('ed-forn').value.trim();
+  const valor = parseBRL(document.getElementById('ed-valor').value);
+  const pgto = document.getElementById('ed-pgto').value;
+  const comp = document.getElementById('ed-comp').value;
+  const obs = document.getElementById('ed-obs').value;
+  const mesRefRaw = document.getElementById('ed-mes-ref').value;
+
+  if (!data || !cat || !valor) { toast('⚠️ Preencha os campos obrigatórios'); return; }
+  if (valor <= 0) { toast('⚠️ Valor precisa ser maior que zero'); return; }
+
+  const mes = mesRefRaw ? parseInt(mesRefRaw) : getMes(data);
+  recs[idx] = {
+    ...recs[idx],
+    data, cat, desc, forn, valor, pgto, comp, obs, mes,
+    mesRef: mesRefRaw ? parseInt(mesRefRaw) : null
+  };
+  save('desp', recs);
+  closeModal('modal-edit-desp');
+  toast('✅ Despesa atualizada!');
+  renderDespesas(); renderDashboard();
+}
+
+// ── MONTHLY DATA
+function monthlyRec() {
+  const recs = load('rec');
+  const ocup = diasOcupadosPorMes();
+  return MONTHS.map((_, i) => {
+    const m = i + 1;
+    const rows = recs.filter(r => r.mes === m);
+    const ab = rows.filter(r => r.plat === 'Airbnb').reduce((a, r) => a + r.valor, 0);
+    const al = rows.filter(r => r.plat === 'Airbnb').reduce((a, r) => a + r.liquido, 0);
+    const bb = rows.filter(r => r.plat === 'Booking').reduce((a, r) => a + r.valor, 0);
+    const bl = rows.filter(r => r.plat === 'Booking').reduce((a, r) => a + r.liquido, 0);
+    const pb = rows.filter(r => r.plat === 'Particular').reduce((a, r) => a + r.valor, 0);
+    const pl = rows.filter(r => r.plat === 'Particular').reduce((a, r) => a + r.liquido, 0);
+    const tt = rows.reduce((a, r) => a + r.taxa, 0);
+    const recebido = rows.filter(r => r.pago === 'Pago').reduce((a, r) => a + r.liquido, 0);
+    const pendente = rows.filter(r => r.pago !== 'Pago').reduce((a, r) => a + r.liquido, 0);
+    const diasMes = diasNoMes(YEAR, m);
+    const diasOcup = ocup[i];
+    const ocupPct = diasMes > 0 ? diasOcup / diasMes : 0;
+    return { m, ab, al, bb, bl, pb, pl, tb: ab+bb+pb, tt, tl: al+bl+pl, reservas: rows.length, hospedes: rows.reduce((a,r) => a+r.pessoas, 0), recebido, pendente, diasOcup, diasMes, ocupPct };
+  });
+}
+
+function monthlyDesp() {
+  const desps = load('desp');
+  return MONTHS.map((_, i) => {
+    const m = i + 1;
+    const rows = desps.filter(d => d.mes === m);
+    const cats = {};
+    CATS.forEach(c => { cats[c] = rows.filter(d => d.cat === c).reduce((a, d) => a + d.valor, 0); });
+    return { m, cats, total: rows.reduce((a, d) => a + d.valor, 0) };
+  });
+}
+
+// ── RENDER RECEITAS
+function renderReceitas() {
+  const recs = applyFiltrosRec(load('rec')).slice().sort((a, b) => a.data.localeCompare(b.data));
+  const tbody = document.getElementById('rec-tbody');
+  tbody.innerHTML = recs.length
+    ? recs.map(r => {
+      const venc = isVencida(r);
+      return `
+      <tr class="${venc ? 'row-vencida' : ''}" title="${venc ? 'Pagamento pendente >30 dias após checkout' : ''}">
+        <td>${r.data.split('-').reverse().join('/')}</td>
+        <td>${r.checkout ? r.checkout.split('-').reverse().join('/') : '-'}</td>
+        <td class="td-left">${esc(r.hospede)}</td>
+        <td><span class="badge badge-${r.plat.toLowerCase()}">${r.plat}</span></td>
+        <td>${r.dias || 1}</td>
+        <td>${r.pessoas || 1}</td>
+        <td>${fmt(r.valor)}</td>
+        <td class="td-red">${r.taxa > 0 ? fmt(r.taxa) : '-'}</td>
+        <td class="td-green">${fmt(r.liquido)}${r.liquidoManual ? ' <span title="Líquido ajustado manualmente" style="cursor:help">🔓</span>' : ''}</td>
+        <td>${r.pgto || '-'}</td>
+        <td><span class="badge ${r.pago === 'Pago' ? 'badge-pago' : 'badge-pendente'}">${r.pago === 'Pago' ? '✅ Pago' : '⏳ Pendente'}</span></td>
+        <td style="white-space:nowrap">
+          <button class="del-btn" onclick="editReceita('${r.id}')" title="Editar">✏️</button>
+          <button class="del-btn" onclick="duplicarReceita('${r.id}')" title="Duplicar">📋</button>
+          <button class="del-btn" onclick="deleteReceita('${r.id}')" title="Excluir">🗑️</button>
+        </td>
+      </tr>`;
+    }).join('')
+    : `<tr><td colspan="12"><div class="empty-state"><div class="icon">📋</div><p>Nenhum lançamento.<br>Clique em "Nova Hospedagem".</p></div></td></tr>`;
+
+  const mr = monthlyRec();
+  const tot = { ab:0, al:0, bb:0, bl:0, pb:0, pl:0, tb:0, tt:0, tl:0, res:0, hosp:0, rec:0, pend:0 };
+  document.getElementById('resumo-rec-tbody').innerHTML = mr.map(r => {
+    tot.ab+=r.ab; tot.al+=r.al; tot.bb+=r.bb; tot.bl+=r.bl; tot.pb+=r.pb; tot.pl+=r.pl;
+    tot.tb+=r.tb; tot.tt+=r.tt; tot.tl+=r.tl; tot.res+=r.reservas; tot.hosp+=r.hospedes;
+    tot.rec+=r.recebido; tot.pend+=r.pendente;
+    return `<tr>
+      <td class="td-left" style="background:#d6e4f0;font-weight:600">${MONTHS[r.m-1]}</td>
+      <td>${r.ab > 0 ? fmt(r.ab) : '-'}</td><td class="td-green">${r.al > 0 ? fmt(r.al) : '-'}</td>
+      <td>${r.bb > 0 ? fmt(r.bb) : '-'}</td><td class="td-green">${r.bl > 0 ? fmt(r.bl) : '-'}</td>
+      <td>${r.pb > 0 ? fmt(r.pb) : '-'}</td><td class="td-green">${r.pl > 0 ? fmt(r.pl) : '-'}</td>
+      <td class="td-orange">${fmt(r.tb)}</td>
+      <td class="td-red">${r.tt > 0 ? fmt(r.tt) : '-'}</td>
+      <td class="td-green">${fmt(r.tl)}</td>
+      <td>${r.reservas || '-'}</td><td>${r.hospedes || '-'}</td>
+      <td class="td-green">${r.recebido > 0 ? fmt(r.recebido) : '-'}</td>
+      <td class="td-red">${r.pendente > 0 ? fmt(r.pendente) : '-'}</td>
+    </tr>`;
+  }).join('') + `<tr>
+    <td class="td-navy">📌 TOTAL</td>
+    <td class="td-navy">${fmt(tot.ab)}</td><td class="td-navy">${fmt(tot.al)}</td>
+    <td class="td-navy">${fmt(tot.bb)}</td><td class="td-navy">${fmt(tot.bl)}</td>
+    <td class="td-navy">${fmt(tot.pb)}</td><td class="td-navy">${fmt(tot.pl)}</td>
+    <td class="td-navy">${fmt(tot.tb)}</td><td class="td-navy">${fmt(tot.tt)}</td>
+    <td class="td-navy">${fmt(tot.tl)}</td>
+    <td class="td-navy">${tot.res}</td><td class="td-navy">${tot.hosp}</td>
+    <td class="td-navy">${fmt(tot.rec)}</td><td class="td-navy">${fmt(tot.pend)}</td>
+  </tr>`;
+}
+
+// ── RENDER DESPESAS
+function renderDespesas() {
+  const desps = applyFiltrosDesp(load('desp')).slice().sort((a, b) => a.data.localeCompare(b.data));
+  document.getElementById('desp-tbody').innerHTML = desps.length
+    ? desps.map(d => `
+      <tr>
+        <td>${d.data.split('-').reverse().join('/')}</td>
+        <td class="td-left">${esc(d.desc || '-')}</td>
+        <td>${esc(d.cat)}</td>
+        <td class="td-left">${esc(d.forn || '-')}</td>
+        <td class="td-red">${fmt(d.valor)}</td>
+        <td>${esc(d.pgto || '-')}</td>
+        <td>${esc(d.comp || '-')}</td>
+        <td style="white-space:nowrap">
+          <button class="del-btn" onclick="editDespesa('${d.id}')" title="Editar">✏️</button>
+          <button class="del-btn" onclick="deleteDespesa('${d.id}')" title="Excluir">🗑️</button>
+        </td>
+      </tr>`).join('')
+    : `<tr><td colspan="8"><div class="empty-state"><div class="icon">📋</div><p>Nenhum lançamento.<br>Clique em "Nova Despesa".</p></div></td></tr>`;
+
+  const md = monthlyDesp();
+  const totC = {}; CATS.forEach(c => totC[c] = 0); let totT = 0;
+  document.getElementById('resumo-desp-tbody').innerHTML = md.map(d => {
+    CATS.forEach(c => totC[c] += d.cats[c]); totT += d.total;
+    return `<tr>
+      <td class="td-left" style="background:#d6e4f0;font-weight:600">${MONTHS[d.m-1]}</td>
+      ${CATS.map(c => `<td class="${d.cats[c] > 0 ? 'td-red' : ''}">${d.cats[c] > 0 ? fmt(d.cats[c]) : '-'}</td>`).join('')}
+      <td class="td-orange">${fmt(d.total)}</td>
+    </tr>`;
+  }).join('') + `<tr><td class="td-navy">📌 TOTAL</td>${CATS.map(c => `<td class="td-navy">${fmt(totC[c])}</td>`).join('')}<td class="td-navy">${fmt(totT)}</td></tr>`;
+}
+
+// ── RENDER DASHBOARD
+// ── PRÓXIMOS 7 DIAS (chegadas + check-outs)
+function renderProximos() {
+  const card = document.getElementById('card-proximos');
+  const cont = document.getElementById('proximos-list');
+  if (!card || !cont) return;
+
+  const hoje = new Date(); hoje.setHours(0,0,0,0);
+  const limite = new Date(hoje); limite.setDate(limite.getDate() + 7);
+  const hojeStr = hoje.toISOString().slice(0,10);
+  const limiteStr = limite.toISOString().slice(0,10);
+
+  const eventos = [];
+  // Vasculha todas as reservas em todos os anos
+  Object.keys(_cache).forEach(yk => {
+    const yr = parseInt(yk);
+    if (isNaN(yr) || !Array.isArray(_cache[yr].rec)) return;
+    _cache[yr].rec.forEach(r => {
+      // Chegada
+      if (r.data && r.data >= hojeStr && r.data <= limiteStr) {
+        eventos.push({ tipo: 'chegada', data: r.data, rec: r });
+      }
+      // Saída
+      if (r.checkout && r.checkout >= hojeStr && r.checkout <= limiteStr) {
+        eventos.push({ tipo: 'saida', data: r.checkout, rec: r });
+      }
+    });
+  });
+
+  if (!eventos.length) {
+    card.style.display = 'none';
+    return;
+  }
+  card.style.display = '';
+
+  // Ordena por data
+  eventos.sort((a,b) => a.data.localeCompare(b.data) || (a.tipo === 'saida' ? -1 : 1));
+
+  cont.innerHTML = eventos.map(ev => {
+    const r = ev.rec;
+    const d = new Date(ev.data + 'T00:00:00');
+    const diffDias = Math.round((d - hoje) / 86400000);
+    let prefix;
+    if (diffDias === 0) prefix = '<span style="color:var(--gold);font-weight:700">Hoje</span>';
+    else if (diffDias === 1) prefix = '<span style="color:var(--terra);font-weight:600">Amanhã</span>';
+    else prefix = `<span style="color:#888">em ${diffDias} dias</span>`;
+    const dataFmt = ev.data.split('-').reverse().join('/');
+    const icone = ev.tipo === 'chegada' ? '🛬 Chegada' : '🛫 Check-out';
+    const cor = ev.tipo === 'chegada' ? 'var(--green)' : 'var(--red)';
+    return `<div style="padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.06);display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+      <div>
+        <span style="color:${cor};font-weight:600">${icone}</span> · <strong>${esc(r.hospede)}</strong>
+        <span style="color:#888"> · ${esc(r.plat||'')}</span>
+      </div>
+      <div style="font-size:0.78rem">${prefix} <span style="color:#888">(${dataFmt})</span></div>
+    </div>`;
+  }).join('');
+}
+
+// ── COMPARATIVO ANO vs ANO
+// Recebe mr/md já calculados pro ano atual (YEAR), e calcula o anterior YEAR-1.
+function renderCompAno(mrAtual, mdAtual) {
+  const card = document.getElementById('card-comp-ano');
+  if (!card) return;
+  const yAnt = YEAR - 1;
+  // Só mostra se existem dados do ano anterior em cache
+  if (!_cache[yAnt] || !Array.isArray(_cache[yAnt].rec) || _cache[yAnt].rec.length === 0) {
+    card.style.display = 'none';
+    return;
+  }
+  card.style.display = '';
+
+  // Calcula totais do ano anterior usando as mesmas fórmulas (sem mexer no YEAR)
+  const recsAnt = _cache[yAnt].rec || [];
+  const despsAnt = _cache[yAnt].desp || [];
+  const calAnt = _cache[yAnt].cal || {};
+
+  const sum = arr => arr.reduce((a,r) => a + (r.valor||0), 0);
+  const sumLiq = arr => arr.reduce((a,r) => a + (r.liquido||0), 0);
+  const sumD = arr => arr.reduce((a,r) => a + (r.valor||0), 0);
+
+  const tbAtual = mrAtual.reduce((a,r) => a + r.tb, 0);
+  const tlAtual = mrAtual.reduce((a,r) => a + r.tl, 0);
+  const tdAtual = mdAtual.reduce((a,r) => a + r.total, 0);
+  const lucAtual = tlAtual - tdAtual;
+  const margAtual = tbAtual > 0 ? lucAtual/tbAtual : 0;
+  const reservasAtual = mrAtual.reduce((a,r) => a + (r.reservas||0), 0);
+  const hospedesAtual = mrAtual.reduce((a,r) => a + (r.hospedes||0), 0);
+  const diasOcupAtual = mrAtual.reduce((a,r) => a + (r.diasOcup||0), 0);
+  const diasTotAtual = mrAtual.reduce((a,r) => a + (r.diasMes||0), 0);
+  const ocupAtual = diasTotAtual > 0 ? diasOcupAtual/diasTotAtual : 0;
+
+  const tbAnt = sum(recsAnt);
+  const tlAnt = sumLiq(recsAnt);
+  const tdAnt = sumD(despsAnt);
+  const lucAnt = tlAnt - tdAnt;
+  const margAnt = tbAnt > 0 ? lucAnt/tbAnt : 0;
+  const reservasAnt = recsAnt.length;
+  const tels = new Set();
+  recsAnt.forEach(r => {
+    const k = r.telefone ? r.telefone : ('nome:' + (r.hospede||'').toLowerCase());
+    tels.add(k);
+  });
+  const hospedesAnt = tels.size;
+  let diasOcupAnt = 0;
+  Object.values(calAnt).forEach(info => {
+    if (info && (info.recId || info.status === 'ocupado' || info.status === 'manutencao')) diasOcupAnt++;
+  });
+  const diasTotAnt = (yAnt % 4 === 0 && (yAnt % 100 !== 0 || yAnt % 400 === 0)) ? 366 : 365;
+  const ocupAnt = diasTotAnt > 0 ? diasOcupAnt/diasTotAnt : 0;
+
+  const ticketAtual = reservasAtual > 0 ? tbAtual/reservasAtual : 0;
+  const ticketAnt = reservasAnt > 0 ? tbAnt/reservasAnt : 0;
+
+  const diariaAtual = diasOcupAtual > 0 ? tbAtual/diasOcupAtual : 0;
+  const diariaAnt = diasOcupAnt > 0 ? tbAnt/diasOcupAnt : 0;
+
+  // Helper: variação
+  function vari(atual, ant) {
+    if (ant === 0 && atual === 0) return { txt: '-', cor: '' };
+    if (ant === 0) return { txt: 'novo', cor: 'var(--green)' };
+    const v = (atual - ant) / Math.abs(ant);
+    const sinal = v >= 0 ? '+' : '';
+    const cor = v > 0.001 ? 'var(--green)' : (v < -0.001 ? 'var(--red)' : '#888');
+    return { txt: sinal + (v*100).toFixed(1) + '%', cor };
+  }
+
+  // Header dinâmico
+  document.getElementById('comp-ano-atual').textContent = String(YEAR);
+  document.getElementById('comp-ano-ant').textContent = String(yAnt);
+  document.getElementById('comp-ano-label').textContent = ' (' + yAnt + ' → ' + YEAR + ')';
+
+  const linhas = [
+    { label: 'Receita Bruta', a: fmt(tbAtual), b: fmt(tbAnt), v: vari(tbAtual, tbAnt) },
+    { label: 'Receita Líquida', a: fmt(tlAtual), b: fmt(tlAnt), v: vari(tlAtual, tlAnt) },
+    { label: 'Despesas', a: fmt(tdAtual), b: fmt(tdAnt), v: vari(tdAtual, tdAnt) },
+    { label: 'Lucro', a: fmt(lucAtual), b: fmt(lucAnt), v: vari(lucAtual, lucAnt) },
+    { label: 'Margem', a: pct(margAtual), b: pct(margAnt), v: vari(margAtual, margAnt) },
+    { label: 'Ocupação', a: pct(ocupAtual), b: pct(ocupAnt), v: vari(ocupAtual, ocupAnt) },
+    { label: 'Reservas', a: String(reservasAtual), b: String(reservasAnt), v: vari(reservasAtual, reservasAnt) },
+    { label: 'Hóspedes únicos', a: String(hospedesAtual), b: String(hospedesAnt), v: vari(hospedesAtual, hospedesAnt) },
+    { label: 'Ticket médio', a: fmt(ticketAtual), b: fmt(ticketAnt), v: vari(ticketAtual, ticketAnt) },
+    { label: 'Diária média', a: fmt(diariaAtual), b: fmt(diariaAnt), v: vari(diariaAtual, diariaAnt) },
+  ];
+
+  document.getElementById('comp-ano-tbody').innerHTML = linhas.map(l => `
+    <tr>
+      <td class="td-left" style="font-weight:600">${l.label}</td>
+      <td>${l.a}</td>
+      <td>${l.b}</td>
+      <td style="color:${l.v.cor};font-weight:600">${l.v.txt}</td>
+    </tr>`).join('');
+}
+
+function renderDashboard() {
+  const dy = document.getElementById('dash-year'); if (dy) dy.textContent = YEAR;
+  const mr = monthlyRec(), md = monthlyDesp();
+
+  // YTD: se for o ano corrente, considera só meses até o mês atual.
+  // Senão (ano passado/futuro), considera os 12 meses.
+  const hojeY = new Date();
+  const isAnoCorrente = YEAR === hojeY.getFullYear();
+  const mesLimite = isAnoCorrente ? hojeY.getMonth() + 1 : 12;
+  const mrYTD = mr.slice(0, mesLimite);
+  const mdYTD = md.slice(0, mesLimite);
+
+  const tRB = mrYTD.reduce((a,r) => a+r.tb, 0);
+  const tRL = mrYTD.reduce((a,r) => a+r.tl, 0);
+  const tD = mdYTD.reduce((a,d) => a+d.total, 0);
+  const lucro = tRL - tD;
+  document.getElementById('kpi-rec-bruta').textContent = fmt(tRB);
+  document.getElementById('kpi-despesas').textContent = fmt(tD);
+  document.getElementById('kpi-lucro').textContent = fmt(lucro);
+  document.getElementById('kpi-margem').textContent = tRB > 0 ? pct(lucro/tRB) : '0%';
+
+  // Badge YTD: avisa que valores são parciais (ano em andamento)
+  const ytdBadge = document.getElementById('ytd-badge');
+  const ytdHelp = document.getElementById('ytd-help');
+  if (ytdBadge) {
+    if (isAnoCorrente && mesLimite < 12) {
+      ytdBadge.textContent = `YTD · Jan–${MONTHS[mesLimite-1]}`;
+      ytdBadge.style.display = 'inline-block';
+      if (ytdHelp) ytdHelp.style.display = 'inline';
+    } else {
+      ytdBadge.style.display = 'none';
+      if (ytdHelp) ytdHelp.style.display = 'none';
+    }
+  }
+
+  // Diária média YTD = receita bruta YTD / dias ocupados YTD
+  const diasOcupYTD = mrYTD.reduce((a,r) => a + (r.diasOcup||0), 0);
+  const diariaMediaYTD = diasOcupYTD > 0 ? tRB/diasOcupYTD : 0;
+  const elDM = document.getElementById('kpi-diaria-media');
+  if (elDM) elDM.textContent = fmt(diariaMediaYTD);
+
+  // ── Card "Este mês" (usa MES_SEL — mês selecionado pelo seletor)
+  const mesCur = MES_SEL;
+  // Atualiza UI do seletor
+  const elSel = document.getElementById('mes-sel'); if (elSel) elSel.value = String(mesCur);
+  const elSelAno = document.getElementById('mes-sel-ano'); if (elSelAno) elSelAno.textContent = YEAR;
+  const mesData = mr[mesCur-1] || { tb:0, tl:0, ocupPct:0 };
+  const mesDesp = md[mesCur-1] || { total:0 };
+  const mesLucro = mesData.tl - mesDesp.total;
+  const elMR = document.getElementById('mes-receita'); if (elMR) elMR.textContent = fmt(mesData.tb);
+  const elMD = document.getElementById('mes-despesas'); if (elMD) elMD.textContent = fmt(mesDesp.total);
+  const elML = document.getElementById('mes-lucro'); if (elML) { elML.textContent = fmt(mesLucro); elML.style.color = mesLucro >= 0 ? 'var(--terra)' : 'var(--red)'; }
+  const elMO = document.getElementById('mes-ocupacao'); if (elMO) elMO.textContent = pct(mesData.ocupPct);
+  // Novos KPIs do mês: diária média e nº reservas
+  const diariaMes = (mesData.diasOcup||0) > 0 ? mesData.tb/(mesData.diasOcup||1) : 0;
+  const elDMes = document.getElementById('mes-diaria'); if (elDMes) elDMes.textContent = fmt(diariaMes);
+  const elResMes = document.getElementById('mes-reservas'); if (elResMes) elResMes.textContent = String(mesData.reservas||0);
+
+  // ── Alerta de pagamentos vencidos
+  const venc = getReservasVencidas();
+  const elAlert = document.getElementById('alert-vencidos');
+  if (elAlert) {
+    if (venc.length > 0) {
+      const totalPend = venc.reduce((a,r) => a + (r.liquido||0), 0);
+      const lista = venc.slice(0, 5).map(r => {
+        const ref = (r.checkout || r.data).split('-').reverse().join('/');
+        return `<div style="margin-top:3px">• <strong>${esc(r.hospede)}</strong> — ${esc(r.plat)} · ${ref} · ${fmt(r.liquido)}</div>`;
+      }).join('');
+      const extra = venc.length > 5 ? `<div style="margin-top:3px;font-style:italic">…e mais ${venc.length-5}</div>` : '';
+      elAlert.innerHTML = `⚠️ <strong>${venc.length} pagamento${venc.length>1?'s':''} pendente${venc.length>1?'s':''} há mais de 30 dias</strong> · Total: ${fmt(totalPend)}${lista}${extra}`;
+      elAlert.classList.add('show');
+    } else {
+      elAlert.classList.remove('show');
+    }
+  }
+
+  document.getElementById('dash-tbody').innerHTML = mr.map((r, i) => {
+    const d = md[i], l = r.tl - d.total, marg = r.tb > 0 ? l/r.tb : 0;
+    return `<tr>
+      <td class="td-left" style="background:#d6e4f0;font-weight:600">${MONTHS[r.m-1]}</td>
+      <td class="td-orange">${fmt(r.tb)}</td>
+      <td class="td-green">${fmt(r.tl)}</td>
+      <td class="td-red">${fmt(d.total)}</td>
+      <td style="${l>=0?'color:var(--green)':'color:var(--red)'};font-weight:600">${fmt(l)}</td>
+      <td>${pct(marg)}</td>
+      <td title="${r.diasOcup} de ${r.diasMes} dias">${r.diasOcup > 0 ? pct(r.ocupPct) : '-'}</td>
+      <td>${r.reservas || '-'}</td>
+      <td>${r.hospedes || '-'}</td>
+      <td class="td-green">${r.recebido > 0 ? fmt(r.recebido) : '-'}</td>
+      <td class="td-red">${r.pendente > 0 ? fmt(r.pendente) : '-'}</td>
+    </tr>`;
+  }).join('');
+
+  // ── Comparativo Ano vs Ano (atual = YEAR; anterior = YEAR-1)
+  renderCompAno(mr, md);
+
+  // ── Próximos 7 dias
+  renderProximos();
+
+  // ── Banner de despesas fixas pendentes/atrasadas
+  renderBannerDespFixas();
+
+  // ── Chart Receita vs Despesa por mês
+  const elChartRD = document.getElementById('chart-rec-vs-desp');
+  if (elChartRD) {
+    const maxRD = Math.max(
+      ...mr.map(r => r.tb || 0),
+      ...md.map(d => d.total || 0),
+      1
+    );
+    elChartRD.innerHTML = '<div class="chart-bar-wrap">' +
+      mr.map((r, i) => {
+        const desp = md[i].total || 0;
+        const rec = r.tb || 0;
+        // Não mostra meses zerados se ambos forem 0
+        if (rec === 0 && desp === 0) return '';
+        const recPct = (rec / maxRD * 100).toFixed(1);
+        const despPct = (desp / maxRD * 100).toFixed(1);
+        return `<div class="rd-month-row">
+          <div class="rd-label">${MONTHS[i].slice(0,3)}</div>
+          <div class="rd-bars">
+            <div class="rd-bar-bg"><div class="rd-bar-fill rd-rec" style="width:${recPct}%"><span class="chart-bar-val">${rec > 0 ? fmt(rec) : ''}</span></div></div>
+            <div class="rd-bar-bg"><div class="rd-bar-fill rd-desp" style="width:${despPct}%"><span class="chart-bar-val">${desp > 0 ? fmt(desp) : ''}</span></div></div>
+          </div>
+        </div>`;
+      }).join('') + '</div>' +
+      '<div style="display:flex;gap:14px;justify-content:center;margin-top:6px;font-size:0.72rem;color:#666"><span>🟢 Receita</span><span>🔴 Despesa</span></div>';
+  }
+
+  // Charts
+  const pd = { Airbnb: mr.reduce((a,r) => a+r.ab, 0), Booking: mr.reduce((a,r) => a+r.bb, 0), Particular: mr.reduce((a,r) => a+r.pb, 0) };
+  const maxP = Math.max(...Object.values(pd), 1);
+  const pc = { Airbnb:'#ff5a5f', Booking:'#003b95', Particular:'#27ae60' };
+  document.getElementById('chart-plat').innerHTML = '<div class="chart-bar-wrap">' +
+    Object.entries(pd).map(([k,v]) => `
+      <div class="chart-bar-row">
+        <div class="chart-bar-label">${k}</div>
+        <div class="chart-bar-bg"><div class="chart-bar-fill" style="width:${(v/maxP*100).toFixed(1)}%;background:${pc[k]}">
+          <span class="chart-bar-val">${v > 0 ? fmt(v) : ''}</span>
+        </div></div>
+      </div>`).join('') + '</div>';
+
+  const totC = {}; CATS.forEach(c => { totC[c] = md.reduce((a,d) => a+d.cats[c], 0); });
+  const maxD = Math.max(...Object.values(totC), 1);
+  const dc = ['#e74c3c','#e67e22','#f39c12','#27ae60','#2980b9','#a07248','#8e44ad','#16a085','#d35400','#7f8c8d'];
+  document.getElementById('chart-desp').innerHTML = '<div class="chart-bar-wrap">' +
+    CATS.map((c,i) => `
+      <div class="chart-bar-row">
+        <div class="chart-bar-label" style="font-size:0.64rem">${c.replace(' Elétrica','').replace(' e Impostos','').replace(' de Reposição','')}</div>
+        <div class="chart-bar-bg"><div class="chart-bar-fill" style="width:${(totC[c]/maxD*100).toFixed(1)}%;background:${dc[i]}">
+          <span class="chart-bar-val">${totC[c] > 0 ? fmt(totC[c]) : ''}</span>
+        </div></div>
+      </div>`).join('') + '</div>';
+}
+
+// ── EDIT RECEITA
+let editPagoStatus = 'Pago';
+
+function setEditPago(val) {
+  editPagoStatus = val;
+  const a = document.getElementById('edit-btn-pago');
+  const b = document.getElementById('edit-btn-pendente');
+  if (!a || !b) return;
+  a.className = val === 'Pago' ? 'active-pago' : '';
+  b.className = val === 'Pendente' ? 'active-pendente' : '';
+}
+
+// Preview de taxa no modal de edição (mesmo padrão do form principal)
+function updateEditTaxaPreview() {
+  const plat = document.getElementById('edit-r-plat').value;
+  const v = parseBRL(document.getElementById('edit-r-valor').value);
+  const el = document.getElementById('edit-taxa-preview');
+  if (!el) return;
+  if (!plat || !v) { el.style.display = 'none'; return; }
+  const t = calcTaxa(plat, v);
+  const liq = v - t;
+  el.style.display = 'block';
+  el.innerHTML = t > 0
+    ? `💸 Taxa ${plat} (${getTaxa(plat)}%): <strong>${fmt(t)}</strong> &nbsp;→&nbsp; ✅ Valor Líquido: <strong style="color:var(--green)">${fmt(liq)}</strong>`
+    : `✅ Sem taxa (Particular) → Valor Líquido: <strong style="color:var(--green)">${fmt(liq)}</strong>`;
+}
+
+// Liga/desliga o ajuste manual do líquido
+function toggleLiquidoManual() {
+  const ck = document.getElementById('edit-liq-manual-toggle');
+  const box = document.getElementById('edit-liq-manual-box');
+  if (!ck || !box) return;
+  if (ck.checked) {
+    box.style.display = 'block';
+    // Pré-preenche com o líquido atual (calculado ou já manual)
+    const liqInput = document.getElementById('edit-r-liquido');
+    if (liqInput && !liqInput.value) {
+      const plat = document.getElementById('edit-r-plat').value;
+      const v = parseBRL(document.getElementById('edit-r-valor').value);
+      if (plat && v) {
+        const liqCalc = v - calcTaxa(plat, v);
+        liqInput.value = numberToBRLInput(liqCalc);
+      }
+    }
+    updateEditTaxaEfetiva();
+  } else {
+    box.style.display = 'none';
+  }
+}
+
+// Calcula e exibe a taxa efetiva quando o usuário ajusta o líquido
+function updateEditTaxaEfetiva() {
+  const v = parseBRL(document.getElementById('edit-r-valor').value);
+  const liq = parseBRL(document.getElementById('edit-r-liquido').value);
+  const plat = document.getElementById('edit-r-plat').value;
+  const el = document.getElementById('edit-taxa-efetiva');
+  if (!el) return;
+  if (!v || !liq) { el.textContent = ''; return; }
+  if (liq > v) {
+    el.innerHTML = '⚠️ <strong style="color:var(--red)">Líquido maior que o bruto</strong> — verifique os valores';
+    return;
+  }
+  const txAbs = v - liq;
+  const txPct = (txAbs / v) * 100;
+  const padraoPct = plat ? getTaxa(plat) : null;
+  let aviso = '';
+  if (padraoPct !== null) {
+    const dif = txPct - padraoPct;
+    if (Math.abs(dif) > 0.5) {
+      const sinal = dif > 0 ? 'acima' : 'abaixo';
+      const cor = dif > 0 ? 'var(--red)' : 'var(--green)';
+      aviso = ` <span style="color:${cor};font-weight:600">(${sinal} do padrão de ${padraoPct}%)</span>`;
+    } else {
+      aviso = ' <span style="color:#888">(igual ao padrão)</span>';
+    }
+  }
+  el.innerHTML = `📊 Taxa efetiva: <strong>${txPct.toFixed(1)}%</strong> (${fmt(txAbs)})${aviso}`;
+}
+
+function editReceita(id) {
+  const rec = load('rec').find(r => r.id === id);
+  if (!rec) return;
+  document.getElementById('edit-rec-id').value = id;
+  document.getElementById('edit-rec-info').innerHTML =
+    `<strong>👤 ${esc(rec.hospede)}</strong> — ${esc(rec.plat)}<br>` +
+    `📅 ${rec.data.split('-').reverse().join('/')}${rec.checkout ? ' → ' + rec.checkout.split('-').reverse().join('/') : ''}<br>` +
+    `💰 ${fmt(rec.liquido)}`;
+  // Preenche todos os campos
+  document.getElementById('edit-r-data').value = rec.data || '';
+  document.getElementById('edit-r-checkout').value = rec.checkout || '';
+  document.getElementById('edit-r-hospede').value = rec.hospede || '';
+  document.getElementById('edit-r-telefone').value = rec.telefone ? formatPhoneDisplay(rec.telefone) : '';
+  document.getElementById('edit-r-plat').value = rec.plat || '';
+  document.getElementById('edit-r-pessoas').value = rec.pessoas || '';
+  document.getElementById('edit-r-valor').value = numberToBRLInput(rec.valor);
+  document.getElementById('edit-pgto').value = rec.pgto || '';
+  document.getElementById('edit-obs').value = rec.obs || '';
+  // Líquido manual: pré-marca toggle se a reserva já tem flag liquidoManual
+  const ck = document.getElementById('edit-liq-manual-toggle');
+  const liqInput = document.getElementById('edit-r-liquido');
+  if (ck) ck.checked = !!rec.liquidoManual;
+  if (liqInput) liqInput.value = rec.liquidoManual ? numberToBRLInput(rec.liquido) : '';
+  toggleLiquidoManual(); // sincroniza visibilidade do box
+  editPagoStatus = rec.pago || 'Pendente';
+  setEditPago(editPagoStatus);
+  updateEditTaxaPreview();
+  openModal('modal-edit-rec');
+}
+
+function saveEditReceita() {
+  const id = document.getElementById('edit-rec-id').value;
+  const recs = load('rec');
+  const idx = recs.findIndex(r => r.id === id);
+  if (idx === -1) { toast('⚠️ Reserva não encontrada'); return; }
+
+  const data = document.getElementById('edit-r-data').value;
+  const checkout = document.getElementById('edit-r-checkout').value;
+  const hospede = document.getElementById('edit-r-hospede').value.trim();
+  const telefone = normalizePhone(document.getElementById('edit-r-telefone').value);
+  const plat = document.getElementById('edit-r-plat').value;
+  const pessoas = parseInt(document.getElementById('edit-r-pessoas').value) || 0;
+  const valor = parseBRL(document.getElementById('edit-r-valor').value);
+  const pgto = document.getElementById('edit-pgto').value;
+  const obs = document.getElementById('edit-obs').value;
+
+  // Validações
+  if (!data || !hospede || !plat || !valor) { toast('⚠️ Preencha os campos obrigatórios'); return; }
+  if (valor <= 0) { toast('⚠️ Valor precisa ser maior que zero'); return; }
+  if (checkout && checkout < data) { toast('⚠️ Check-out não pode ser antes do check-in'); return; }
+
+  // Verifica conflito de datas IGNORANDO a própria reserva
+  const datasNovas = getDatesInRange(data, checkout);
+  const conflitos = [];
+  Object.values(_cache).forEach(yearData => {
+    if (!yearData || !yearData.cal) return;
+    Object.entries(yearData.cal).forEach(([d, info]) => {
+      if (info.recId === id) return; // ignora a própria
+      if (info.recId && datasNovas.includes(d)) {
+        conflitos.push(d);
+      }
+    });
+  });
+  if (conflitos.length > 0) {
+    toast('⚠️ Conflito: período já ocupado por outra reserva (' + conflitos[0].split('-').reverse().join('/') + ')');
+    return;
+  }
+
+  // Recalcula taxa e líquido
+  // Se o usuário marcou "ajustar líquido manualmente", usa o valor do input.
+  // Senão, calcula automaticamente pela taxa da plataforma.
+  const liqManualCk = document.getElementById('edit-liq-manual-toggle');
+  const usarManual = liqManualCk && liqManualCk.checked;
+  let taxa, liquido, liquidoManual = false;
+  if (usarManual) {
+    const liqInput = parseBRL(document.getElementById('edit-r-liquido').value);
+    if (!liqInput || liqInput <= 0) { toast('⚠️ Líquido manual deve ser maior que zero'); return; }
+    if (liqInput > valor) { toast('⚠️ Líquido não pode ser maior que o bruto'); return; }
+    liquido = liqInput;
+    taxa = valor - liquido;
+    liquidoManual = true;
+  } else {
+    taxa = calcTaxa(plat, valor);
+    liquido = valor - taxa;
+  }
+  const dias = datasNovas.length || 1;
+  const mes = getMes(data);
+
+  // Hóspede ANTIGO pode ter sido renomeado/teltrocado — ajusta CRM
+  const recAntiga = recs[idx];
+  const chaveAntiga = recAntiga.telefone ? recAntiga.telefone : ('nome:' + (recAntiga.hospede || '').toLowerCase());
+  const hosp = loadHospedes();
+  if (hosp[chaveAntiga]) {
+    // remove esta visita do hóspede antigo
+    hosp[chaveAntiga].visitas = Math.max(0, (hosp[chaveAntiga].visitas || 1) - 1);
+    hosp[chaveAntiga].totalGasto = Math.max(0, (hosp[chaveAntiga].totalGasto || 0) - (recAntiga.valor || 0));
+    if (hosp[chaveAntiga].visitas === 0) delete hosp[chaveAntiga];
+    saveHospedes(hosp);
+  }
+
+  // Atualiza a reserva
+  recs[idx] = {
+    ...recAntiga,
+    data, checkout, hospede, telefone, plat, pessoas, valor, taxa, liquido, liquidoManual,
+    pgto, obs, pago: editPagoStatus, dias, mes
+  };
+  save('rec', recs);
+
+  // Recria calendário desta reserva (limpa o anterior + preenche o novo)
+  clearCalendar(id);
+  fillCalendar(recs[idx]);
+
+  // Registra hóspede novo (cria ou incrementa)
+  registrarHospede(recs[idx]);
+
+  closeModal('modal-edit-rec');
+  toast('✅ Reserva atualizada!');
+  renderReceitas(); renderDashboard(); renderCalendario(); renderHospedes();
+}
+
+// ── RENDER CALENDÁRIO
+function renderCalendario() {
+  const cn = document.getElementById('cal-year-num'); if (cn) cn.textContent = YEAR;
+  const cal = loadCal();
+  const container = document.getElementById('cal-container');
+  container.innerHTML = MONTHS.map((mn, m) => {
+    const firstDay = new Date(YEAR, m, 1).getDay();
+    const daysInMonth = new Date(YEAR, m+1, 0).getDate();
+    let h = `<div class="cal-month card">
+      <div class="cal-month-title">📅 ${mn.toUpperCase()} ${YEAR}</div>
+      <div class="cal-grid">`;
+    ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].forEach((d, i) =>
+      h += `<div class="cal-weekday${i===0||i===6?' wknd':''}">${d}</div>`);
+    for (let e = 0; e < firstDay; e++) h += `<div class="cal-day empty"></div>`;
+    for (let day = 1; day <= daysInMonth; day++) {
+      const key = `${YEAR}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+      const info = cal[key] || {};
+      const status = info.status || '';
+      const dow = (firstDay + day - 1) % 7;
+      const isWknd = dow === 0 || dow === 6;
+      const isAuto = info.autoFilled;
+      const isPago = info.pago === 'Pago';
+      const isPendente = info.pago === 'Pendente';
+      h += `<div class="cal-day ${isAuto ? 'auto-filled' : status}${isWknd ? ' wknd' : ''}" onclick="openCalDay('${key}','${mn} ${day}')">
+        ${isAuto ? '<div class="cal-auto-badge">AUTO</div>' : ''}
+        ${isAuto && isPago ? '<div class="cal-pago-badge">PAGO</div>' : ''}
+        ${isAuto && isPendente ? '<div class="cal-pendente-badge">A REC.</div>' : ''}
+        <div class="cal-day-num">${day}</div>
+        <div class="cal-day-info">
+          ${info.hospede ? `👤 ${esc(info.hospede)}` : ''}
+          ${info.pessoas ? `<br>👥 ${esc(info.pessoas)}` : ''}
+          ${info.valor ? `<br>${fmt(info.valor)}` : ''}
+        </div>
+      </div>`;
+    }
+    h += '</div></div>';
+    return h;
+  }).join('');
+}
+
+// ── CALENDAR DAY MODAL
+function openCalDay(key, label) {
+  const cal = loadCal();
+  const info = cal[key] || {};
+  document.getElementById('cal-modal-title').textContent = `📅 ${label}`;
+  document.getElementById('cal-date-key').value = key;
+  document.getElementById('cal-status').value = info.status || '';
+  document.getElementById('cal-hospede').value = info.hospede || '';
+  document.getElementById('cal-pessoas').value = info.pessoas || '';
+  document.getElementById('cal-valor').value = numberToBRLInput(info.valor);
+  const ai = document.getElementById('cal-auto-info');
+  if (info.autoFilled) {
+    ai.style.display = 'block';
+    const pagoStr = info.pago ? ` — ${info.pago === 'Pago' ? '✅ Pago' : '⏳ A Receber'}` : '';
+    ai.innerHTML = `🔄 <strong>Reserva automática</strong>: ${esc(info.hospede)}${pagoStr}. Você pode editar manualmente.`;
+  } else {
+    ai.style.display = 'none';
+  }
+  openModal('modal-cal');
+}
+
+function saveCalDay() {
+  const key = document.getElementById('cal-date-key').value;
+  const cal = loadCal();
+  const ex = cal[key] || {};
+  const entry = {
+    ...ex,
+    status: document.getElementById('cal-status').value,
+    hospede: document.getElementById('cal-hospede').value,
+    pessoas: document.getElementById('cal-pessoas').value,
+    valor: parseBRL(document.getElementById('cal-valor').value),
+    autoFilled: false
+  };
+  if (!entry.status && !entry.hospede && !entry.valor) delete cal[key];
+  else cal[key] = entry;
+  saveCal(cal);
+  closeModal('modal-cal');
+  renderCalendario();
+  toast('✅ Dia atualizado!');
+}
+
+// ── BACKUP & RESTORE
+function exportarBackup() {
+  // Multi-ano: junta todos os anos presentes no cache
+  const anos = {};
+  Object.keys(_cache).forEach(k => {
+    const yr = parseInt(k);
+    if (isNaN(yr)) return;
+    anos[yr] = {
+      receitas: _cache[yr].rec || [],
+      despesas: _cache[yr].desp || [],
+      calendario: _cache[yr].cal || {}
+    };
+  });
+  const data = {
+    versao: '3.8',
+    data: new Date().toLocaleDateString('pt-BR'),
+    timestamp: new Date().toISOString(),
+    anoCorrente: YEAR,
+    anos: anos,
+    config: loadConfig(),
+    hospedes: loadHospedes(),
+    despFixas: loadDespFixas(),
+    // Compatibilidade retroativa: se houver só 1 ano, exporta também no formato v2
+    receitas: load('rec'),
+    despesas: load('desp'),
+    calendario: loadCal()
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `rota-latina-backup-${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  // Registra data do último backup
+  try { localStorage.setItem('rl_last_backup', new Date().toISOString()); } catch (e) {}
+  toast('📥 Backup gerado! Salve no Google Drive.', 3500);
+  renderLembreteBackup(); // atualiza banner
+}
+
+// Banner avisa se faz mais de 30 dias sem backup
+function renderLembreteBackup() {
+  const banner = document.getElementById('banner-backup');
+  if (!banner) return;
+  const last = localStorage.getItem('rl_last_backup');
+  let diasDesde = null;
+  if (last) {
+    const diff = Date.now() - new Date(last).getTime();
+    diasDesde = Math.floor(diff / 86400000);
+  }
+  if (diasDesde === null || diasDesde > 30) {
+    const msg = diasDesde === null
+      ? 'Você ainda não fez backup local. Recomendamos exportar o JSON e guardar em local seguro (Google Drive).'
+      : `Faz <strong>${diasDesde} dias</strong> que você não exporta backup. Que tal fazer agora?`;
+    banner.innerHTML = `📥 ${msg}
+      <button onclick="exportarBackup()" style="margin-left:8px;background:var(--gold);color:var(--navy);border:none;padding:4px 10px;border-radius:5px;cursor:pointer;font-weight:600;font-family:'Outfit',sans-serif;font-size:0.78rem">Fazer backup</button>`;
+    banner.style.display = 'block';
+  } else {
+    banner.style.display = 'none';
+  }
+}
+
+// Banner: avisa sobre despesas fixas atrasadas ou que vão vencer nos próximos 7 dias
+function renderBannerDespFixas() {
+  const banner = document.getElementById('banner-df-pendentes');
+  if (!banner) return;
+  const tpls = loadDespFixas();
+  if (!tpls.length) { banner.style.display = 'none'; return; }
+
+  const hoje = new Date();
+  const mes = hoje.getMonth() + 1;
+  const ano = hoje.getFullYear();
+  const diaHoje = hoje.getDate();
+
+  const atrasadas = []; // têm dia, dia já passou, não foram lançadas no mês
+  const proximas = [];  // têm dia, faltam ≤ 7 dias, não foram lançadas
+  const semDia = [];    // sem dia definido, ainda não lançadas
+
+  tpls.forEach(t => {
+    if (tplJaLancadoEm(t.id, mes, ano)) return;
+    if (t.dia) {
+      const dia = parseInt(t.dia);
+      if (dia < diaHoje) {
+        atrasadas.push({ tpl: t, dia });
+      } else {
+        const faltam = dia - diaHoje;
+        if (faltam <= 7) proximas.push({ tpl: t, dia, faltam });
+      }
+    } else {
+      semDia.push(t);
+    }
+  });
+
+  if (!atrasadas.length && !proximas.length) {
+    banner.style.display = 'none';
+    return;
+  }
+
+  let html = '';
+  if (atrasadas.length) {
+    const lista = atrasadas.map(({tpl,dia}) =>
+      `<div style="margin-top:3px">• <strong>${esc(tpl.desc || tpl.cat)}</strong> — venceu dia <strong>${dia}</strong> (${fmt(tpl.valor)})</div>`
+    ).join('');
+    html += `<div style="color:#b71c1c"><strong>⚠️ ${atrasadas.length} despesa${atrasadas.length>1?'s':''} fixa${atrasadas.length>1?'s':''} atrasada${atrasadas.length>1?'s':''} em ${MONTHS[mes-1]}</strong>${lista}</div>`;
+  }
+  if (proximas.length) {
+    if (atrasadas.length) html += '<div style="height:6px"></div>';
+    const lista = proximas.map(({tpl,dia,faltam}) => {
+      const quando = faltam === 0 ? 'hoje' : (faltam === 1 ? 'amanhã' : `em ${faltam} dias`);
+      return `<div style="margin-top:3px">• <strong>${esc(tpl.desc || tpl.cat)}</strong> — vence ${quando} (dia ${dia}, ${fmt(tpl.valor)})</div>`;
+    }).join('');
+    html += `<div>⏰ <strong>${proximas.length} vencimento${proximas.length>1?'s':''} próximo${proximas.length>1?'s':''}</strong>${lista}</div>`;
+  }
+  html += `<div style="margin-top:8px"><a href="#" onclick="event.preventDefault();showTab('config',document.querySelector('.tab-btn:nth-child(6)'));return false" style="color:#5d4037;text-decoration:underline;font-weight:600">Ir para Despesas Fixas →</a></div>`;
+  banner.innerHTML = html;
+  banner.style.display = 'block';
+}
+
+function importarBackup(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  if (!confirmar('Isso vai substituir todos os dados atuais pelo backup. Continuar?')) { event.target.value = ''; return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      // Formato v3 (multi-ano)
+      if (data.anos && typeof data.anos === 'object') {
+        Object.keys(data.anos).forEach(y => {
+          const yr = parseInt(y);
+          if (isNaN(yr)) return;
+          _ensureYear(yr);
+          const a = data.anos[y];
+          if (a.receitas)   { _cache[yr].rec  = a.receitas;   localStorage.setItem('rl_rec_'+yr,  JSON.stringify(a.receitas));   _pushToFirestore('rec_'+yr,  a.receitas); }
+          if (a.despesas)   { _cache[yr].desp = a.despesas;   localStorage.setItem('rl_desp_'+yr, JSON.stringify(a.despesas));   _pushToFirestore('desp_'+yr, a.despesas); }
+          if (a.calendario) { _cache[yr].cal  = a.calendario; localStorage.setItem('rl_cal_'+yr,  JSON.stringify(a.calendario)); _pushToFirestore('cal_'+yr,  a.calendario); }
+        });
+        if (data.anoCorrente && !isNaN(parseInt(data.anoCorrente))) YEAR = parseInt(data.anoCorrente);
+      }
+      // Formato v2 (ano único, fallback)
+      else {
+        if (data.receitas)   save('rec',  data.receitas);
+        if (data.despesas)   save('desp', data.despesas);
+        if (data.calendario) saveCal(data.calendario);
+      }
+      // Globais
+      if (data.config)    saveConfig(data.config);
+      if (data.hospedes)  saveHospedes(data.hospedes);
+      if (data.despFixas) saveDespFixas(data.despFixas);
+      // Se não veio cadastro de hóspedes mas vieram reservas, reconstrói
+      if (!data.hospedes) rebuildHospedes();
+
+      toast(`✅ Backup restaurado! (${data.data || ''})`, 3000);
+      rerenderAll();
+    } catch (err) { console.error(err); toast('❌ Arquivo inválido.'); }
+    event.target.value = '';
+  };
+  reader.readAsText(file);
+}
+
+// ── INIT
+_loadCacheFromLocal(); // primeiro renderiza com cache local (instantâneo)
+setPago('Pago');
+renderDashboard();
+renderReceitas();
+renderDespesas();
+renderCalendario();
+renderConfig();
+renderHospedes();
+renderDespFixas();
+ajustarTabBarTop(); // posiciona a tab-bar corretamente
+renderLembreteBackup(); // banner de backup se faz tempo
+renderBannerDespFixas(); // banner de despesas fixas pendentes/vencidas
+
+function copyUid() {
+  const uid = document.getElementById('userUid').textContent;
+  if (navigator.clipboard) navigator.clipboard.writeText(uid);
+  toast('📋 UID copiado!');
+}
+
+async function doLogout() {
+  if (!confirmar('Deseja sair da conta?')) return;
+  try { await window._fb.signOut(window._fb.auth); location.reload(); }
+  catch(e) { console.error(e); toast('❌ Erro ao sair'); }
+}
+
+function _showLogin() {
+  document.getElementById('loginOverlay').style.display = 'flex';
+}
+function _hideLogin() {
+  document.getElementById('loginOverlay').style.display = 'none';
+}
+function _showUserBar(email, uid) {
+  const bar = document.getElementById('userBar');
+  bar.style.display = 'flex';
+  document.getElementById('userEmail').textContent = email || '';
+  document.getElementById('userUid').textContent = uid || '';
+  ajustarTabBarTop();
+}
+
+// Calcula a altura real do header + userBar e ajusta o top sticky da tab-bar
+function ajustarTabBarTop() {
+  // No-op: a partir da v3.8, o sticky é do wrapper .topo-fixo,
+  // então não precisa mais calcular altura dinamicamente.
+  // Mantida por compatibilidade com chamadas existentes.
+}
+
+window.addEventListener('resize', ajustarTabBarTop);
+
+// Conecta no Firestore + Auth e configura sincronização em tempo real
+async function _initFirebase() {
+  setSyncStatus('connecting');
+  try {
+    const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js');
+    const { getFirestore, doc, setDoc, getDoc, deleteDoc, onSnapshot, collection, getDocs, enableIndexedDbPersistence }
+      = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js');
+    const { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut, browserLocalPersistence, setPersistence }
+      = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js');
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyB6iYW3vdrjQJ5v4745db1WNvToNPgWnu8",
+      authDomain: "rota-latina.firebaseapp.com",
+      projectId: "rota-latina",
+      storageBucket: "rota-latina.firebasestorage.app",
+      messagingSenderId: "918944629567",
+      appId: "1:918944629567:web:2e05905a2ba8d99816898a"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    await setPersistence(auth, browserLocalPersistence); // mantém logado entre sessões
+
+    // Habilita persistência offline (funciona sem internet)
+    try { await enableIndexedDbPersistence(db); } catch(e) { /* já habilitado ou outro tab aberto */ }
+
+    window._fb = { db, doc, setDoc, getDoc, deleteDoc, onSnapshot, collection, getDocs, auth, signOut };
+
+    // Configura botão de login
+    const provider = new GoogleAuthProvider();
+    document.getElementById('btnLoginGoogle').onclick = async () => {
+      try {
+        document.getElementById('loginError').style.display = 'none';
+        await signInWithPopup(auth, provider);
+      } catch (err) {
+        console.error('Erro login:', err);
+        const errEl = document.getElementById('loginError');
+        errEl.style.display = 'block';
+        errEl.textContent = '❌ ' + (err.code === 'auth/popup-closed-by-user' ? 'Login cancelado.' : err.message);
+      }
+    };
+
+    // Detecta estado de login
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        _showLogin();
+        setSyncStatus('connecting');
+        document.getElementById('loginMsg').textContent = 'Faça login com sua conta Google para acessar o app.';
+        return;
+      }
+      _hideLogin();
+      _showUserBar(user.email, user.uid);
+      await _afterLogin(db);
+    });
+
+    // Detecta perda/recuperação de conexão
+    window.addEventListener('online',  () => { if (_firestoreReady) setSyncStatus('synced'); });
+    window.addEventListener('offline', () => setSyncStatus('offline'));
+  } catch (err) {
+    console.error('Erro inicializando Firebase:', err);
+    setSyncStatus('error');
+    toast('⚠️ Sem conexão com a nuvem. Dados salvos localmente.', 4000);
+    _showLogin();
+    document.getElementById('loginError').style.display = 'block';
+    document.getElementById('loginError').textContent = '❌ Erro de conexão: ' + err.message;
+  }
+}
+
+async function _afterLogin(db) {
+  setSyncStatus('syncing');
+  const { doc, setDoc, getDoc, onSnapshot, deleteDoc } = window._fb;
+  try {
+    // ── MIGRAÇÃO DE DADOS ANTIGOS ──
+    // Versões anteriores guardavam em app/rec, app/desp, app/cal (sem sufixo de ano).
+    // Migramos para app/rec_2026, app/desp_2026, app/cal_2026 e depois apagamos os antigos.
+    for (const oldKey of ['rec', 'desp', 'cal']) {
+      const oldSnap = await getDoc(doc(db, 'app', oldKey));
+      const newSnap = await getDoc(doc(db, 'app', oldKey + '_2026'));
+      if (oldSnap.exists() && !newSnap.exists()) {
+        const data = oldSnap.data().data;
+        await setDoc(doc(db, 'app', oldKey + '_2026'), { data });
+        await deleteDoc(doc(db, 'app', oldKey));
+        console.log('Migrado app/' + oldKey + ' -> app/' + oldKey + '_2026');
+      } else if (oldSnap.exists() && newSnap.exists()) {
+        // Ambos existem: prioriza o novo (que pode estar mais atual) e remove o velho
+        await deleteDoc(doc(db, 'app', oldKey));
+      }
+    }
+
+    // ── CARREGA TODOS OS DOCUMENTOS DA COLEÇÃO 'app' ──
+    const { collection, getDocs } = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js');
+    const allDocs = await getDocs(collection(db, 'app'));
+    const yearsSeen = new Set();
+    allDocs.forEach(s => {
+      const id = s.id;
+      const data = s.data().data;
+      const m = id.match(/^(rec|desp|cal)_(\d{4})$/);
+      if (m) {
+        const [_, kind, y] = m;
+        const yr = parseInt(y);
+        yearsSeen.add(yr);
+        _ensureYear(yr);
+        _cache[yr][kind] = data;
+        localStorage.setItem('rl_' + kind + '_' + yr, JSON.stringify(data));
+      } else if (id === 'config') {
+        _cache.config = data;
+        localStorage.setItem('rl_config', JSON.stringify(data));
+      } else if (id === 'hospedes') {
+        _cache.hospedes = data;
+        localStorage.setItem('rl_hospedes', JSON.stringify(data));
+      } else if (id === 'despFixas') {
+        _cache.despFixas = data;
+        localStorage.setItem('rl_despFixas', JSON.stringify(data));
+      }
+    });
+
+    // Se nada existe no Firestore mas existe local pro ano corrente, faz upload (primeiro uso)
+    const cur = _ensureYear(YEAR);
+    if (!yearsSeen.has(YEAR)) {
+      for (const k of ['rec', 'desp', 'cal']) {
+        const localData = cur[k];
+        const isEmpty = Array.isArray(localData) ? localData.length === 0 : Object.keys(localData).length === 0;
+        if (!isEmpty) await setDoc(doc(db, 'app', k + '_' + YEAR), { data: localData });
+      }
+    }
+
+    _firestoreReady = true;
+    setSyncStatus('synced');
+    rerenderAll();
+
+    // Listener em tempo real: atualiza cache quando outro dispositivo escreve
+    onSnapshot(collection(db, 'app'), (snap) => {
+      let changed = false;
+      snap.docChanges().forEach(ch => {
+        if (ch.type === 'removed') return;
+        if (ch.doc.metadata.hasPendingWrites) return;
+        const id = ch.doc.id;
+        const data = ch.doc.data().data;
+        const m = id.match(/^(rec|desp|cal)_(\d{4})$/);
+        if (m) {
+          const yr = parseInt(m[2]);
+          _ensureYear(yr);
+          // Só rerenderiza se o dado mudou de verdade (evita eco do próprio device)
+          const atual = JSON.stringify(_cache[yr][m[1]] || (m[1]==='cal'?{}:[]));
+          const novo = JSON.stringify(data);
+          if (atual !== novo) {
+            _cache[yr][m[1]] = data;
+            localStorage.setItem('rl_' + m[1] + '_' + yr, JSON.stringify(data));
+            changed = true;
+          }
+        } else if (id === 'config') {
+          if (JSON.stringify(_cache.config) !== JSON.stringify(data)) {
+            _cache.config = data; localStorage.setItem('rl_config', JSON.stringify(data)); changed = true;
+          }
+        } else if (id === 'hospedes') {
+          if (JSON.stringify(_cache.hospedes) !== JSON.stringify(data)) {
+            _cache.hospedes = data; localStorage.setItem('rl_hospedes', JSON.stringify(data)); changed = true;
+          }
+        } else if (id === 'despFixas') {
+          if (JSON.stringify(_cache.despFixas) !== JSON.stringify(data)) {
+            _cache.despFixas = data; localStorage.setItem('rl_despFixas', JSON.stringify(data)); changed = true;
+          }
+        }
+      });
+      if (changed) rerenderAll();
+    });
+  } catch (err) {
+    console.error('Erro sincronizando após login:', err);
+    setSyncStatus('error');
+    toast('⚠️ Erro ao sincronizar: ' + err.message, 5000);
+  }
+}
+
+function rerenderAll() {
+  renderDashboard(); renderReceitas(); renderDespesas(); renderCalendario(); renderConfig();
+  renderHospedes();
+  renderDespFixas();
+  updateYearLabel();
+}
+
+function updateYearLabel() {
+  const el = document.getElementById('year-label');
+  if (el) el.textContent = YEAR;
+}
+
+function changeYear(delta) {
+  const novo = YEAR + delta;
+  if (novo < 2026) { toast('⚠️ Ano mínimo: 2026'); return; }
+  if (novo > 2099) return;
+  YEAR = novo;
+  _ensureYear(YEAR);
+  rerenderAll();
+  toast('📅 Ano alterado para ' + YEAR);
+}
+
+// ── NAVEGAÇÃO DE MÊS (card "Este Mês")
+function setMes(m) {
+  if (!m || m < 1 || m > 12) return;
+  MES_SEL = m;
+  // Sincroniza filtros das listas para o mês selecionado
+  const fr = document.getElementById('filtro-rec-mes');
+  const fd = document.getElementById('filtro-desp-mes');
+  if (fr) fr.value = String(m);
+  if (fd) fd.value = String(m);
+  renderDashboard();
+  renderReceitas();
+  renderDespesas();
+}
+
+function mudarMes(delta) {
+  let m = MES_SEL + delta;
+  let y = YEAR;
+  if (m < 1) {
+    // Volta um ano
+    if (y - 1 < 2026) { toast('⚠️ Ano mínimo: 2026'); return; }
+    y -= 1; m = 12;
+    YEAR = y; _ensureYear(YEAR);
+    MES_SEL = m;
+    rerenderAll();
+    toast('📅 ' + MONTHS[m-1] + '/' + y);
+    return;
+  }
+  if (m > 12) {
+    if (y + 1 > 2099) return;
+    y += 1; m = 1;
+    YEAR = y; _ensureYear(YEAR);
+    MES_SEL = m;
+    rerenderAll();
+    toast('📅 ' + MONTHS[m-1] + '/' + y);
+    return;
+  }
+  setMes(m);
+}
+
+function irParaMesAtual() {
+  const hoje = new Date();
+  const anoAtual = hoje.getFullYear();
+  const mesAtual = hoje.getMonth() + 1;
+  if (YEAR !== anoAtual && anoAtual >= 2026 && anoAtual <= 2099) {
+    YEAR = anoAtual;
+    _ensureYear(YEAR);
+    MES_SEL = mesAtual;
+    rerenderAll();
+  } else {
+    setMes(mesAtual);
+  }
+  toast('📌 ' + MONTHS[mesAtual-1] + '/' + anoAtual);
+}
+
+_initFirebase();
+</script>
+</body>
+</html>
