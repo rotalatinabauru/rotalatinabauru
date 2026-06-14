@@ -1243,6 +1243,23 @@ function formatPhoneDisplay(d) {
   return d;
 }
 
+// Monta o link wa.me a partir de um telefone (só dígitos). Adiciona 55 (Brasil) se faltar.
+function whatsappLink(tel) {
+  const d = normalizePhone(tel);
+  if (!d || d.length < 10) return '';
+  // Se já vier com 55 na frente (12-13 dígitos), usa direto; senão prefixa 55
+  const full = (d.length >= 12 && d.startsWith('55')) ? d : ('55' + d);
+  return 'https://wa.me/' + full;
+}
+
+// Retorna um ícone clicável de WhatsApp (ou string vazia se não houver telefone)
+function whatsappBtn(tel, nome) {
+  const link = whatsappLink(tel);
+  if (!link) return '';
+  const titulo = nome ? ('Conversar com ' + esc(nome) + ' no WhatsApp') : 'Abrir no WhatsApp';
+  return ` <a href="${link}" target="_blank" rel="noopener" title="${titulo}" style="text-decoration:none;cursor:pointer" onclick="event.stopPropagation()">💬</a>`;
+}
+
 // Reconstrói o CRM a partir das reservas existentes (útil após importar backup antigo)
 function rebuildHospedes() {
   const hosp = {};
@@ -1448,7 +1465,7 @@ function renderHospedes() {
       <div class="hospede-row1">
         <div>
           <div class="hospede-nome">👤 ${esc(h.nome)}</div>
-          <div class="hospede-tel">📱 ${tel}</div>
+          <div class="hospede-tel">📱 ${tel}${whatsappBtn(h.telefone, h.nome)}</div>
         </div>
         ${isRec ? '<span class="hospede-recorrente-tag">🌟 RECORRENTE</span>' : ''}
       </div>
@@ -2395,7 +2412,7 @@ function renderReceitas() {
       <tr class="${venc ? 'row-vencida' : ''}" title="${venc ? 'Pagamento pendente >30 dias após checkout' : ''}">
         <td>${r.data.split('-').reverse().join('/')}</td>
         <td>${r.checkout ? r.checkout.split('-').reverse().join('/') : '-'}</td>
-        <td class="td-left">${esc(r.hospede)}</td>
+        <td class="td-left">${esc(r.hospede)}${whatsappBtn(r.telefone, r.hospede)}</td>
         <td><span class="badge badge-${r.plat.toLowerCase()}">${r.plat}</span></td>
         <td>${r.dias || 1}</td>
         <td>${r.pessoas || 1}</td>
@@ -2532,7 +2549,7 @@ function renderProximos() {
     return `<div style="padding:7px 0;border-bottom:1px solid rgba(0,0,0,0.06)">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
         <div>
-          <span style="color:${cor};font-weight:600">${icone}</span> · <strong>${esc(r.hospede)}</strong>
+          <span style="color:${cor};font-weight:600">${icone}</span> · <strong>${esc(r.hospede)}</strong>${whatsappBtn(r.telefone, r.hospede)}
           <span style="color:#888"> · ${esc(r.plat||'')}</span>${pessoasStr}
         </div>
         <div style="font-size:0.78rem">${prefix} <span style="color:#888">(${dataFmt})</span></div>
@@ -3086,7 +3103,7 @@ function exportarBackup() {
     };
   });
   const data = {
-    versao: '3.9',
+    versao: '3.10',
     data: new Date().toLocaleDateString('pt-BR'),
     timestamp: new Date().toISOString(),
     anoCorrente: YEAR,
