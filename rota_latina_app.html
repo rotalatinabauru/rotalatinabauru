@@ -266,6 +266,40 @@ tr:last-child td{border-bottom:none}
   table.rtable td.td-orange{background:white!important;color:var(--terra-d)}
   table.rtable td.td-navy{background:white!important;color:var(--navy)}
 }
+
+/* Navegação inferior (mobile) + micro-interações */
+.tab-ico{margin-right:6px}
+.tab-content.active{animation:fadeIn .25s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.btn{transition:all .15s}
+.btn:hover{filter:brightness(1.06)}
+.print-btn{background:var(--navy);color:var(--gold);border:none;padding:5px 12px;border-radius:8px;font-family:'Outfit',sans-serif;font-size:0.72rem;font-weight:600;cursor:pointer;transition:background .15s}
+.print-btn:hover{background:var(--navy2)}
+#insight-body strong{color:var(--navy)}
+@media(max-width:640px){
+  .tab-bar{position:fixed;left:0;right:0;bottom:0;top:auto;z-index:150;justify-content:space-around;background:var(--navy);border-top:1px solid rgba(255,255,255,0.12);border-bottom:none;box-shadow:0 -4px 18px rgba(0,0,0,0.28);overflow:visible}
+  .tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 2px 7px;border-bottom:none;border-top:3px solid transparent;font-size:0.58rem}
+  .tab-btn .tab-ico{margin-right:0;font-size:1.3rem;line-height:1}
+  .tab-btn.active{border-top-color:var(--gold);background:rgba(212,168,83,0.10)}
+  body{padding-bottom:70px}
+  .toast{bottom:84px}
+}
+
+/* Impressão / PDF */
+.print-only{display:none}
+@media print{
+  .print-only{display:block!important}
+  .topo-fixo,.tab-bar,#userBar,.print-btn,.mes-nav-btn,.mes-hoje-btn,.backup-btns,.filters,.filters-clear,#card-proximos{display:none!important}
+  body{background:white!important;padding:0!important}
+  .tab-content{display:none!important}
+  #tab-dashboard{display:block!important;padding:0}
+  .card,.kpi-card{box-shadow:none!important;border:1px solid #ccc!important;break-inside:avoid}
+  .card-header{color:#111!important;background:#eee!important;border-bottom:1px solid #ccc}
+  .kpi-value{color:#111!important}
+  table{font-size:9pt}
+  th{background:#333!important}
+  @page{margin:14mm}
+}
 </style>
 </head>
 <body>
@@ -318,20 +352,31 @@ tr:last-child td{border-bottom:none}
 
 <!-- TAB BAR -->
 <div class="tab-bar">
-  <button class="tab-btn active" onclick="showTab('dashboard',this)">📊 Dashboard</button>
-  <button class="tab-btn" onclick="showTab('calendario',this)">📅 Calendário</button>
-  <button class="tab-btn" onclick="showTab('receitas',this)">💰 Receitas</button>
-  <button class="tab-btn" onclick="showTab('despesas',this)">💸 Despesas</button>
-  <button class="tab-btn" onclick="showTab('hospedes',this)">👥 Hóspedes</button>
-  <button class="tab-btn" onclick="showTab('config',this)">⚙️ Config</button>
+  <button class="tab-btn active" onclick="showTab('dashboard',this)"><span class="tab-ico">📊</span><span class="tab-txt">Dashboard</span></button>
+  <button class="tab-btn" onclick="showTab('calendario',this)"><span class="tab-ico">📅</span><span class="tab-txt">Calendário</span></button>
+  <button class="tab-btn" onclick="showTab('receitas',this)"><span class="tab-ico">💰</span><span class="tab-txt">Receitas</span></button>
+  <button class="tab-btn" onclick="showTab('despesas',this)"><span class="tab-ico">💸</span><span class="tab-txt">Despesas</span></button>
+  <button class="tab-btn" onclick="showTab('hospedes',this)"><span class="tab-ico">👥</span><span class="tab-txt">Hóspedes</span></button>
+  <button class="tab-btn" onclick="showTab('config',this)"><span class="tab-ico">⚙️</span><span class="tab-txt">Config</span></button>
 </div>
 </div><!-- /topo-fixo -->
 
 <!-- ═══════════ DASHBOARD ═══════════ -->
 <div id="tab-dashboard" class="tab-content active">
+  <div class="print-only" style="text-align:center;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid var(--navy)">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:700;color:var(--navy)">Rota Latina</div>
+    <div style="color:#555;font-size:0.9rem">Relatório Financeiro · Apto 608 — Bauru/SP · <span id="print-year"></span></div>
+  </div>
   <div id="banner-backup" style="display:none;background:#fff8e1;border:1px solid #ffd54f;border-left:4px solid var(--gold);border-radius:9px;padding:10px 13px;margin-bottom:12px;font-size:0.82rem;color:#5d4037"></div>
   <div id="banner-df-pendentes" style="display:none;background:#fff8e1;border:1px solid #ffd54f;border-left:4px solid var(--gold);border-radius:9px;padding:10px 13px;margin-bottom:12px;font-size:0.82rem;color:#5d4037"></div>
   <div id="banner-taxas" style="display:none;background:#fff3e0;border:1px solid #ffcc80;border-left:4px solid var(--terra);border-radius:9px;padding:10px 13px;margin-bottom:12px;font-size:0.82rem;color:#8a4b2a"></div>
+  <div class="card" id="card-insight" style="display:none">
+    <div class="card-header bg-gold" style="background:var(--gold);color:var(--navy);justify-content:space-between">
+      <span>✨ Destaques</span>
+      <button class="print-btn" onclick="window.print()" title="Imprimir ou salvar em PDF">🖨️ PDF</button>
+    </div>
+    <div class="card-body" id="insight-body" style="font-size:0.86rem;line-height:1.55"></div>
+  </div>
   <div class="alert-vencidos" id="alert-vencidos"></div>
   <div class="card" id="card-proximos" style="display:none">
     <div class="card-header bg-navy">⏰ Próximos 7 dias</div>
@@ -2138,6 +2183,13 @@ function scrollCalendarioParaMes(mes1a12) {
 function openModal(id) { document.getElementById(id).classList.add('open'); document.body.style.overflow = 'hidden'; }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); document.body.style.overflow = ''; }
 function closeModalOutside(e, id) { if (e.target === document.getElementById(id)) closeModal(id); }
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    let closed = false;
+    document.querySelectorAll('.modal-backdrop.open').forEach(m => { m.classList.remove('open'); closed = true; });
+    if (closed) document.body.style.overflow = '';
+  }
+});
 
 // ── TOAST
 function toast(msg, dur=2500) {
@@ -2719,9 +2771,36 @@ try {
   }).observe(document.body, { childList: true, subtree: true });
 } catch (e) {}
 
+function renderInsight(mr, md) {
+  const card = document.getElementById('card-insight');
+  const body = document.getElementById('insight-body');
+  const py = document.getElementById('print-year'); if (py) py.textContent = 'Ano ' + YEAR;
+  if (!card || !body) return;
+  const ops = mr.map((r, i) => ({ lucro: r.tl - md[i].total, tb: r.tb, diasOcup: r.diasOcup, ocupPct: r.ocupPct, i })).filter(r => r.tb > 0 || r.diasOcup > 0);
+  if (ops.length === 0) { card.style.display = 'none'; return; }
+  card.style.display = '';
+  const melhor = ops.reduce((a, b) => b.lucro > a.lucro ? b : a);
+  const pior = ops.reduce((a, b) => b.lucro < a.lucro ? b : a);
+  const ocupMedia = ops.reduce((a, r) => a + r.ocupPct, 0) / ops.length;
+  const totalReceber = mr.reduce((a, r) => a + (r.pendente || 0), 0);
+  const venc = getReservasVencidas();
+  const totalVenc = venc.reduce((a, r) => a + (r.liquido || 0), 0);
+  const items = [];
+  items.push(`🏆 Melhor mês: <strong>${MONTHS[melhor.i]}</strong> — lucro ${fmt(melhor.lucro)} · ${pct(melhor.ocupPct)} de ocupação`);
+  if (ops.length > 1 && pior.i !== melhor.i) items.push(`📉 Mais fraco: <strong>${MONTHS[pior.i]}</strong> — ${pior.lucro >= 0 ? 'lucro' : 'prejuízo'} ${fmt(pior.lucro)}`);
+  items.push(`🛏️ Ocupação média do ano: <strong>${pct(ocupMedia)}</strong>`);
+  if (totalReceber > 0) items.push(`💰 A receber (pendente): <strong>${fmt(totalReceber)}</strong>`);
+  let acao;
+  if (venc.length > 0) acao = `⚠️ <strong>Prioridade:</strong> cobrar ${venc.length} pagamento${venc.length > 1 ? 's' : ''} vencido${venc.length > 1 ? 's' : ''} (${fmt(totalVenc)}).`;
+  else if (ocupMedia < 0.5) acao = `💡 <strong>Oportunidade:</strong> ocupação média em ${pct(ocupMedia)} — vale ajustar preço ou liberar datas nos meses fracos.`;
+  else acao = `✅ <strong>No rumo certo:</strong> ocupação saudável e sem pagamentos vencidos.`;
+  body.innerHTML = items.map(t => `<div style="margin-bottom:5px">${t}</div>`).join('') + `<div style="margin-top:9px;padding-top:9px;border-top:1px solid rgba(0,0,0,0.08)">${acao}</div>`;
+}
+
 function renderDashboard() {
   const dy = document.getElementById('dash-year'); if (dy) dy.textContent = YEAR;
   const mr = monthlyRec(), md = monthlyDesp();
+  renderInsight(mr, md);
 
   // YTD: se for o ano corrente, considera só meses até o mês atual.
   // Senão (ano passado/futuro), considera os 12 meses.
@@ -3217,7 +3296,7 @@ function exportarBackup() {
     };
   });
   const data = {
-    versao: '3.12',
+    versao: '3.13',
     data: new Date().toLocaleDateString('pt-BR'),
     timestamp: new Date().toISOString(),
     anoCorrente: YEAR,
