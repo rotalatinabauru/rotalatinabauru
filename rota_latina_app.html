@@ -300,9 +300,17 @@ tr:last-child td{border-bottom:none}
   th{background:#333!important}
   @page{margin:14mm}
 }
+/* BOTÃO FLUTUANTE (+) para lançar rápido */
+.fab{position:fixed;right:20px;bottom:26px;z-index:160;width:60px;height:60px;border-radius:50%;border:none;color:#fff;font-size:2rem;font-weight:300;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 28px rgba(0,0,0,0.4);transition:transform .18s ease,box-shadow .18s ease;font-family:'Outfit',sans-serif}
+.fab:hover{transform:translateY(-3px) scale(1.05);box-shadow:0 14px 34px rgba(0,0,0,0.5)}
+.fab:active{transform:scale(0.95)}
+.fab-green{background:var(--green)}
+.fab-red{background:var(--red)}
+@media(max-width:640px){ .fab{bottom:86px;right:16px;width:58px;height:58px} }
 </style>
 </head>
 <body>
+<button id="fab" class="fab fab-green" onclick="fabAction()" style="display:none" aria-label="Adicionar lançamento">+</button>
 
 <!-- LOGIN OVERLAY -->
 <div id="loginOverlay" style="display:none;position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#1a2744 0%,#243058 100%);align-items:center;justify-content:center;flex-direction:column;padding:20px;font-family:'Outfit',sans-serif">
@@ -2141,6 +2149,20 @@ function renderConfig() {
 }
 
 // ── TABS
+let FAB_TAB = 'dashboard';
+function updateFab(id) {
+  FAB_TAB = id;
+  const fab = document.getElementById('fab');
+  if (!fab) return;
+  if (id === 'receitas') { fab.style.display = 'flex'; fab.className = 'fab fab-green'; fab.setAttribute('title','Nova Hospedagem'); }
+  else if (id === 'despesas') { fab.style.display = 'flex'; fab.className = 'fab fab-red'; fab.setAttribute('title','Nova Despesa'); }
+  else { fab.style.display = 'none'; }
+}
+function fabAction() {
+  if (FAB_TAB === 'receitas') openModal('modal-rec');
+  else if (FAB_TAB === 'despesas') openModal('modal-desp');
+}
+
 function showTab(id, btn) {
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -2152,6 +2174,7 @@ function showTab(id, btn) {
   if (id === 'calendario') { renderCalendario(); scrollCalendarioParaHoje(); }
   if (id === 'config') { renderConfig(); renderDespFixas(); }
   if (id === 'hospedes') renderHospedes();
+  updateFab(id);
 }
 
 function scrollCalendarioParaHoje() {
@@ -3296,7 +3319,7 @@ function exportarBackup() {
     };
   });
   const data = {
-    versao: '3.13',
+    versao: '3.14',
     data: new Date().toLocaleDateString('pt-BR'),
     timestamp: new Date().toISOString(),
     anoCorrente: YEAR,
