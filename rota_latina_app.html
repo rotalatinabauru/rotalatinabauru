@@ -146,6 +146,12 @@ tr:last-child td{border-bottom:none}
 .badge-particular{background:#e8f5e9;color:#2e7d32}
 .badge-pago{background:#d5f5e3;color:#1e8449;border:1px solid #27ae60}
 .badge-pendente{background:#fdebd0;color:#ca6f1e;border:1px solid #e67e22}
+.badge-click{cursor:pointer;user-select:none}
+.badge-click:active{transform:scale(0.95)}
+
+/* RESUMO RECOLHÍVEL */
+.card-header.clicavel{cursor:pointer;user-select:none}
+.chev-resumo{margin-left:auto;font-size:0.75rem;opacity:0.85}
 
 /* SUMMARY */
 .summary-note{background:var(--green-l);border-left:4px solid var(--green);padding:9px 12px;font-size:0.78rem;color:var(--green);border-radius:0 8px 8px 0;margin-bottom:12px}
@@ -290,6 +296,8 @@ tr:last-child td{border-bottom:none}
 @media print{
   .print-only{display:block!important}
   .topo-fixo,.tab-bar,#userBar,.print-btn,.mes-nav-btn,.mes-hoje-btn,.backup-btns,.filters,.filters-clear,#card-proximos{display:none!important}
+  #resumo-rec-wrap,#resumo-desp-wrap{display:block!important}
+  .chev-resumo{display:none!important}
   body{background:white!important;padding:0!important}
   .tab-content{display:none!important}
   #tab-dashboard{display:block!important;padding:0}
@@ -482,13 +490,15 @@ tr:last-child td{border-bottom:none}
 <!-- ═══════════ RECEITAS ═══════════ -->
 <div id="tab-receitas" class="tab-content">
   <div class="card">
-    <div class="card-header bg-green">📊 Seção 1 — Resumo Mensal (automático)</div>
+    <div class="card-header bg-green clicavel" onclick="toggleResumo('rec')" title="Clique para mostrar/ocultar">📊 Seção 1 — Resumo Mensal (automático)<span class="chev-resumo" id="resumo-rec-chev">▸ mostrar</span></div>
+    <div id="resumo-rec-wrap">
     <div class="card-body" style="padding:10px 14px">
       <div class="summary-note">✅ Atualizado automaticamente. Não preencha nada aqui.</div>
       <div class="table-wrap">
         <table><thead><tr><th>Mês</th><th>Airbnb Bruto</th><th>Airbnb Líq.</th><th>Booking Bruto</th><th>Booking Líq.</th><th>Particular Bruto</th><th>Particular Líq.</th><th>Total Bruto</th><th>Taxas</th><th>Total Líq.</th><th>Reservas</th><th>Hóspedes</th><th>Recebido</th><th>A Receber</th></tr></thead>
         <tbody id="resumo-rec-tbody"></tbody></table>
       </div>
+    </div>
     </div>
   </div>
   <div class="card">
@@ -508,6 +518,11 @@ tr:last-child td{border-bottom:none}
             <option value="">Todas plataformas</option>
             <option>Airbnb</option><option>Booking</option><option>Particular</option>
           </select>
+          <select class="form-control" id="filtro-rec-status" onchange="renderReceitas()">
+            <option value="">Todos status</option>
+            <option value="Pendente">⏳ Pendente</option>
+            <option value="Pago">✅ Pago</option>
+          </select>
           <input type="text" class="form-control filters-search" id="filtro-rec-busca" placeholder="🔍 Buscar por nome do hóspede..." oninput="renderReceitasDebounced()">
         </div>
         <span class="filters-clear" onclick="limparFiltrosRec()">Limpar filtros</span>
@@ -523,13 +538,15 @@ tr:last-child td{border-bottom:none}
 <!-- ═══════════ DESPESAS ═══════════ -->
 <div id="tab-despesas" class="tab-content">
   <div class="card">
-    <div class="card-header bg-red">📊 Seção 1 — Resumo Mensal por Categoria (automático)</div>
+    <div class="card-header bg-red clicavel" onclick="toggleResumo('desp')" title="Clique para mostrar/ocultar">📊 Seção 1 — Resumo Mensal por Categoria (automático)<span class="chev-resumo" id="resumo-desp-chev">▸ mostrar</span></div>
+    <div id="resumo-desp-wrap">
     <div class="card-body" style="padding:10px 14px">
       <div class="summary-note red">✅ Atualizado automaticamente. Não preencha nada aqui.</div>
       <div class="table-wrap">
         <table><thead><tr><th>Mês</th><th>Condomínio</th><th>Energia</th><th>Internet</th><th>Limpeza</th><th>Manutenção</th><th>Móveis</th><th>Taxas</th><th>Marketing</th><th>Material</th><th>Outros</th><th>TOTAL</th></tr></thead>
         <tbody id="resumo-desp-tbody"></tbody></table>
       </div>
+    </div>
     </div>
   </div>
   <div class="card">
@@ -1423,10 +1440,13 @@ function getReservasVencidas() {
 function applyFiltrosRec(recs) {
   const mes = (document.getElementById('filtro-rec-mes') || {value:''}).value;
   const plat = (document.getElementById('filtro-rec-plat') || {value:''}).value;
+  const status = (document.getElementById('filtro-rec-status') || {value:''}).value;
   const busca = ((document.getElementById('filtro-rec-busca') || {value:''}).value || '').toLowerCase().trim();
   return recs.filter(r => {
     if (mes && String(r.mes) !== mes) return false;
     if (plat && r.plat !== plat) return false;
+    if (status === 'Pago' && r.pago !== 'Pago') return false;
+    if (status === 'Pendente' && r.pago === 'Pago') return false;
     if (busca) {
       const hay = (r.hospede || '').toLowerCase() + ' ' + (r.telefone || '');
       if (!hay.includes(busca)) return false;
@@ -1436,7 +1456,7 @@ function applyFiltrosRec(recs) {
 }
 
 function limparFiltrosRec() {
-  ['filtro-rec-mes','filtro-rec-plat','filtro-rec-busca'].forEach(id => { const el=document.getElementById(id); if (el) el.value=''; });
+  ['filtro-rec-mes','filtro-rec-plat','filtro-rec-status','filtro-rec-busca'].forEach(id => { const el=document.getElementById(id); if (el) el.value=''; });
   renderReceitas();
 }
 
@@ -1458,6 +1478,57 @@ function applyFiltrosDesp(desps) {
 function limparFiltrosDesp() {
   ['filtro-desp-mes','filtro-desp-cat','filtro-desp-busca'].forEach(id => { const el=document.getElementById(id); if (el) el.value=''; });
   renderDespesas();
+}
+
+// ── RESUMO MENSAL RECOLHÍVEL (v3.15)
+// Padrão: recolhido (o resumo ocupava muito scroll antes dos lançamentos).
+// Preferência fica salva no aparelho (localStorage, não sincroniza).
+function toggleResumo(kind) {
+  const wrap = document.getElementById('resumo-' + kind + '-wrap');
+  const chev = document.getElementById('resumo-' + kind + '-chev');
+  if (!wrap) return;
+  const estavaAberto = wrap.style.display !== 'none';
+  wrap.style.display = estavaAberto ? 'none' : '';
+  if (chev) chev.textContent = estavaAberto ? '▸ mostrar' : '▾ ocultar';
+  try { localStorage.setItem('rl_ui_resumo_' + kind, estavaAberto ? '0' : '1'); } catch {}
+}
+function initResumoCollapse() {
+  ['rec', 'desp'].forEach(kind => {
+    let aberto = false; // padrão: recolhido
+    try { aberto = localStorage.getItem('rl_ui_resumo_' + kind) === '1'; } catch {}
+    const wrap = document.getElementById('resumo-' + kind + '-wrap');
+    const chev = document.getElementById('resumo-' + kind + '-chev');
+    if (wrap) wrap.style.display = aberto ? '' : 'none';
+    if (chev) chev.textContent = aberto ? '▾ ocultar' : '▸ mostrar';
+  });
+}
+
+// ── TOGGLE RÁPIDO DE PAGAMENTO (v3.15)
+// Clique no badge de status alterna Pago ⇄ Pendente sem abrir a edição.
+function togglePago(id) {
+  const recs = load('rec');
+  const idx = recs.findIndex(r => r.id === id);
+  if (idx === -1) { toast('⚠️ Reserva não encontrada'); return; }
+  const novo = recs[idx].pago === 'Pago' ? 'Pendente' : 'Pago';
+  recs[idx] = { ...recs[idx], pago: novo };
+  save('rec', recs);
+  // Atualiza o status nos dias do calendário desta reserva (pode cruzar anos)
+  Object.keys(_cache).forEach(k => {
+    const yr = parseInt(k);
+    if (isNaN(yr) || !_cache[yr] || !_cache[yr].cal) return;
+    const cal = { ..._cache[yr].cal };
+    let changed = false;
+    Object.keys(cal).forEach(d => {
+      if (cal[d].recId === id) { cal[d] = { ...cal[d], pago: novo }; changed = true; }
+    });
+    if (changed) {
+      _cache[yr].cal = cal;
+      localStorage.setItem('rl_cal_' + yr, JSON.stringify(cal));
+      _pushToFirestore('cal_' + yr, cal);
+    }
+  });
+  renderReceitas(); renderDashboard(); renderCalendario();
+  toast(novo === 'Pago' ? '✅ Marcado como PAGO' : '⏳ Marcado como PENDENTE');
 }
 
 // ── DUPLICAR RESERVA
@@ -2542,7 +2613,7 @@ function renderReceitas() {
         <td class="td-red">${r.taxa > 0 ? fmt(r.taxa) : '-'}</td>
         <td class="td-green">${fmt(r.liquido)}${r.liquidoManual ? ' <span title="Líquido ajustado manualmente" style="cursor:help">🔓</span>' : ''}</td>
         <td>${r.pgto || '-'}</td>
-        <td><span class="badge ${r.pago === 'Pago' ? 'badge-pago' : 'badge-pendente'}">${r.pago === 'Pago' ? '✅ Pago' : '⏳ Pendente'}</span></td>
+        <td><span class="badge badge-click ${r.pago === 'Pago' ? 'badge-pago' : 'badge-pendente'}" onclick="togglePago('${r.id}')" title="Clique para alternar Pago/Pendente">${r.pago === 'Pago' ? '✅ Pago' : '⏳ Pendente'}</span></td>
         <td style="white-space:nowrap">
           <button class="del-btn" onclick="editReceita('${r.id}')" title="Editar">✏️</button>
           <button class="del-btn" onclick="duplicarReceita('${r.id}')" title="Duplicar">📋</button>
@@ -3319,7 +3390,7 @@ function exportarBackup() {
     };
   });
   const data = {
-    versao: '3.14',
+    versao: '3.15',
     data: new Date().toLocaleDateString('pt-BR'),
     timestamp: new Date().toISOString(),
     anoCorrente: YEAR,
@@ -3467,6 +3538,7 @@ function importarBackup(event) {
 
 // ── INIT
 _loadCacheFromLocal(); // primeiro renderiza com cache local (instantâneo)
+initResumoCollapse(); // v3.15: resumo mensal recolhido por padrão
 setPago('Pago');
 renderDashboard();
 renderReceitas();
@@ -3765,6 +3837,7 @@ function irParaMesAtual() {
 }
 
 _initFirebase();
+// v3.15 — resumo mensal recolhível + toggle rápido de pagamento + filtro de status
 </script>
 </body>
 </html>
