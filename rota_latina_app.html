@@ -398,6 +398,10 @@ tr:last-child td{border-bottom:none}
     <div class="card-header bg-navy">⏰ Próximos 7 dias</div>
     <div class="card-body" id="proximos-list" style="font-size:0.85rem"></div>
   </div>
+  <div class="card" id="card-areceber" style="display:none">
+    <div class="card-header bg-terra" style="justify-content:space-between"><span>💰 A Receber</span><span id="areceber-total" style="font-size:0.9rem;font-weight:700"></span></div>
+    <div class="card-body" id="areceber-list" style="font-size:0.85rem"></div>
+  </div>
   <div class="card">
     <div class="card-header bg-gold" style="background:var(--gold);color:var(--navy);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px">
       <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
@@ -490,7 +494,7 @@ tr:last-child td{border-bottom:none}
 <!-- ═══════════ RECEITAS ═══════════ -->
 <div id="tab-receitas" class="tab-content">
   <div class="card">
-    <div class="card-header bg-green clicavel" onclick="toggleResumo('rec')" title="Clique para mostrar/ocultar">📊 Seção 1 — Resumo Mensal (automático)<span class="chev-resumo" id="resumo-rec-chev">▸ mostrar</span></div>
+    <div class="card-header bg-green clicavel" onclick="toggleResumo('rec')" title="Clique para mostrar/ocultar">📊 Seção 1 — Resumo Mensal (automático)<button class="print-btn" onclick="event.stopPropagation();exportarCSV('rec')" title="Exportar planilha (CSV abre no Excel)" style="margin-left:8px">⬇️ CSV</button><span class="chev-resumo" id="resumo-rec-chev">▸ mostrar</span></div>
     <div id="resumo-rec-wrap">
     <div class="card-body" style="padding:10px 14px">
       <div class="summary-note">✅ Atualizado automaticamente. Não preencha nada aqui.</div>
@@ -522,6 +526,7 @@ tr:last-child td{border-bottom:none}
             <option value="">Todos status</option>
             <option value="Pendente">⏳ Pendente</option>
             <option value="Pago">✅ Pago</option>
+            <option value="Cancelada">🚫 Cancelada</option>
           </select>
           <input type="text" class="form-control filters-search" id="filtro-rec-busca" placeholder="🔍 Buscar por nome do hóspede..." oninput="renderReceitasDebounced()">
         </div>
@@ -538,7 +543,7 @@ tr:last-child td{border-bottom:none}
 <!-- ═══════════ DESPESAS ═══════════ -->
 <div id="tab-despesas" class="tab-content">
   <div class="card">
-    <div class="card-header bg-red clicavel" onclick="toggleResumo('desp')" title="Clique para mostrar/ocultar">📊 Seção 1 — Resumo Mensal por Categoria (automático)<span class="chev-resumo" id="resumo-desp-chev">▸ mostrar</span></div>
+    <div class="card-header bg-red clicavel" onclick="toggleResumo('desp')" title="Clique para mostrar/ocultar">📊 Seção 1 — Resumo Mensal por Categoria (automático)<button class="print-btn" onclick="event.stopPropagation();exportarCSV('desp')" title="Exportar planilha (CSV abre no Excel)" style="margin-left:8px">⬇️ CSV</button><span class="chev-resumo" id="resumo-desp-chev">▸ mostrar</span></div>
     <div id="resumo-desp-wrap">
     <div class="card-body" style="padding:10px 14px">
       <div class="summary-note red">✅ Atualizado automaticamente. Não preencha nada aqui.</div>
@@ -1041,6 +1046,12 @@ tr:last-child td{border-bottom:none}
       </div>
     </div>
     <div class="info-box info-blue" id="edit-taxa-preview" style="display:none"></div>
+    <div class="form-group" style="background:rgba(231,76,60,0.06);border:1px solid rgba(231,76,60,0.25);border-radius:9px;padding:10px 12px">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.82rem;color:var(--red);font-weight:600">
+        <input type="checkbox" id="edit-cancelada-toggle" style="width:auto;margin:0">
+        <span>🚫 Reserva cancelada — sai das estatísticas e libera o calendário</span>
+      </label>
+    </div>
     <div class="form-group" style="background:rgba(45,52,86,0.04);border:1px solid rgba(45,52,86,0.1);border-radius:9px;padding:10px 12px">
       <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.82rem;color:var(--navy);font-weight:600">
         <input type="checkbox" id="edit-liq-manual-toggle" onchange="toggleLiquidoManual()" style="width:auto;margin:0">
@@ -1420,6 +1431,7 @@ function diasEntre(d1, d2) {
 
 // Reserva é "vencida" se: pago != Pago E checkout (ou data) < hoje-30 dias
 function isVencida(rec) {
+  if (rec.cancelada) return false; // v3.16: canceladas nunca vencem
   if (rec.pago === 'Pago') return false;
   const ref = rec.checkout || rec.data;
   if (!ref) return false;
@@ -1445,8 +1457,9 @@ function applyFiltrosRec(recs) {
   return recs.filter(r => {
     if (mes && String(r.mes) !== mes) return false;
     if (plat && r.plat !== plat) return false;
-    if (status === 'Pago' && r.pago !== 'Pago') return false;
-    if (status === 'Pendente' && r.pago === 'Pago') return false;
+    if (status === 'Pago' && (r.pago !== 'Pago' || r.cancelada)) return false;
+    if (status === 'Pendente' && (r.pago === 'Pago' || r.cancelada)) return false;
+    if (status === 'Cancelada' && !r.cancelada) return false;
     if (busca) {
       const hay = (r.hospede || '').toLowerCase() + ' ' + (r.telefone || '');
       if (!hay.includes(busca)) return false;
@@ -1503,12 +1516,57 @@ function initResumoCollapse() {
   });
 }
 
+// ── EXPORTAÇÃO CSV (v3.16) — abre direto no Excel (BOM UTF-8 + separador ;)
+function csvTxt(v) {
+  if (v === null || v === undefined) return '';
+  const s = String(v);
+  return (s.includes(';') || s.includes('"') || s.includes('\n')) ? '"' + s.replace(/"/g, '""') + '"' : s;
+}
+function exportarCSV(kind) {
+  const sep = ';';
+  const brNum = v => (typeof v === 'number' ? v.toFixed(2).replace('.', ',') : (v === undefined || v === null ? '' : v));
+  const linhas = [];
+  let nomeArq;
+  if (kind === 'rec') {
+    nomeArq = 'rota-latina-receitas-' + YEAR + '.csv';
+    linhas.push(['Mês','Airbnb Bruto','Airbnb Líquido','Booking Bruto','Booking Líquido','Particular Bruto','Particular Líquido','Total Bruto','Taxas','Total Líquido','Reservas','Hóspedes','Recebido','A Receber','Ocupação %'].join(sep));
+    monthlyRec().forEach(r => {
+      linhas.push([MONTHS[r.m-1], brNum(r.ab), brNum(r.al), brNum(r.bb), brNum(r.bl), brNum(r.pb), brNum(r.pl), brNum(r.tb), brNum(r.tt), brNum(r.tl), r.reservas, r.hospedes, brNum(r.recebido), brNum(r.pendente), (r.ocupPct*100).toFixed(1).replace('.', ',')].join(sep));
+    });
+    linhas.push('');
+    linhas.push(['Entrada','Saída','Hóspede','Telefone','Plataforma','Dias','Pessoas','Bruto','Taxa','Líquido','Forma Pgto','Status','Observações'].join(sep));
+    load('rec').slice().sort((a, b) => (a.data || '').localeCompare(b.data || '')).forEach(r => {
+      linhas.push([r.data || '', r.checkout || '', csvTxt(r.hospede), r.telefone || '', r.plat || '', r.dias || 1, r.pessoas || 1, brNum(r.valor), brNum(r.taxa), brNum(r.liquido), r.pgto || '', r.cancelada ? 'Cancelada' : (r.pago || ''), csvTxt(r.obs)].join(sep));
+    });
+  } else {
+    nomeArq = 'rota-latina-despesas-' + YEAR + '.csv';
+    linhas.push(['Mês'].concat(CATS).concat(['TOTAL']).join(sep));
+    monthlyDesp().forEach(d => {
+      linhas.push([MONTHS[d.m-1]].concat(CATS.map(c => brNum(d.cats[c]))).concat([brNum(d.total)]).join(sep));
+    });
+    linhas.push('');
+    linhas.push(['Data','Descrição','Categoria','Fornecedor','Valor','Forma Pgto','Comprovante','Observações'].join(sep));
+    load('desp').slice().sort((a, b) => (a.data || '').localeCompare(b.data || '')).forEach(d => {
+      linhas.push([d.data || '', csvTxt(d.desc), csvTxt(d.cat), csvTxt(d.forn), brNum(d.valor), d.pgto || '', d.comp || '', csvTxt(d.obs)].join(sep));
+    });
+  }
+  const blob = new Blob(['\uFEFF' + linhas.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = nomeArq;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('📊 Planilha exportada! Abra no Excel.');
+}
+
 // ── TOGGLE RÁPIDO DE PAGAMENTO (v3.15)
 // Clique no badge de status alterna Pago ⇄ Pendente sem abrir a edição.
 function togglePago(id) {
   const recs = load('rec');
   const idx = recs.findIndex(r => r.id === id);
   if (idx === -1) { toast('⚠️ Reserva não encontrada'); return; }
+  if (recs[idx].cancelada) { toast('🚫 Reserva cancelada — reative na edição (✏️) para alterar'); return; }
   const novo = recs[idx].pago === 'Pago' ? 'Pendente' : 'Pago';
   recs[idx] = { ...recs[idx], pago: novo };
   save('rec', recs);
@@ -2566,7 +2624,7 @@ function monthlyRec() {
   const ocup = diasOcupadosPorMes();
   return MONTHS.map((_, i) => {
     const m = i + 1;
-    const rows = recs.filter(r => r.mes === m);
+    const rows = recs.filter(r => r.mes === m && !r.cancelada); // v3.16: canceladas fora dos KPIs
     const ab = rows.filter(r => r.plat === 'Airbnb').reduce((a, r) => a + r.valor, 0);
     const al = rows.filter(r => r.plat === 'Airbnb').reduce((a, r) => a + r.liquido, 0);
     const bb = rows.filter(r => r.plat === 'Booking').reduce((a, r) => a + r.valor, 0);
@@ -2602,7 +2660,7 @@ function renderReceitas() {
     ? recs.map(r => {
       const venc = isVencida(r);
       return `
-      <tr class="${venc ? 'row-vencida' : ''}" title="${venc ? 'Pagamento pendente >30 dias após checkout' : ''}">
+      <tr class="${venc ? 'row-vencida' : ''}" style="${r.cancelada ? 'opacity:0.45' : ''}" title="${venc ? 'Pagamento pendente >30 dias após checkout' : (r.cancelada ? 'Reserva cancelada — fora das estatísticas' : '')}">
         <td>${r.data.split('-').reverse().join('/')}</td>
         <td>${r.checkout ? r.checkout.split('-').reverse().join('/') : '-'}</td>
         <td class="td-left">${esc(r.hospede)}${whatsappBtn(r.telefone, r.hospede)}</td>
@@ -2613,7 +2671,7 @@ function renderReceitas() {
         <td class="td-red">${r.taxa > 0 ? fmt(r.taxa) : '-'}</td>
         <td class="td-green">${fmt(r.liquido)}${r.liquidoManual ? ' <span title="Líquido ajustado manualmente" style="cursor:help">🔓</span>' : ''}</td>
         <td>${r.pgto || '-'}</td>
-        <td><span class="badge badge-click ${r.pago === 'Pago' ? 'badge-pago' : 'badge-pendente'}" onclick="togglePago('${r.id}')" title="Clique para alternar Pago/Pendente">${r.pago === 'Pago' ? '✅ Pago' : '⏳ Pendente'}</span></td>
+        <td>${r.cancelada ? '<span class="badge" style="background:#eeeeee;color:#777;border:1px solid #ccc">🚫 Cancelada</span>' : `<span class="badge badge-click ${r.pago === 'Pago' ? 'badge-pago' : 'badge-pendente'}" onclick="togglePago('${r.id}')" title="Clique para alternar Pago/Pendente">${r.pago === 'Pago' ? '✅ Pago' : '⏳ Pendente'}</span>`}</td>
         <td style="white-space:nowrap">
           <button class="del-btn" onclick="editReceita('${r.id}')" title="Editar">✏️</button>
           <button class="del-btn" onclick="duplicarReceita('${r.id}')" title="Duplicar">📋</button>
@@ -2685,6 +2743,67 @@ function renderDespesas() {
   }).join('') + `<tr><td class="td-navy">📌 TOTAL</td>${CATS.map(c => `<td class="td-navy">${fmt(totC[c])}</td>`).join('')}<td class="td-navy">${fmt(totT)}</td></tr>`;
 }
 
+// ── TEMPLATES WHATSAPP (v3.16)
+function waMsgLink(tel, msg) {
+  const t = normalizePhone(tel);
+  if (!t) return '';
+  const num = t.length <= 11 ? '55' + t : t;
+  return 'https://wa.me/' + num + '?text=' + encodeURIComponent(msg);
+}
+function waBoasVindas(nome) {
+  const n = (nome || '').trim().split(' ')[0] || 'tudo bem';
+  return 'Olá, ' + n + '! 😊 Seja bem-vindo(a) à *Rota Latina*!\n\n' +
+    '🏠 City Residencial, apto 608 — Bauru/SP\n' +
+    '🕒 Check-in: a partir das 15h\n' +
+    '📶 Wi-Fi: Wifi-Rede-Claro-2.4GHz\n' +
+    '🔑 Senha: Rot@lat1na\n\n' +
+    'Qualquer dúvida é só chamar por aqui. Boa estadia!';
+}
+function waCheckout(nome) {
+  const n = (nome || '').trim().split(' ')[0] || 'tudo bem';
+  return 'Olá, ' + n + '! 😊 Passando para lembrar que o check-out é até *12h*.\n\n' +
+    'Esperamos que a estadia tenha sido ótima! Se puder deixar sua avaliação na plataforma, ajuda muito. 🙏\n\n' +
+    'Até a próxima! — Rota Latina';
+}
+
+// ── CARD A RECEBER (v3.16)
+function renderAReceber() {
+  const card = document.getElementById('card-areceber');
+  const cont = document.getElementById('areceber-list');
+  const totEl = document.getElementById('areceber-total');
+  if (!card || !cont) return;
+  const hoje = new Date(); hoje.setHours(0,0,0,0);
+  const pend = [];
+  Object.keys(_cache).forEach(yk => {
+    const yr = parseInt(yk);
+    if (isNaN(yr) || !Array.isArray(_cache[yr].rec)) return;
+    _cache[yr].rec.forEach(r => { if (r.pago !== 'Pago' && !r.cancelada) pend.push({ yr, r }); });
+  });
+  if (!pend.length) { card.style.display = 'none'; return; }
+  card.style.display = '';
+  pend.sort((a, b) => ((a.r.checkout || a.r.data) || '').localeCompare((b.r.checkout || b.r.data) || ''));
+  const total = pend.reduce((a, p) => a + (p.r.liquido || 0), 0);
+  if (totEl) totEl.textContent = fmt(total);
+  cont.innerHTML = pend.map(({ yr, r }) => {
+    const ref = r.checkout || r.data;
+    const refFmt = ref ? ref.split('-').reverse().join('/') : '-';
+    const atraso = ref ? Math.round((hoje - new Date(ref + 'T00:00:00')) / 86400000) : 0;
+    let atrasoStr;
+    if (atraso > 30) atrasoStr = '<span style="color:var(--red);font-weight:700">⚠️ ' + atraso + ' dias após o checkout</span>';
+    else if (atraso > 0) atrasoStr = '<span style="color:var(--terra);font-weight:600">' + atraso + ' dia' + (atraso > 1 ? 's' : '') + ' após o checkout</span>';
+    else atrasoStr = '<span style="color:#888">checkout em ' + refFmt + '</span>';
+    const badge = yr === YEAR
+      ? '<span class="badge badge-click badge-pendente" onclick="togglePago(\'' + r.id + '\')" title="Clique para marcar como Pago">⏳ Pendente</span>'
+      : '<span class="badge badge-pendente" title="Reserva de ' + yr + ' — troque o ano para alterar">⏳ ' + yr + '</span>';
+    return '<div style="padding:8px 0;border-bottom:1px solid rgba(0,0,0,0.06);display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">' +
+      '<div><strong>' + esc(r.hospede) + '</strong>' + whatsappBtn(r.telefone, r.hospede) +
+      ' <span style="color:#888">· ' + esc(r.plat || '') + ' · entrada ' + (r.data ? r.data.split('-').reverse().join('/') : '-') + '</span>' +
+      '<div style="font-size:0.75rem;margin-top:2px">' + atrasoStr + '</div></div>' +
+      '<div style="display:flex;align-items:center;gap:8px"><strong style="color:var(--green)">' + fmt(r.liquido) + '</strong>' + badge + '</div>' +
+      '</div>';
+  }).join('');
+}
+
 // ── RENDER DASHBOARD
 // ── PRÓXIMOS 7 DIAS (chegadas + check-outs)
 function renderProximos() {
@@ -2703,6 +2822,7 @@ function renderProximos() {
     const yr = parseInt(yk);
     if (isNaN(yr) || !Array.isArray(_cache[yr].rec)) return;
     _cache[yr].rec.forEach(r => {
+      if (r.cancelada) return; // v3.16: canceladas fora da agenda
       // Chegada
       if (r.data && r.data >= hojeStr && r.data <= limiteStr) {
         eventos.push({ tipo: 'chegada', data: r.data, rec: r });
@@ -2739,10 +2859,20 @@ function renderProximos() {
     const obsStr = (r.obs && r.obs.trim())
       ? `<div style="font-size:0.74rem;color:#777;margin-top:2px;padding-left:2px">📝 ${esc(r.obs)}</div>`
       : '';
+    // v3.16: botão de mensagem pronta no WhatsApp (boas-vindas / lembrete de check-out)
+    let tplBtn = '';
+    if (r.telefone) {
+      const link = ev.tipo === 'chegada' ? waMsgLink(r.telefone, waBoasVindas(r.hospede)) : waMsgLink(r.telefone, waCheckout(r.hospede));
+      const estilo = ev.tipo === 'chegada'
+        ? 'background:#e8f5e9;border:1px solid #27ae60;color:#1e8449'
+        : 'background:#fdebd0;border:1px solid #e67e22;color:#ca6f1e';
+      const rotulo = ev.tipo === 'chegada' ? '👋 Boas-vindas' : '🧳 Lembrete check-out';
+      tplBtn = ` <a href="${link}" target="_blank" rel="noopener" style="text-decoration:none;font-size:0.72rem;${estilo};border-radius:6px;padding:2px 7px;font-weight:600;white-space:nowrap">${rotulo}</a>`;
+    }
     return `<div style="padding:7px 0;border-bottom:1px solid rgba(0,0,0,0.06)">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
         <div>
-          <span style="color:${cor};font-weight:600">${icone}</span> · <strong>${esc(r.hospede)}</strong>${whatsappBtn(r.telefone, r.hospede)}
+          <span style="color:${cor};font-weight:600">${icone}</span> · <strong>${esc(r.hospede)}</strong>${whatsappBtn(r.telefone, r.hospede)}${tplBtn}
           <span style="color:#888"> · ${esc(r.plat||'')}</span>${pessoasStr}
         </div>
         <div style="font-size:0.78rem">${prefix} <span style="color:#888">(${dataFmt})</span></div>
@@ -2766,7 +2896,7 @@ function renderCompAno(mrAtual, mdAtual) {
   card.style.display = '';
 
   // Calcula totais do ano anterior usando as mesmas fórmulas (sem mexer no YEAR)
-  const recsAnt = _cache[yAnt].rec || [];
+  const recsAnt = (_cache[yAnt].rec || []).filter(r => !r.cancelada); // v3.16
   const despsAnt = _cache[yAnt].desp || [];
   const calAnt = _cache[yAnt].cal || {};
 
@@ -3040,6 +3170,9 @@ function renderDashboard() {
   // ── Próximos 7 dias
   renderProximos();
 
+  // ── A Receber (v3.16)
+  renderAReceber();
+
   // ── Banner de despesas fixas pendentes/atrasadas
   renderBannerDespFixas();
 
@@ -3199,6 +3332,8 @@ function editReceita(id) {
   if (ck) ck.checked = !!rec.liquidoManual;
   if (liqInput) liqInput.value = rec.liquidoManual ? numberToBRLInput(rec.liquido) : '';
   toggleLiquidoManual(); // sincroniza visibilidade do box
+  const ckCanc = document.getElementById('edit-cancelada-toggle');
+  if (ckCanc) ckCanc.checked = !!rec.cancelada;
   editPagoStatus = rec.pago || 'Pendente';
   setEditPago(editPagoStatus);
   updateEditTaxaPreview();
@@ -3220,6 +3355,7 @@ function saveEditReceita() {
   const valor = parseBRL(document.getElementById('edit-r-valor').value);
   const pgto = document.getElementById('edit-pgto').value;
   const obs = document.getElementById('edit-obs').value;
+  const cancelada = !!((document.getElementById('edit-cancelada-toggle') || {}).checked);
 
   // Validações
   if (!data || !hospede || !plat || !valor) { toast('⚠️ Preencha os campos obrigatórios'); return; }
@@ -3238,7 +3374,7 @@ function saveEditReceita() {
       }
     });
   });
-  if (conflitos.length > 0) {
+  if (conflitos.length > 0 && !cancelada) {
     toast('⚠️ Conflito: período já ocupado por outra reserva (' + conflitos[0].split('-').reverse().join('/') + ')');
     return;
   }
@@ -3279,16 +3415,17 @@ function saveEditReceita() {
   recs[idx] = {
     ...recAntiga,
     data, checkout, hospede, telefone, plat, pessoas, valor, taxa, liquido, liquidoManual,
-    pgto, obs, pago: editPagoStatus, dias, mes
+    pgto, obs, pago: editPagoStatus, dias, mes, cancelada
   };
   save('rec', recs);
 
   // Recria calendário desta reserva (limpa o anterior + preenche o novo)
+  // v3.16: reserva cancelada libera os dias do calendário
   clearCalendar(id);
-  fillCalendar(recs[idx]);
+  if (!cancelada) fillCalendar(recs[idx]);
 
-  // Registra hóspede novo (cria ou incrementa)
-  registrarHospede(recs[idx]);
+  // Registra hóspede novo (cria ou incrementa) — canceladas ficam fora do CRM
+  if (!cancelada) registrarHospede(recs[idx]);
 
   closeModal('modal-edit-rec');
   toast('✅ Reserva atualizada!');
@@ -3390,7 +3527,7 @@ function exportarBackup() {
     };
   });
   const data = {
-    versao: '3.15',
+    versao: '3.16',
     data: new Date().toLocaleDateString('pt-BR'),
     timestamp: new Date().toISOString(),
     anoCorrente: YEAR,
@@ -3838,6 +3975,7 @@ function irParaMesAtual() {
 
 _initFirebase();
 // v3.15 — resumo mensal recolhível + toggle rápido de pagamento + filtro de status
+// v3.16 — card A Receber + status Cancelada + templates WhatsApp + exportação CSV
 </script>
 </body>
 </html>
