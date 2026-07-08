@@ -629,6 +629,25 @@ tr:last-child td{border-bottom:none}
   </div>
 
   <div class="card">
+    <div class="card-header bg-navy">💬 Mensagens de WhatsApp</div>
+    <div class="card-body">
+      <div class="info-box info-blue">
+        💡 Textos dos botões <strong>👋 Boas-vindas</strong> e <strong>🧳 Lembrete check-out</strong> (card "Próximos 7 dias"). Escreva <strong>{nome}</strong> onde quiser inserir o primeiro nome do hóspede. As mensagens sincronizam entre seus aparelhos.
+      </div>
+      <div class="form-group">
+        <label class="form-label">👋 Boas-vindas (chegada)</label>
+        <textarea class="form-control" id="cfg-wa-bv" rows="8" style="resize:vertical;font-family:inherit;font-size:0.85rem;line-height:1.45"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">🧳 Lembrete de check-out (saída)</label>
+        <textarea class="form-control" id="cfg-wa-co" rows="6" style="resize:vertical;font-family:inherit;font-size:0.85rem;line-height:1.45"></textarea>
+      </div>
+      <button class="btn btn-green btn-full" onclick="salvarMensagensWA()">✅ Salvar Mensagens</button>
+      <button class="btn btn-full btn-cancel" onclick="restaurarMensagensWA()">↩️ Restaurar padrão</button>
+    </div>
+  </div>
+
+  <div class="card">
     <div class="card-header bg-red">💸 Despesas Fixas</div>
     <div class="card-body">
       <div class="info-box info-blue">
@@ -2249,7 +2268,8 @@ function salvarConfig() {
   const airbnb = parseFloat(document.getElementById('cfg-taxa-airbnb').value || 15);
   const booking = parseFloat(document.getElementById('cfg-taxa-booking').value || 15);
   const particular = parseFloat(document.getElementById('cfg-taxa-particular').value || 0);
-  saveConfig({ Airbnb: airbnb, Booking: booking, Particular: particular });
+  // v3.17: mescla com a config existente para não apagar as mensagens de WhatsApp
+  saveConfig({ ...loadConfig(), Airbnb: airbnb, Booking: booking, Particular: particular });
   renderConfig();
   toast('✅ Taxas salvas!');
 }
@@ -2260,6 +2280,8 @@ function renderConfig() {
   const cfg = loadConfig();
 
   // Preenche os campos
+  const taBV = document.getElementById('cfg-wa-bv'); if (taBV) taBV.value = cfg.waMsgBoasVindas || WA_TPL_PADRAO.bv;
+  const taCO = document.getElementById('cfg-wa-co'); if (taCO) taCO.value = cfg.waMsgCheckout || WA_TPL_PADRAO.co;
   document.getElementById('cfg-taxa-airbnb').value = getTaxa('Airbnb');
   document.getElementById('cfg-taxa-booking').value = getTaxa('Booking');
   document.getElementById('cfg-taxa-particular').value = getTaxa('Particular');
@@ -2750,20 +2772,47 @@ function waMsgLink(tel, msg) {
   const num = t.length <= 11 ? '55' + t : t;
   return 'https://wa.me/' + num + '?text=' + encodeURIComponent(msg);
 }
-function waBoasVindas(nome) {
-  const n = (nome || '').trim().split(' ')[0] || 'tudo bem';
-  return 'Olá, ' + n + '! 😊 Seja bem-vindo(a) à *Rota Latina*!\n\n' +
+// v3.17: mensagens editáveis em ⚙️ Config (salvas na config, sincronizam via Firestore).
+// {nome} é substituído pelo primeiro nome do hóspede.
+const WA_TPL_PADRAO = {
+  bv: 'Olá, {nome}! 😊 Seja bem-vindo(a) à *Rota Latina*!\n\n' +
     '🏠 City Residencial, apto 608 — Bauru/SP\n' +
     '🕒 Check-in: a partir das 15h\n' +
     '📶 Wi-Fi: Wifi-Rede-Claro-2.4GHz\n' +
     '🔑 Senha: Rot@lat1na\n\n' +
-    'Qualquer dúvida é só chamar por aqui. Boa estadia!';
+    'Qualquer dúvida é só chamar por aqui. Boa estadia!',
+  co: 'Olá, {nome}! 😊 Passando para lembrar que o check-out é até *12h*.\n\n' +
+    'Esperamos que a estadia tenha sido ótima! Se puder deixar sua avaliação na plataforma, ajuda muito. 🙏\n\n' +
+    'Até a próxima! — Rota Latina'
+};
+function waAplicarTpl(tpl, nome) {
+  const n = (nome || '').trim().split(' ')[0] || 'tudo bem';
+  return String(tpl || '').split('{nome}').join(n);
+}
+function waBoasVindas(nome) {
+  return waAplicarTpl(loadConfig().waMsgBoasVindas || WA_TPL_PADRAO.bv, nome);
 }
 function waCheckout(nome) {
-  const n = (nome || '').trim().split(' ')[0] || 'tudo bem';
-  return 'Olá, ' + n + '! 😊 Passando para lembrar que o check-out é até *12h*.\n\n' +
-    'Esperamos que a estadia tenha sido ótima! Se puder deixar sua avaliação na plataforma, ajuda muito. 🙏\n\n' +
-    'Até a próxima! — Rota Latina';
+  return waAplicarTpl(loadConfig().waMsgCheckout || WA_TPL_PADRAO.co, nome);
+}
+function salvarMensagensWA() {
+  const bv = ((document.getElementById('cfg-wa-bv') || {value:''}).value || '').trim();
+  const co = ((document.getElementById('cfg-wa-co') || {value:''}).value || '').trim();
+  if (!bv || !co) { toast('⚠️ As mensagens não podem ficar vazias'); return; }
+  saveConfig({ ...loadConfig(), waMsgBoasVindas: bv, waMsgCheckout: co });
+  renderConfig();
+  renderDashboard(); // atualiza os links dos botões no card Próximos 7 dias
+  toast('✅ Mensagens salvas!');
+}
+function restaurarMensagensWA() {
+  if (!confirmar('Restaurar as mensagens padrão?\n\nSuas edições serão perdidas.')) return;
+  const cfg = { ...loadConfig() };
+  delete cfg.waMsgBoasVindas;
+  delete cfg.waMsgCheckout;
+  saveConfig(cfg);
+  renderConfig();
+  renderDashboard();
+  toast('↩️ Mensagens padrão restauradas');
 }
 
 // ── CARD A RECEBER (v3.16)
@@ -3527,7 +3576,7 @@ function exportarBackup() {
     };
   });
   const data = {
-    versao: '3.16',
+    versao: '3.17',
     data: new Date().toLocaleDateString('pt-BR'),
     timestamp: new Date().toISOString(),
     anoCorrente: YEAR,
@@ -3976,6 +4025,7 @@ function irParaMesAtual() {
 _initFirebase();
 // v3.15 — resumo mensal recolhível + toggle rápido de pagamento + filtro de status
 // v3.16 — card A Receber + status Cancelada + templates WhatsApp + exportação CSV
+// v3.17 — mensagens de WhatsApp editáveis em Config (com {nome} e padrão restaurável)
 </script>
 </body>
 </html>
