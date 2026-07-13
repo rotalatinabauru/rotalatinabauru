@@ -295,8 +295,8 @@ tr:last-child td{border-bottom:none}
 .print-only{display:none}
 @media print{
   .print-only{display:block!important}
-  .topo-fixo,.tab-bar,#userBar,.print-btn,.mes-nav-btn,.mes-hoje-btn,.backup-btns,.filters,.filters-clear,#card-proximos{display:none!important}
-  #resumo-rec-wrap,#resumo-desp-wrap{display:block!important}
+  .topo-fixo,.tab-bar,#userBar,.print-btn,.mes-nav-btn,.mes-hoje-btn,.backup-btns,.filters,.filters-clear,#card-proximos,.analise-toggle{display:none!important}
+  #resumo-rec-wrap,#resumo-desp-wrap,#analise-wrap{display:block!important}
   .chev-resumo{display:none!important}
   body{background:white!important;padding:0!important}
   .tab-content{display:none!important}
@@ -315,6 +315,15 @@ tr:last-child td{border-bottom:none}
 .fab-green{background:var(--green)}
 .fab-red{background:var(--red)}
 @media(max-width:640px){ .fab{bottom:86px;right:16px;width:58px;height:58px} }
+
+/* v3.18: barra "Análise detalhada" (recolhível) */
+.analise-toggle{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--navy);color:#fff;border-radius:var(--radius);padding:13px 16px;margin:16px 0 12px;cursor:pointer;user-select:none;box-shadow:var(--shadow-sm);transition:background .15s}
+.analise-toggle:hover{background:var(--navy2)}
+.analise-toggle:active{transform:scale(0.995)}
+.analise-tit{font-weight:600;font-size:0.92rem;letter-spacing:0.02em}
+.analise-sub{font-size:0.72rem;color:rgba(255,255,255,0.55);font-weight:400}
+.analise-toggle .chev-resumo{margin-left:auto;color:var(--gold);font-size:0.78rem;font-weight:600;opacity:1}
+@media(max-width:640px){ .analise-sub{width:100%;order:3;margin-top:-2px} .analise-toggle .chev-resumo{order:2} }
 </style>
 </head>
 <body>
@@ -431,6 +440,13 @@ tr:last-child td{border-bottom:none}
       </div>
     </div>
   </div>
+  <!-- v3.18: bloco de análise detalhada (resumo anual + tabelas + gráficos) — recolhido por padrão no celular -->
+  <div class="analise-toggle" id="analise-toggle" onclick="toggleAnalise()">
+    <span class="analise-tit">🔎 Análise detalhada</span>
+    <span class="analise-sub">resumo anual · tabelas · gráficos</span>
+    <span class="chev-resumo" id="analise-chev">▸ mostrar</span>
+  </div>
+  <div id="analise-wrap">
   <div style="display:flex;align-items:center;gap:8px;margin:14px 0 6px;flex-wrap:wrap">
     <div style="font-size:0.78rem;font-weight:600;color:var(--silver);text-transform:uppercase;letter-spacing:0.04em">📊 Resumo Anual</div>
     <span id="ytd-badge" style="display:none;background:var(--gold);color:var(--navy);font-size:0.62rem;font-weight:700;padding:3px 8px;border-radius:4px;letter-spacing:0.03em">YTD</span>
@@ -466,6 +482,7 @@ tr:last-child td{border-bottom:none}
   </div>
   <div class="card"><div class="card-header bg-terra">📊 Receitas por Plataforma</div><div class="card-body" id="chart-plat"></div></div>
   <div class="card"><div class="card-header bg-red">📊 Despesas por Categoria</div><div class="card-body" id="chart-desp"></div></div>
+  </div><!-- /analise-wrap -->
 </div>
 
 <!-- ═══════════ CALENDÁRIO ═══════════ -->
@@ -632,11 +649,15 @@ tr:last-child td{border-bottom:none}
     <div class="card-header bg-navy">💬 Mensagens de WhatsApp</div>
     <div class="card-body">
       <div class="info-box info-blue">
-        💡 Textos dos botões <strong>👋 Boas-vindas</strong> e <strong>🧳 Lembrete check-out</strong> (card "Próximos 7 dias"). Escreva <strong>{nome}</strong> onde quiser inserir o primeiro nome do hóspede. As mensagens sincronizam entre seus aparelhos.
+        💡 Textos dos botões <strong>👋 Boas-vindas</strong>, <strong>🏠 Durante a estadia</strong> e <strong>🧳 Lembrete check-out</strong> (card "Próximos 7 dias"). Escreva <strong>{nome}</strong> onde quiser inserir o primeiro nome do hóspede. As mensagens sincronizam entre seus aparelhos.
       </div>
       <div class="form-group">
         <label class="form-label">👋 Boas-vindas (chegada)</label>
-        <textarea class="form-control" id="cfg-wa-bv" rows="8" style="resize:vertical;font-family:inherit;font-size:0.85rem;line-height:1.45"></textarea>
+        <textarea class="form-control" id="cfg-wa-bv" rows="10" style="resize:vertical;font-family:inherit;font-size:0.85rem;line-height:1.45"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">🏠 Durante a estadia (à disposição + regras)</label>
+        <textarea class="form-control" id="cfg-wa-est" rows="10" style="resize:vertical;font-family:inherit;font-size:0.85rem;line-height:1.45"></textarea>
       </div>
       <div class="form-group">
         <label class="form-label">🧳 Lembrete de check-out (saída)</label>
@@ -1535,6 +1556,30 @@ function initResumoCollapse() {
   });
 }
 
+// ── ANÁLISE DETALHADA recolhível (v3.18)
+// Padrão: recolhido no celular (≤640px), aberto no desktop. Preferência salva no aparelho.
+function _analiseSet(aberto) {
+  const wrap = document.getElementById('analise-wrap');
+  const chev = document.getElementById('analise-chev');
+  if (wrap) wrap.style.display = aberto ? '' : 'none';
+  if (chev) chev.textContent = aberto ? '▾ ocultar' : '▸ mostrar';
+}
+function toggleAnalise() {
+  const wrap = document.getElementById('analise-wrap');
+  if (!wrap) return;
+  const aberto = wrap.style.display !== 'none';
+  _analiseSet(!aberto);
+  try { localStorage.setItem('rl_ui_analise', aberto ? '0' : '1'); } catch {}
+}
+function initAnaliseCollapse() {
+  let aberto;
+  try {
+    const s = localStorage.getItem('rl_ui_analise');
+    aberto = (s === null) ? (window.innerWidth > 640) : (s === '1');
+  } catch { aberto = true; }
+  _analiseSet(aberto);
+}
+
 // ── EXPORTAÇÃO CSV (v3.16) — abre direto no Excel (BOM UTF-8 + separador ;)
 function csvTxt(v) {
   if (v === null || v === undefined) return '';
@@ -2281,6 +2326,7 @@ function renderConfig() {
 
   // Preenche os campos
   const taBV = document.getElementById('cfg-wa-bv'); if (taBV) taBV.value = cfg.waMsgBoasVindas || WA_TPL_PADRAO.bv;
+  const taEST = document.getElementById('cfg-wa-est'); if (taEST) taEST.value = cfg.waMsgEstadia || WA_TPL_PADRAO.estadia;
   const taCO = document.getElementById('cfg-wa-co'); if (taCO) taCO.value = cfg.waMsgCheckout || WA_TPL_PADRAO.co;
   document.getElementById('cfg-taxa-airbnb').value = getTaxa('Airbnb');
   document.getElementById('cfg-taxa-booking').value = getTaxa('Booking');
@@ -2773,14 +2819,30 @@ function waMsgLink(tel, msg) {
   return 'https://wa.me/' + num + '?text=' + encodeURIComponent(msg);
 }
 // v3.17: mensagens editáveis em ⚙️ Config (salvas na config, sincronizam via Firestore).
+// v3.18: 3ª mensagem (durante a estadia) + endereço com link do Google Maps na boas-vindas.
 // {nome} é substituído pelo primeiro nome do hóspede.
+const WA_MAPS_LINK = 'https://www.google.com/maps/search/?api=1&query=Rua+Henrique+Savi+2-63+Bauru+SP+17012205';
 const WA_TPL_PADRAO = {
   bv: 'Olá, {nome}! 😊 Seja bem-vindo(a) à *Rota Latina*!\n\n' +
-    '🏠 City Residencial, apto 608 — Bauru/SP\n' +
+    '📍 *Endereço*\n' +
+    'Condomínio City Residencial\n' +
+    'Rua Henrique Savi, 2-63 — Apto 608 (6º andar)\n' +
+    'Vila Nova Cidade Universitária — Bauru/SP\n' +
+    'CEP 17012-205\n' +
+    '🗺️ Localização no Google Maps:\n' + WA_MAPS_LINK + '\n\n' +
     '🕒 Check-in: a partir das 15h\n' +
     '📶 Wi-Fi: Wifi-Rede-Claro-2.4GHz\n' +
     '🔑 Senha: Rot@lat1na\n\n' +
-    'Qualquer dúvida é só chamar por aqui. Boa estadia!',
+    'Qualquer dúvida é só chamar por aqui. Boa viagem e ótima estadia!',
+  estadia: 'Oi, {nome}! 😊 Tudo certo com a chegada? Espero que já esteja se sentindo em casa.\n\n' +
+    'Passando só para dizer que estamos totalmente à disposição — qualquer coisa que precisar durante a estadia, é só chamar por aqui. 💬\n\n' +
+    'E para que a casa continue sempre aconchegante pra você e pra quem vem depois, deixo uns lembretes com carinho:\n\n' +
+    '🧽 Não cobramos taxa de limpeza — em troca, pedimos só que deixe a louça lavada. 🙏\n' +
+    '🗑️ O lixo pode ser descartado nas lixeiras do 1º andar.\n' +
+    '🛋️ Os móveis ficam onde estão — se precisar reorganizar algo, é só combinar com a gente antes. 😉\n' +
+    '🌙 A partir das 22h, um pouquinho de silêncio para respeitar os vizinhos.\n\n' +
+    'É isso! Aproveite bastante Bauru — estamos aqui para o que precisar. 🧡\n' +
+    '— Rota Latina',
   co: 'Olá, {nome}! 😊 Passando para lembrar que o check-out é até *12h*.\n\n' +
     'Esperamos que a estadia tenha sido ótima! Se puder deixar sua avaliação na plataforma, ajuda muito. 🙏\n\n' +
     'Até a próxima! — Rota Latina'
@@ -2795,11 +2857,15 @@ function waBoasVindas(nome) {
 function waCheckout(nome) {
   return waAplicarTpl(loadConfig().waMsgCheckout || WA_TPL_PADRAO.co, nome);
 }
+function waEstadia(nome) {
+  return waAplicarTpl(loadConfig().waMsgEstadia || WA_TPL_PADRAO.estadia, nome);
+}
 function salvarMensagensWA() {
   const bv = ((document.getElementById('cfg-wa-bv') || {value:''}).value || '').trim();
+  const est = ((document.getElementById('cfg-wa-est') || {value:''}).value || '').trim();
   const co = ((document.getElementById('cfg-wa-co') || {value:''}).value || '').trim();
-  if (!bv || !co) { toast('⚠️ As mensagens não podem ficar vazias'); return; }
-  saveConfig({ ...loadConfig(), waMsgBoasVindas: bv, waMsgCheckout: co });
+  if (!bv || !est || !co) { toast('⚠️ As mensagens não podem ficar vazias'); return; }
+  saveConfig({ ...loadConfig(), waMsgBoasVindas: bv, waMsgEstadia: est, waMsgCheckout: co });
   renderConfig();
   renderDashboard(); // atualiza os links dos botões no card Próximos 7 dias
   toast('✅ Mensagens salvas!');
@@ -2808,6 +2874,7 @@ function restaurarMensagensWA() {
   if (!confirmar('Restaurar as mensagens padrão?\n\nSuas edições serão perdidas.')) return;
   const cfg = { ...loadConfig() };
   delete cfg.waMsgBoasVindas;
+  delete cfg.waMsgEstadia;
   delete cfg.waMsgCheckout;
   saveConfig(cfg);
   renderConfig();
@@ -2908,15 +2975,21 @@ function renderProximos() {
     const obsStr = (r.obs && r.obs.trim())
       ? `<div style="font-size:0.74rem;color:#777;margin-top:2px;padding-left:2px">📝 ${esc(r.obs)}</div>`
       : '';
-    // v3.16: botão de mensagem pronta no WhatsApp (boas-vindas / lembrete de check-out)
+    // v3.16/v3.18: botões de mensagem pronta no WhatsApp
+    // chegada → 👋 Boas-vindas + 🏠 Durante a estadia · saída → 🧳 Lembrete check-out
     let tplBtn = '';
     if (r.telefone) {
-      const link = ev.tipo === 'chegada' ? waMsgLink(r.telefone, waBoasVindas(r.hospede)) : waMsgLink(r.telefone, waCheckout(r.hospede));
-      const estilo = ev.tipo === 'chegada'
-        ? 'background:#e8f5e9;border:1px solid #27ae60;color:#1e8449'
-        : 'background:#fdebd0;border:1px solid #e67e22;color:#ca6f1e';
-      const rotulo = ev.tipo === 'chegada' ? '👋 Boas-vindas' : '🧳 Lembrete check-out';
-      tplBtn = ` <a href="${link}" target="_blank" rel="noopener" style="text-decoration:none;font-size:0.72rem;${estilo};border-radius:6px;padding:2px 7px;font-weight:600;white-space:nowrap">${rotulo}</a>`;
+      const btn = (link, estilo, rotulo) =>
+        ` <a href="${link}" target="_blank" rel="noopener" style="text-decoration:none;font-size:0.72rem;${estilo};border-radius:6px;padding:2px 7px;font-weight:600;white-space:nowrap;display:inline-block;margin-top:2px">${rotulo}</a>`;
+      const cGreen = 'background:#e8f5e9;border:1px solid #27ae60;color:#1e8449';
+      const cBlue  = 'background:#e3f2fd;border:1px solid #1565c0;color:#1565c0';
+      const cTerra = 'background:#fdebd0;border:1px solid #e67e22;color:#ca6f1e';
+      if (ev.tipo === 'chegada') {
+        tplBtn = btn(waMsgLink(r.telefone, waBoasVindas(r.hospede)), cGreen, '👋 Boas-vindas')
+               + btn(waMsgLink(r.telefone, waEstadia(r.hospede)), cBlue, '🏠 Durante a estadia');
+      } else {
+        tplBtn = btn(waMsgLink(r.telefone, waCheckout(r.hospede)), cTerra, '🧳 Lembrete check-out');
+      }
     }
     return `<div style="padding:7px 0;border-bottom:1px solid rgba(0,0,0,0.06)">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
@@ -3576,7 +3649,7 @@ function exportarBackup() {
     };
   });
   const data = {
-    versao: '3.17',
+    versao: '3.18',
     data: new Date().toLocaleDateString('pt-BR'),
     timestamp: new Date().toISOString(),
     anoCorrente: YEAR,
@@ -3725,6 +3798,7 @@ function importarBackup(event) {
 // ── INIT
 _loadCacheFromLocal(); // primeiro renderiza com cache local (instantâneo)
 initResumoCollapse(); // v3.15: resumo mensal recolhido por padrão
+initAnaliseCollapse(); // v3.18: análise detalhada recolhida no celular
 setPago('Pago');
 renderDashboard();
 renderReceitas();
@@ -4026,6 +4100,7 @@ _initFirebase();
 // v3.15 — resumo mensal recolhível + toggle rápido de pagamento + filtro de status
 // v3.16 — card A Receber + status Cancelada + templates WhatsApp + exportação CSV
 // v3.17 — mensagens de WhatsApp editáveis em Config (com {nome} e padrão restaurável)
+// v3.18 — 3ª mensagem (durante a estadia + regras da casa) · endereço + link Google Maps na boas-vindas · dashboard mobile reorganizado (Análise detalhada recolhível)
 </script>
 </body>
 </html>
