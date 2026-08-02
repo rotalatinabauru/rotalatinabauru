@@ -146,12 +146,6 @@ tr:last-child td{border-bottom:none}
 .badge-particular{background:#e8f5e9;color:#2e7d32}
 .badge-pago{background:#d5f5e3;color:#1e8449;border:1px solid #27ae60}
 .badge-pendente{background:#fdebd0;color:#ca6f1e;border:1px solid #e67e22}
-.badge-click{cursor:pointer;user-select:none}
-.badge-click:active{transform:scale(0.95)}
-
-/* RESUMO RECOLHÍVEL */
-.card-header.clicavel{cursor:pointer;user-select:none}
-.chev-resumo{margin-left:auto;font-size:0.75rem;opacity:0.85}
 
 /* SUMMARY */
 .summary-note{background:var(--green-l);border-left:4px solid var(--green);padding:9px 12px;font-size:0.78rem;color:var(--green);border-radius:0 8px 8px 0;margin-bottom:12px}
@@ -295,12 +289,10 @@ tr:last-child td{border-bottom:none}
 .print-only{display:none}
 @media print{
   .print-only{display:block!important}
-  .topo-fixo,.tab-bar,#userBar,.print-btn,.mes-nav-btn,.mes-hoje-btn,.backup-btns,.filters,.filters-clear,#card-proximos,.analise-toggle{display:none!important}
-  #resumo-rec-wrap,#resumo-desp-wrap,#analise-wrap{display:block!important}
-  .chev-resumo{display:none!important}
+  .topo-fixo,.tab-bar,#userBar,.print-btn,.mes-nav-btn,.mes-hoje-btn,.backup-btns,.filters,.filters-clear,#card-proximos{display:none!important}
   body{background:white!important;padding:0!important}
   .tab-content{display:none!important}
-  #tab-dashboard{display:block!important;padding:0}
+  #tab-analises{display:block!important;padding:0}
   .card,.kpi-card{box-shadow:none!important;border:1px solid #ccc!important;break-inside:avoid}
   .card-header{color:#111!important;background:#eee!important;border-bottom:1px solid #ccc}
   .kpi-value{color:#111!important}
@@ -316,14 +308,134 @@ tr:last-child td{border-bottom:none}
 .fab-red{background:var(--red)}
 @media(max-width:640px){ .fab{bottom:86px;right:16px;width:58px;height:58px} }
 
-/* v3.18: barra "Análise detalhada" (recolhível) */
-.analise-toggle{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--navy);color:#fff;border-radius:var(--radius);padding:13px 16px;margin:16px 0 12px;cursor:pointer;user-select:none;box-shadow:var(--shadow-sm);transition:background .15s}
-.analise-toggle:hover{background:var(--navy2)}
-.analise-toggle:active{transform:scale(0.995)}
-.analise-tit{font-weight:600;font-size:0.92rem;letter-spacing:0.02em}
-.analise-sub{font-size:0.72rem;color:rgba(255,255,255,0.55);font-weight:400}
-.analise-toggle .chev-resumo{margin-left:auto;color:var(--gold);font-size:0.78rem;font-weight:600;opacity:1}
-@media(max-width:640px){ .analise-sub{width:100%;order:3;margin-top:-2px} .analise-toggle .chev-resumo{order:2} }
+/* ═══════════ v4 — NOVOS COMPONENTES ═══════════ */
+/* Ícones do cabeçalho */
+.hdr-tools{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.hdr-ico-btn{position:relative;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.22);color:#fff;width:34px;height:32px;border-radius:8px;font-size:0.95rem;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;transition:background .15s}
+.hdr-ico-btn:active{background:rgba(255,255,255,0.2)}
+.hdr-badge{position:absolute;top:-5px;right:-5px;background:var(--red);color:#fff;font-size:0.58rem;font-weight:700;min-width:16px;height:16px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 4px;border:1px solid var(--navy)}
+/* Barra de período (ano + mês) */
+.periodo-bar{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-top:9px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.10)}
+.periodo-bar .mes-nav-btn{background:rgba(255,255,255,0.10);border:1px solid rgba(255,255,255,0.2);color:#fff}
+.periodo-bar .mes-select{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.25);color:#fff;font-weight:600}
+.periodo-bar .mes-select option{color:#1a1a2e}
+.periodo-bar .mes-hoje-btn{background:var(--gold);color:var(--navy);font-weight:700}
+.periodo-tag{font-size:0.68rem;color:rgba(255,255,255,0.55);margin-left:auto}
+/* Sub-abas (dentro de Financeiro) */
+.subtab-bar{display:flex;gap:6px;background:var(--gray);border-radius:10px;padding:4px;margin-bottom:12px}
+.subtab-btn{flex:1;padding:9px 6px;border:none;background:transparent;border-radius:7px;font-family:'Outfit',sans-serif;font-size:0.82rem;font-weight:600;color:var(--silver);cursor:pointer;transition:all .15s}
+.subtab-btn.active{background:white;color:var(--navy);box-shadow:0 1px 4px rgba(0,0,0,0.12)}
+.subtab-panel{display:none}
+.subtab-panel.active{display:block}
+/* Lista compacta expansível (reservas / despesas) */
+.clist{display:flex;flex-direction:column;gap:6px}
+.crow{background:white;border:1px solid var(--gray2);border-left:4px solid var(--gray2);border-radius:10px;overflow:hidden;transition:box-shadow .15s}
+.crow.open{box-shadow:var(--shadow)}
+.crow.pl-airbnb{border-left-color:#ff5a5f}.crow.pl-booking{border-left-color:#003580}.crow.pl-particular{border-left-color:var(--gold)}
+.crow.venc{border-left-color:var(--red);background:#fff6f5}
+.crow-head{display:flex;align-items:center;gap:9px;padding:10px 12px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.crow-date{flex-shrink:0;text-align:center;min-width:38px;line-height:1.05}
+.crow-date b{display:block;font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-weight:700;color:var(--navy)}
+.crow-date span{font-size:0.6rem;color:var(--silver);text-transform:uppercase;letter-spacing:0.04em}
+.crow-main{flex:1;min-width:0}
+.crow-title{font-weight:600;font-size:0.9rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.crow-sub{font-size:0.72rem;color:var(--silver);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.crow-right{flex-shrink:0;text-align:right}
+.crow-val{font-weight:700;font-size:0.9rem;font-variant-numeric:tabular-nums}
+.crow-chev{flex-shrink:0;color:var(--gray2);font-size:0.75rem;transition:transform .2s}
+.crow.open .crow-chev{transform:rotate(90deg)}
+.crow-body{display:none;padding:2px 12px 12px;border-top:1px dashed var(--gray2);margin-top:0}
+.crow.open .crow-body{display:block}
+.crow-kv{display:grid;grid-template-columns:auto 1fr;gap:3px 10px;font-size:0.79rem;margin:9px 0}
+.crow-kv dt{color:var(--silver)}
+.crow-kv dd{font-weight:500;text-align:right}
+.crow-acts{display:flex;gap:6px;flex-wrap:wrap}
+.crow-acts .btn{flex:1;padding:9px 6px;font-size:0.76rem;min-width:74px}
+.pill{display:inline-block;padding:2px 7px;border-radius:20px;font-size:0.65rem;font-weight:700;letter-spacing:0.02em}
+.pill-pago{background:var(--green-l);color:#1e6b40}
+.pill-pend{background:var(--orange-l);color:#a35a00}
+.clist-tot{display:flex;justify-content:space-between;align-items:center;background:var(--navy);color:#fff;border-radius:10px;padding:10px 14px;font-size:0.82rem;margin-top:10px}
+.clist-tot b{font-size:0.95rem;color:var(--gold)}
+/* Busca global */
+.search-wrap{position:fixed;inset:0;z-index:300;background:rgba(15,24,48,0.55);display:none;align-items:flex-start;justify-content:center;padding:0}
+.search-wrap.open{display:flex}
+.search-panel{background:#fff;width:100%;max-width:620px;max-height:100%;display:flex;flex-direction:column}
+.search-top{display:flex;gap:8px;align-items:center;padding:12px 14px;background:var(--navy)}
+.search-top input{flex:1;padding:11px 13px;border:none;border-radius:9px;font-family:'Outfit',sans-serif;font-size:0.95rem}
+.search-top button{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.25);color:#fff;border-radius:9px;padding:10px 13px;cursor:pointer;font-size:0.85rem}
+.search-results{flex:1;overflow-y:auto;padding:10px 14px 30px}
+.search-sec{font-size:0.68rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--silver);font-weight:700;margin:14px 0 6px}
+.search-item{padding:10px 12px;border:1px solid var(--gray2);border-radius:9px;margin-bottom:6px;cursor:pointer}
+.search-item:active{background:var(--gray)}
+.search-item .si-t{font-weight:600;font-size:0.87rem}
+.search-item .si-s{font-size:0.73rem;color:var(--silver);margin-top:2px}
+/* Autocomplete de hóspede */
+.ac-wrap{position:relative}
+.ac-list{position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid var(--gray2);border-radius:0 0 9px 9px;box-shadow:0 8px 22px rgba(0,0,0,0.16);z-index:50;max-height:210px;overflow-y:auto;display:none}
+.ac-list.open{display:block}
+.ac-item{padding:9px 12px;cursor:pointer;font-size:0.85rem;border-bottom:1px solid var(--gray)}
+.ac-item:last-child{border-bottom:none}
+.ac-item:active{background:var(--gray)}
+.ac-item small{display:block;color:var(--silver);font-size:0.72rem;margin-top:1px}
+/* Múltiplos períodos na mesma reserva */
+.per-row{display:grid;grid-template-columns:1fr 1fr auto auto;gap:6px;align-items:center;margin-bottom:7px}
+.per-row .form-control{padding:9px 10px;font-size:0.82rem}
+.per-del{background:var(--red-l);color:var(--red);border:none;border-radius:8px;width:34px;height:36px;font-size:0.85rem;cursor:pointer}
+.per-dias{font-size:0.7rem;color:var(--silver);min-width:42px;text-align:center}
+/* Lembretes */
+.lem-row{display:flex;align-items:flex-start;gap:10px;background:#fff;border:1px solid var(--gray2);border-left:4px solid var(--gold);border-radius:10px;padding:11px 12px;margin-bottom:7px}
+.lem-row.done{opacity:0.5;border-left-color:var(--green)}
+.lem-row.late{border-left-color:var(--red);background:#fff6f5}
+.lem-check{width:23px;height:23px;flex-shrink:0;border:2px solid var(--gray2);border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:0.8rem;background:#fff}
+.lem-row.done .lem-check{background:var(--green);border-color:var(--green);color:#fff}
+.lem-body{flex:1;min-width:0}
+.lem-txt{font-size:0.88rem;font-weight:500;word-break:break-word}
+.lem-row.done .lem-txt{text-decoration:line-through}
+.lem-meta{font-size:0.71rem;color:var(--silver);margin-top:2px}
+.lem-tag{display:inline-block;padding:1px 6px;border-radius:5px;font-size:0.63rem;font-weight:700;margin-right:5px}
+.lem-tag.compra{background:#e8f0fe;color:#1565c0}
+.lem-tag.tarefa{background:#fdebd0;color:#a35a00}
+.lem-tag.reserva{background:var(--green-l);color:#1e6b40}
+.lem-del{background:none;border:none;color:var(--gray2);font-size:0.9rem;cursor:pointer;padding:2px 4px}
+/* Avisos */
+.aviso-vazio{text-align:center;color:var(--silver);font-size:0.85rem;padding:22px 10px}
+/* Faixa de resumo em Hoje */
+.hoje-alerta{display:flex;align-items:center;gap:9px;background:#fff8e1;border:1px solid #ffd54f;border-left:4px solid var(--gold);border-radius:10px;padding:11px 13px;margin-bottom:12px;font-size:0.83rem;color:#5d4037;cursor:pointer}
+.hoje-alerta.zero{background:var(--green-l);border-color:#a5d6a7;border-left-color:var(--green);color:#1e6b40}
+/* Próximos 7 dias — linhas clicáveis */
+.prox-item{padding:9px 4px;border-bottom:1px solid rgba(0,0,0,0.06);cursor:pointer;-webkit-tap-highlight-color:transparent;border-radius:7px}
+.prox-item:active{background:var(--gray)}
+.prox-item:last-child{border-bottom:none}
+/* Dia do calendário — ação */
+.cal-acao{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+
+
+/* ── ajustes finos v4 ── */
+.kpi-value{white-space:nowrap;font-size:1.35rem}
+@media(max-width:430px){
+  .kpi-grid{gap:9px}
+  .kpi-card{padding:12px}
+  .kpi-value{font-size:1.12rem}
+  .kpi-label{font-size:0.66rem}
+  .crow-title{font-size:0.86rem}
+  .crow-val{font-size:0.85rem}
+  .fab{bottom:86px!important}
+  .subtab-btn{font-size:0.76rem;padding:9px 3px}
+  .periodo-bar .mes-select{max-width:104px}
+}
+@media(max-width:640px){ .fab{bottom:86px} }
+.clist-tot{flex-wrap:wrap;gap:4px;line-height:1.35}
+.clist-tot span{font-size:0.76rem}
+.per-row .form-control{min-width:0}
+.modal .ac-wrap{position:relative}
+details#cal-manual summary::-webkit-details-marker{display:none}
+
+@media(max-width:640px){
+  .table-wrap.keep-table{overflow-x:auto!important;-webkit-overflow-scrolling:touch;border:1px solid var(--gray2);border-radius:9px}
+  .table-wrap.keep-table table{min-width:760px;font-size:0.72rem}
+  .table-wrap.keep-table th{position:sticky;top:0}
+}
+@media print{ .subtab-panel{display:block!important} .subtab-bar,.search-wrap{display:none!important} }
 </style>
 </head>
 <body>
@@ -362,73 +474,62 @@ tr:last-child td{border-bottom:none}
       <h1>🏠 Rota Latina</h1>
       <p>Gestão Financeira <span id="syncStatus" style="margin-left:6px;font-size:0.7rem;color:rgba(212,168,83,0.9)">⏳ Conectando…</span></p>
     </div>
-    <div class="backup-btns">
-      <div class="year-switcher">
-        <button class="year-btn" onclick="changeYear(-1)" title="Ano anterior">◀</button>
-        <span class="year-label" id="year-label">2026</span>
-        <button class="year-btn" onclick="changeYear(1)" title="Próximo ano">▶</button>
-      </div>
-      <button class="backup-btn gold" onclick="exportarBackup()">📥 Backup</button>
-      <button class="backup-btn green" onclick="document.getElementById('importFile').click()">📤 Importar</button>
-      <input type="file" id="importFile" accept=".json" style="display:none" onchange="importarBackup(event)">
+    <div class="hdr-tools">
+      <button class="hdr-ico-btn" onclick="abrirBusca()" title="Buscar" aria-label="Buscar">🔍</button>
+      <button class="hdr-ico-btn" onclick="abrirAvisos()" title="Avisos" aria-label="Avisos">🔔<span class="hdr-badge" id="avisos-badge" style="display:none">0</span></button>
+      <button class="hdr-ico-btn" onclick="showTab('config')" title="Configurações" aria-label="Configurações">⚙️</button>
     </div>
+  </div>
+  <div class="periodo-bar">
+    <div class="year-switcher">
+      <button class="year-btn" onclick="changeYear(-1)" title="Ano anterior">◀</button>
+      <span class="year-label" id="year-label">2026</span>
+      <button class="year-btn" onclick="changeYear(1)" title="Próximo ano">▶</button>
+    </div>
+    <button class="mes-nav-btn" onclick="mudarMes(-1)" title="Mês anterior">◀</button>
+    <select id="mes-sel" class="mes-select" onchange="setMes(parseInt(this.value))">
+      <option value="0">Ano todo</option>
+      <option value="1">Janeiro</option><option value="2">Fevereiro</option><option value="3">Março</option>
+      <option value="4">Abril</option><option value="5">Maio</option><option value="6">Junho</option>
+      <option value="7">Julho</option><option value="8">Agosto</option><option value="9">Setembro</option>
+      <option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option>
+    </select>
+    <button class="mes-nav-btn" onclick="mudarMes(1)" title="Próximo mês">▶</button>
+    <button class="mes-hoje-btn" onclick="irParaMesAtual()" title="Ir pro mês atual">📌 Hoje</button>
+    <span class="periodo-tag" id="periodo-tag"></span>
   </div>
 </div>
 
 <!-- TAB BAR -->
 <div class="tab-bar">
-  <button class="tab-btn active" onclick="showTab('dashboard',this)"><span class="tab-ico">📊</span><span class="tab-txt">Dashboard</span></button>
+  <button class="tab-btn active" onclick="showTab('hoje',this)"><span class="tab-ico">🏠</span><span class="tab-txt">Hoje</span></button>
   <button class="tab-btn" onclick="showTab('calendario',this)"><span class="tab-ico">📅</span><span class="tab-txt">Calendário</span></button>
-  <button class="tab-btn" onclick="showTab('receitas',this)"><span class="tab-ico">💰</span><span class="tab-txt">Receitas</span></button>
-  <button class="tab-btn" onclick="showTab('despesas',this)"><span class="tab-ico">💸</span><span class="tab-txt">Despesas</span></button>
+  <button class="tab-btn" onclick="showTab('financeiro',this)"><span class="tab-ico">💰</span><span class="tab-txt">Financeiro</span></button>
+  <button class="tab-btn" onclick="showTab('analises',this)"><span class="tab-ico">📈</span><span class="tab-txt">Análises</span></button>
   <button class="tab-btn" onclick="showTab('hospedes',this)"><span class="tab-ico">👥</span><span class="tab-txt">Hóspedes</span></button>
-  <button class="tab-btn" onclick="showTab('config',this)"><span class="tab-ico">⚙️</span><span class="tab-txt">Config</span></button>
 </div>
 </div><!-- /topo-fixo -->
 
-<!-- ═══════════ DASHBOARD ═══════════ -->
-<div id="tab-dashboard" class="tab-content active">
-  <div class="print-only" style="text-align:center;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid var(--navy)">
-    <div style="font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:700;color:var(--navy)">Rota Latina</div>
-    <div style="color:#555;font-size:0.9rem">Relatório Financeiro · Apto 608 — Bauru/SP · <span id="print-year"></span></div>
+<!-- ═══════════ HOJE ═══════════ -->
+<div id="tab-hoje" class="tab-content active">
+  <div class="hoje-alerta zero" id="hoje-alerta" onclick="abrirAvisos()">
+    <span style="font-size:1.15rem">✅</span><span id="hoje-alerta-txt">Tudo em dia por aqui.</span>
   </div>
-  <div id="banner-backup" style="display:none;background:#fff8e1;border:1px solid #ffd54f;border-left:4px solid var(--gold);border-radius:9px;padding:10px 13px;margin-bottom:12px;font-size:0.82rem;color:#5d4037"></div>
-  <div id="banner-df-pendentes" style="display:none;background:#fff8e1;border:1px solid #ffd54f;border-left:4px solid var(--gold);border-radius:9px;padding:10px 13px;margin-bottom:12px;font-size:0.82rem;color:#5d4037"></div>
-  <div id="banner-taxas" style="display:none;background:#fff3e0;border:1px solid #ffcc80;border-left:4px solid var(--terra);border-radius:9px;padding:10px 13px;margin-bottom:12px;font-size:0.82rem;color:#8a4b2a"></div>
-  <div class="card" id="card-insight" style="display:none">
-    <div class="card-header bg-gold" style="background:var(--gold);color:var(--navy);justify-content:space-between">
-      <span>✨ Destaques</span>
-      <button class="print-btn" onclick="window.print()" title="Imprimir ou salvar em PDF">🖨️ PDF</button>
-    </div>
-    <div class="card-body" id="insight-body" style="font-size:0.86rem;line-height:1.55"></div>
-  </div>
-  <div class="alert-vencidos" id="alert-vencidos"></div>
-  <div class="card" id="card-proximos" style="display:none">
+<div class="card" id="card-proximos" style="display:none">
     <div class="card-header bg-navy">⏰ Próximos 7 dias</div>
     <div class="card-body" id="proximos-list" style="font-size:0.85rem"></div>
   </div>
-  <div class="card" id="card-areceber" style="display:none">
-    <div class="card-header bg-terra" style="justify-content:space-between"><span>💰 A Receber</span><span id="areceber-total" style="font-size:0.9rem;font-weight:700"></span></div>
-    <div class="card-body" id="areceber-list" style="font-size:0.85rem"></div>
+    <div class="card">
+    <div class="card-header bg-gold" style="background:var(--gold);color:var(--navy);justify-content:space-between">
+      <span>📝 Lembretes</span>
+      <button class="print-btn" onclick="showTab('lembretes')">ver todos ›</button>
+    </div>
+    <div class="card-body" id="lembretes-hoje" style="padding:12px 14px"></div>
   </div>
   <div class="card">
-    <div class="card-header bg-gold" style="background:var(--gold);color:var(--navy);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px">
-      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-        <span>📅</span>
-        <button class="mes-nav-btn" onclick="mudarMes(-1)" title="Mês anterior">◀</button>
-        <select id="mes-sel" class="mes-select" onchange="setMes(parseInt(this.value))">
-          <option value="1">Janeiro</option><option value="2">Fevereiro</option><option value="3">Março</option>
-          <option value="4">Abril</option><option value="5">Maio</option><option value="6">Junho</option>
-          <option value="7">Julho</option><option value="8">Agosto</option><option value="9">Setembro</option>
-          <option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option>
-        </select>
-        <span style="font-size:0.85rem">/ <span id="mes-sel-ano">2026</span></span>
-        <button class="mes-nav-btn" onclick="mudarMes(1)" title="Próximo mês">▶</button>
-      </div>
-      <button class="mes-hoje-btn" onclick="irParaMesAtual()" title="Ir pro mês atual">📌 Hoje</button>
-    </div>
+    <div class="card-header bg-navy" id="hoje-mes-titulo">💵 Resumo do mês</div>
     <div class="card-body">
-      <div class="kpi-grid" style="margin-bottom:0">
+<div class="kpi-grid" style="margin-bottom:0">
         <div class="kpi-card green"><div class="kpi-label">💰 Receita</div><div class="kpi-value green" id="mes-receita">R$ 0,00</div><div class="kpi-sub" id="mes-receita-var"></div></div>
         <div class="kpi-card red"><div class="kpi-label">💸 Despesas</div><div class="kpi-value red" id="mes-despesas">R$ 0,00</div></div>
         <div class="kpi-card terra"><div class="kpi-label">✅ Lucro</div><div class="kpi-value terra" id="mes-lucro">R$ 0,00</div></div>
@@ -437,52 +538,9 @@ tr:last-child td{border-bottom:none}
         <div class="kpi-card gold"><div class="kpi-label">📊 Reservas</div><div class="kpi-value gold" id="mes-reservas">0</div></div>
         <div class="kpi-card"><div class="kpi-label">📈 RevPAR</div><div class="kpi-value" id="mes-revpar">R$ 0,00</div><div class="kpi-sub">receita ÷ diária disp.</div></div>
         <div class="kpi-card"><div class="kpi-label">🎟️ Ticket Médio</div><div class="kpi-value" id="mes-ticket">R$ 0,00</div><div class="kpi-sub">por reserva</div></div>
-      </div>
+          </div>
     </div>
   </div>
-  <!-- v3.18: bloco de análise detalhada (resumo anual + tabelas + gráficos) — recolhido por padrão no celular -->
-  <div class="analise-toggle" id="analise-toggle" onclick="toggleAnalise()">
-    <span class="analise-tit">🔎 Análise detalhada</span>
-    <span class="analise-sub">resumo anual · tabelas · gráficos</span>
-    <span class="chev-resumo" id="analise-chev">▸ mostrar</span>
-  </div>
-  <div id="analise-wrap">
-  <div style="display:flex;align-items:center;gap:8px;margin:14px 0 6px;flex-wrap:wrap">
-    <div style="font-size:0.78rem;font-weight:600;color:var(--silver);text-transform:uppercase;letter-spacing:0.04em">📊 Resumo Anual</div>
-    <span id="ytd-badge" style="display:none;background:var(--gold);color:var(--navy);font-size:0.62rem;font-weight:700;padding:3px 8px;border-radius:4px;letter-spacing:0.03em">YTD</span>
-    <span id="ytd-help" style="font-size:0.7rem;color:#888">YTD = ano até o mês atual (parciais)</span>
-  </div>
-  <div class="kpi-grid">
-    <div class="kpi-card green"><div class="kpi-label">💰 Receita Bruta</div><div class="kpi-value green" id="kpi-rec-bruta">R$ 0,00</div></div>
-    <div class="kpi-card red"><div class="kpi-label">💸 Despesas</div><div class="kpi-value red" id="kpi-despesas">R$ 0,00</div></div>
-    <div class="kpi-card terra"><div class="kpi-label">✅ Lucro Líquido</div><div class="kpi-value terra" id="kpi-lucro">R$ 0,00</div></div>
-    <div class="kpi-card gold"><div class="kpi-label">📈 Margem</div><div class="kpi-value gold" id="kpi-margem">0%</div></div>
-    <div class="kpi-card terra"><div class="kpi-label">🛏️ Diária Média</div><div class="kpi-value terra" id="kpi-diaria-media">R$ 0,00</div></div>
-    <div class="kpi-card"><div class="kpi-label">📊 RevPAR</div><div class="kpi-value" id="kpi-revpar">R$ 0,00</div><div class="kpi-sub">receita ÷ diária disponível</div></div>
-    <div class="kpi-card"><div class="kpi-label">🎟️ Ticket Médio</div><div class="kpi-value" id="kpi-ticket">R$ 0,00</div><div class="kpi-sub">por reserva</div></div>
-    <div class="kpi-card"><div class="kpi-label">🔁 Recorrência</div><div class="kpi-value" id="kpi-recorrencia">0%</div><div class="kpi-sub">hóspedes que voltaram</div></div>
-  </div>
-  <div class="card">
-    <div class="card-header bg-navy">📊 Comparativo Mensal <span id="dash-year">2026</span></div>
-    <div class="table-wrap">
-      <table><thead><tr><th>Mês</th><th>Rec. Bruta</th><th>Rec. Líq.</th><th>Despesas</th><th>Lucro</th><th>Margem</th><th>Ocupação</th><th>Reservas</th><th>Hóspedes</th><th>Recebido</th><th>A Receber</th></tr></thead>
-      <tbody id="dash-tbody"></tbody></table>
-    </div>
-  </div>
-  <div class="card">
-    <div class="card-header bg-navy">📊 Receita vs Despesa por Mês</div>
-    <div class="card-body" id="chart-rec-vs-desp"></div>
-  </div>
-  <div class="card" id="card-comp-ano" style="display:none">
-    <div class="card-header bg-terra">📊 Comparativo Ano vs Ano <span id="comp-ano-label" style="font-weight:400;font-size:0.85rem;opacity:0.85"></span></div>
-    <div class="table-wrap">
-      <table><thead><tr><th>Métrica</th><th id="comp-ano-atual">Atual</th><th id="comp-ano-ant">Anterior</th><th>Variação</th></tr></thead>
-      <tbody id="comp-ano-tbody"></tbody></table>
-    </div>
-  </div>
-  <div class="card"><div class="card-header bg-terra">📊 Receitas por Plataforma</div><div class="card-body" id="chart-plat"></div></div>
-  <div class="card"><div class="card-header bg-red">📊 Despesas por Categoria</div><div class="card-body" id="chart-desp"></div></div>
-  </div><!-- /analise-wrap -->
 </div>
 
 <!-- ═══════════ CALENDÁRIO ═══════════ -->
@@ -508,103 +566,268 @@ tr:last-child td{border-bottom:none}
   <div id="cal-container"></div>
 </div>
 
-<!-- ═══════════ RECEITAS ═══════════ -->
-<div id="tab-receitas" class="tab-content">
+<!-- ═══════════ FINANCEIRO ═══════════ -->
+<div id="tab-financeiro" class="tab-content">
+  <div class="subtab-bar">
+    <button class="subtab-btn active" id="sb-receitas" onclick="showSub('receitas',this)">💰 Receitas</button>
+    <button class="subtab-btn" id="sb-despesas" onclick="showSub('despesas',this)">💸 Despesas</button>
+    <button class="subtab-btn" id="sb-fixas" onclick="showSub('fixas',this)">🔁 Fixas</button>
+  </div>
+
+  <div class="subtab-panel active" id="sub-receitas">
+    <button class="btn btn-green btn-full" onclick="abrirNovaReserva()">➕ Nova Hospedagem</button>
+    <div class="filters" style="margin-top:10px">
+      <select class="form-control" id="filtro-rec-plat" onchange="renderReceitas()">
+        <option value="">Todas plataformas</option>
+        <option>Airbnb</option><option>Booking</option><option>Particular</option>
+      </select>
+      <select class="form-control" id="filtro-rec-status" onchange="renderReceitas()">
+        <option value="">Pagos e pendentes</option>
+        <option value="Pendente">⏳ Só pendentes</option>
+        <option value="Pago">✅ Só pagos</option>
+      </select>
+      <input type="text" class="form-control filters-search" id="filtro-rec-busca" placeholder="🔍 Buscar hóspede..." oninput="renderReceitasDebounced()">
+    </div>
+    <span class="filters-clear" onclick="limparFiltrosRec()">Limpar filtros</span>
+    <div id="rec-list" class="clist"></div>
+    <div class="clist-tot" id="rec-total"></div>
+  </div>
+
+  <div class="subtab-panel" id="sub-despesas">
+    <button class="btn btn-red btn-full" onclick="openModal('modal-desp')">➕ Nova Despesa</button>
+    <div class="filters" style="margin-top:10px">
+      <select class="form-control" id="filtro-desp-cat" onchange="renderDespesas()">
+        <option value="">Todas categorias</option>
+        <option>Condomínio</option><option>Energia Elétrica</option><option>Internet</option>
+        <option>Limpeza</option><option>Manutenção</option><option>Móveis</option>
+        <option>Taxas e Impostos</option><option>Marketing</option><option>Material de Reposição</option><option>Outros</option>
+      </select>
+      <input type="text" class="form-control filters-search" id="filtro-desp-busca" placeholder="🔍 Buscar descrição/fornecedor..." oninput="renderDespesasDebounced()">
+    </div>
+    <span class="filters-clear" onclick="limparFiltrosDesp()">Limpar filtros</span>
+    <div id="desp-list" class="clist"></div>
+    <div class="clist-tot" id="desp-total"></div>
+  </div>
+
+  <div class="subtab-panel" id="sub-fixas">
+<div class="card">
+    <div class="card-header bg-red">💸 Despesas Fixas</div>
+    <div class="card-body">
+      <div class="info-box info-blue">
+        💡 Cadastre despesas que se repetem todo mês. Use o botão <strong>Lançar</strong> em cada uma quando o boleto chegar (ajuste o valor se variou). O sistema avisa quando algo está pra vencer ou ficou pendente.
+      </div>
+      <div id="df-list"></div>
+      <div style="background:#f5f5f5;padding:10px 13px;border-radius:9px;margin-top:10px;display:flex;justify-content:space-between;align-items:center;font-size:0.84rem">
+        <span>Total fixo mensal (referência):</span>
+        <strong id="df-total" style="color:var(--red)">R$ 0,00</strong>
+      </div>
+      <button class="btn btn-red btn-full" id="df-lancar-btn" style="margin-top:10px" onclick="lancarTodasPendentes()">📅 Lançar todas as pendentes deste mês</button>
+
+      <div style="font-size:0.78rem;font-weight:600;color:var(--silver);text-transform:uppercase;letter-spacing:0.04em;margin:18px 0 8px">➕ Adicionar nova despesa fixa</div>
+      <div class="tpl-add-form">
+        <select class="form-control full" id="df-cat">
+          <option value="">Categoria *</option>
+          <option>Condomínio</option><option>Energia Elétrica</option><option>Internet</option>
+          <option>Limpeza</option><option>Manutenção</option><option>Móveis</option>
+          <option>Taxas e Impostos</option><option>Marketing</option><option>Material de Reposição</option><option>Outros</option>
+        </select>
+        <input type="text" class="form-control full" id="df-desc" placeholder="Descrição (ex: Condomínio do prédio)">
+        <input type="text" class="form-control" id="df-forn" placeholder="Fornecedor">
+        <select class="form-control" id="df-pgto">
+          <option value="">Forma pgto.</option>
+          <option>PIX</option><option>Dinheiro</option><option>Boleto</option><option>Cartão</option>
+        </select>
+        <input type="tel" inputmode="numeric" class="form-control" id="df-valor" placeholder="R$ 0,00 (referência) *" oninput="formatCurrencyInput(this)">
+        <input type="number" min="1" max="31" class="form-control" id="df-dia" placeholder="Dia venc. (1-31)">
+        <button class="btn btn-red full" onclick="addDespFixa()">➕ Cadastrar</button>
+      </div>
+    </div>
+  </div>
+  </div>
+</div>
+
+<!-- ═══════════ ANÁLISES ═══════════ -->
+<div id="tab-analises" class="tab-content">
+  <div class="subtab-bar">
+    <button class="subtab-btn active" id="sa-resumo" onclick="showSubAn('resumo',this)">📊 Resumo</button>
+    <button class="subtab-btn" id="sa-graficos" onclick="showSubAn('graficos',this)">📈 Gráficos</button>
+    <button class="subtab-btn" id="sa-tabelas" onclick="showSubAn('tabelas',this)">📋 Tabelas</button>
+    <button class="subtab-btn" id="sa-ano" onclick="showSubAn('ano',this)">🆚 Ano a ano</button>
+  </div>
+  <div class="subtab-panel active" id="san-resumo">
+<div class="print-only" style="text-align:center;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid var(--navy)">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:700;color:var(--navy)">Rota Latina</div>
+    <div style="color:#555;font-size:0.9rem">Relatório Financeiro · Apto 608 — Bauru/SP · <span id="print-year"></span></div>
+  </div>
+  <div class="card" id="card-insight" style="display:none">
+    <div class="card-header bg-gold" style="background:var(--gold);color:var(--navy);justify-content:space-between">
+      <span>✨ Destaques</span>
+      <button class="print-btn" onclick="window.print()" title="Imprimir ou salvar em PDF">🖨️ PDF</button>
+    </div>
+    <div class="card-body" id="insight-body" style="font-size:0.86rem;line-height:1.55"></div>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px;margin:14px 0 6px;flex-wrap:wrap">
+    <div style="font-size:0.78rem;font-weight:600;color:var(--silver);text-transform:uppercase;letter-spacing:0.04em">📊 Resumo Anual</div>
+    <span id="ytd-badge" style="display:none;background:var(--gold);color:var(--navy);font-size:0.62rem;font-weight:700;padding:3px 8px;border-radius:4px;letter-spacing:0.03em">YTD</span>
+    <span id="ytd-help" style="font-size:0.7rem;color:#888">YTD = ano até o mês atual (parciais)</span>
+  </div>
+  <div class="kpi-grid">
+    <div class="kpi-card green"><div class="kpi-label">💰 Receita Bruta</div><div class="kpi-value green" id="kpi-rec-bruta">R$ 0,00</div></div>
+    <div class="kpi-card red"><div class="kpi-label">💸 Despesas</div><div class="kpi-value red" id="kpi-despesas">R$ 0,00</div></div>
+    <div class="kpi-card terra"><div class="kpi-label">✅ Lucro Líquido</div><div class="kpi-value terra" id="kpi-lucro">R$ 0,00</div></div>
+    <div class="kpi-card gold"><div class="kpi-label">📈 Margem</div><div class="kpi-value gold" id="kpi-margem">0%</div></div>
+    <div class="kpi-card terra"><div class="kpi-label">🛏️ Diária Média</div><div class="kpi-value terra" id="kpi-diaria-media">R$ 0,00</div></div>
+    <div class="kpi-card"><div class="kpi-label">📊 RevPAR</div><div class="kpi-value" id="kpi-revpar">R$ 0,00</div><div class="kpi-sub">receita ÷ diária disponível</div></div>
+    <div class="kpi-card"><div class="kpi-label">🎟️ Ticket Médio</div><div class="kpi-value" id="kpi-ticket">R$ 0,00</div><div class="kpi-sub">por reserva</div></div>
+    <div class="kpi-card"><div class="kpi-label">🔁 Recorrência</div><div class="kpi-value" id="kpi-recorrencia">0%</div><div class="kpi-sub">hóspedes que voltaram</div></div>
+  </div>
   <div class="card">
-    <div class="card-header bg-green clicavel" onclick="toggleResumo('rec')" title="Clique para mostrar/ocultar">📊 Seção 1 — Resumo Mensal (automático)<button class="print-btn" onclick="event.stopPropagation();exportarCSV('rec')" title="Exportar planilha (CSV abre no Excel)" style="margin-left:8px">⬇️ CSV</button><span class="chev-resumo" id="resumo-rec-chev">▸ mostrar</span></div>
-    <div id="resumo-rec-wrap">
+    <div class="card-header bg-navy">📊 Comparativo Mensal <span id="dash-year">2026</span></div>
+    <div class="table-wrap keep-table">
+      <table><thead><tr><th>Mês</th><th>Rec. Bruta</th><th>Rec. Líq.</th><th>Despesas</th><th>Lucro</th><th>Margem</th><th>Ocupação</th><th>Reservas</th><th>Hóspedes</th><th>Recebido</th><th>A Receber</th></tr></thead>
+      <tbody id="dash-tbody"></tbody></table>
+    </div>
+  </div>
+    </div>
+  <div class="subtab-panel" id="san-graficos">
+<div class="card">
+    <div class="card-header bg-navy">📊 Receita vs Despesa por Mês</div>
+    <div class="card-body" id="chart-rec-vs-desp"></div>
+  </div>
+  <div class="card"><div class="card-header bg-terra">📊 Receitas por Plataforma</div><div class="card-body" id="chart-plat"></div></div>
+  <div class="card"><div class="card-header bg-red">📊 Despesas por Categoria</div><div class="card-body" id="chart-desp"></div></div>
+  </div>
+  <div class="subtab-panel" id="san-tabelas">
+    <div class="info-box info-blue" style="margin-bottom:10px">💡 Tabelas completas do ano. Deslize na horizontal para ver todas as colunas.</div>
+<div class="card">
+    <div class="card-header bg-green">💰 Receitas por mês e plataforma</div>
     <div class="card-body" style="padding:10px 14px">
       <div class="summary-note">✅ Atualizado automaticamente. Não preencha nada aqui.</div>
-      <div class="table-wrap">
+      <div class="table-wrap keep-table">
         <table><thead><tr><th>Mês</th><th>Airbnb Bruto</th><th>Airbnb Líq.</th><th>Booking Bruto</th><th>Booking Líq.</th><th>Particular Bruto</th><th>Particular Líq.</th><th>Total Bruto</th><th>Taxas</th><th>Total Líq.</th><th>Reservas</th><th>Hóspedes</th><th>Recebido</th><th>A Receber</th></tr></thead>
         <tbody id="resumo-rec-tbody"></tbody></table>
       </div>
     </div>
-    </div>
   </div>
   <div class="card">
-    <div class="card-header bg-terra">📝 Seção 2 — Lançamentos Individuais</div>
-    <div class="card-body">
-      <button class="btn btn-green btn-full" onclick="openModal('modal-rec')">➕ Nova Hospedagem</button>
-      <div style="margin-top:10px">
-        <div class="filters">
-          <select class="form-control" id="filtro-rec-mes" onchange="renderReceitas()">
-            <option value="">Todos os meses (entrada)</option>
-            <option value="1">Janeiro</option><option value="2">Fevereiro</option><option value="3">Março</option>
-            <option value="4">Abril</option><option value="5">Maio</option><option value="6">Junho</option>
-            <option value="7">Julho</option><option value="8">Agosto</option><option value="9">Setembro</option>
-            <option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option>
-          </select>
-          <select class="form-control" id="filtro-rec-plat" onchange="renderReceitas()">
-            <option value="">Todas plataformas</option>
-            <option>Airbnb</option><option>Booking</option><option>Particular</option>
-          </select>
-          <select class="form-control" id="filtro-rec-status" onchange="renderReceitas()">
-            <option value="">Todos status</option>
-            <option value="Pendente">⏳ Pendente</option>
-            <option value="Pago">✅ Pago</option>
-            <option value="Cancelada">🚫 Cancelada</option>
-          </select>
-          <input type="text" class="form-control filters-search" id="filtro-rec-busca" placeholder="🔍 Buscar por nome do hóspede..." oninput="renderReceitasDebounced()">
-        </div>
-        <span class="filters-clear" onclick="limparFiltrosRec()">Limpar filtros</span>
-      </div>
-    </div>
-    <div class="table-wrap">
-      <table><thead><tr><th>Entrada ▼</th><th>Saída</th><th>Hóspede</th><th>Plataforma</th><th>Dias</th><th>Pessoas</th><th>Bruto</th><th>Taxa</th><th>Líquido</th><th>Pgto</th><th>Status</th><th></th></tr></thead>
-      <tbody id="rec-tbody"></tbody></table>
-    </div>
-  </div>
-</div>
-
-<!-- ═══════════ DESPESAS ═══════════ -->
-<div id="tab-despesas" class="tab-content">
-  <div class="card">
-    <div class="card-header bg-red clicavel" onclick="toggleResumo('desp')" title="Clique para mostrar/ocultar">📊 Seção 1 — Resumo Mensal por Categoria (automático)<button class="print-btn" onclick="event.stopPropagation();exportarCSV('desp')" title="Exportar planilha (CSV abre no Excel)" style="margin-left:8px">⬇️ CSV</button><span class="chev-resumo" id="resumo-desp-chev">▸ mostrar</span></div>
-    <div id="resumo-desp-wrap">
+    <div class="card-header bg-red">💸 Despesas por mês e categoria</div>
     <div class="card-body" style="padding:10px 14px">
       <div class="summary-note red">✅ Atualizado automaticamente. Não preencha nada aqui.</div>
-      <div class="table-wrap">
+      <div class="table-wrap keep-table">
         <table><thead><tr><th>Mês</th><th>Condomínio</th><th>Energia</th><th>Internet</th><th>Limpeza</th><th>Manutenção</th><th>Móveis</th><th>Taxas</th><th>Marketing</th><th>Material</th><th>Outros</th><th>TOTAL</th></tr></thead>
         <tbody id="resumo-desp-tbody"></tbody></table>
       </div>
     </div>
+  </div>
+    </div>
+  <div class="subtab-panel" id="san-ano">
+<div class="card" id="card-comp-ano" style="display:none">
+    <div class="card-header bg-terra">📊 Comparativo Ano vs Ano <span id="comp-ano-label" style="font-weight:400;font-size:0.85rem;opacity:0.85"></span></div>
+    <div class="table-wrap">
+      <table><thead><tr><th>Métrica</th><th id="comp-ano-atual">Atual</th><th id="comp-ano-ant">Anterior</th><th>Variação</th></tr></thead>
+      <tbody id="comp-ano-tbody"></tbody></table>
+    </div>
+  </div>
+    </div>
+</div>
+
+<!-- ═══════════ HÓSPEDES (CRM) ═══════════ -->
+<div id="tab-hospedes" class="tab-content">
+  <div class="kpi-grid">
+    <div class="kpi-card gold"><div class="kpi-label">👥 Total</div><div class="kpi-value gold" id="hosp-kpi-total">0</div></div>
+    <div class="kpi-card green"><div class="kpi-label">🌟 Recorrentes</div><div class="kpi-value green" id="hosp-kpi-recorrentes">0</div></div>
+    <div class="kpi-card terra"><div class="kpi-label">💰 Receita Total</div><div class="kpi-value terra" id="hosp-kpi-receita">R$ 0,00</div></div>
+    <div class="kpi-card red"><div class="kpi-label">📈 Tx. Recorrência</div><div class="kpi-value red" id="hosp-kpi-tx">0%</div></div>
+  </div>
+  <div class="card">
+    <div class="card-header bg-navy">👥 Cadastro de Hóspedes</div>
+    <div class="card-body">
+      <div class="info-box info-blue">💡 O cadastro é alimentado automaticamente pelas reservas. Hóspedes com 2+ visitas aparecem como recorrentes.</div>
+      <div class="filters" style="margin-bottom:10px">
+        <select class="form-control" id="filtro-hosp-tipo" onchange="renderHospedes()">
+          <option value="">Todos</option>
+          <option value="recorrente">🌟 Apenas recorrentes</option>
+          <option value="primeiravez">🆕 Apenas primeira vez</option>
+        </select>
+        <select class="form-control" id="filtro-hosp-ord" onchange="renderHospedes()">
+          <option value="visitas">Mais visitas</option>
+          <option value="recente">Visita mais recente</option>
+          <option value="gasto">Maior valor gasto</option>
+          <option value="nome">Nome (A-Z)</option>
+        </select>
+        <input type="text" class="form-control filters-search" id="filtro-hosp-busca" placeholder="🔍 Buscar por nome ou telefone..." oninput="renderHospedesDebounced()">
+      </div>
+      <div style="text-align:right;margin-bottom:8px">
+        <button class="btn btn-terra" style="padding:7px 14px;font-size:0.78rem" onclick="rebuildHospedesUI()">🔄 Reconstruir do histórico</button>
+      </div>
+      <div id="hosp-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ LEMBRETES ═══════════ -->
+<div id="tab-lembretes" class="tab-content">
+  <div class="card">
+    <div class="card-header bg-gold" style="background:var(--gold);color:var(--navy)">📝 Novo lembrete</div>
+    <div class="card-body">
+      <div class="form-group">
+        <input type="text" class="form-control" id="lem-txt" placeholder="O que você precisa fazer ou comprar?" onkeydown="if(event.key==='Enter')addLembrete()">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Tipo</label>
+          <select class="form-control" id="lem-tipo">
+            <option value="tarefa">🔧 Tarefa</option>
+            <option value="compra">🛒 Compra</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Data (opcional)</label>
+          <input type="date" class="form-control" id="lem-data">
+        </div>
+      </div>
+      <button class="btn btn-green btn-full" onclick="addLembrete()">➕ Adicionar</button>
     </div>
   </div>
   <div class="card">
-    <div class="card-header bg-terra">📝 Seção 2 — Lançamentos Individuais</div>
+    <div class="card-header bg-navy" style="justify-content:space-between">
+      <span>📋 Meus lembretes</span>
+      <button class="print-btn" onclick="limparLembretesFeitos()">limpar feitos</button>
+    </div>
     <div class="card-body">
-      <button class="btn btn-red btn-full" onclick="openModal('modal-desp')">➕ Nova Despesa</button>
-      <div style="margin-top:10px">
-        <div class="filters">
-          <select class="form-control" id="filtro-desp-mes" onchange="renderDespesas()">
-            <option value="">Todos os meses</option>
-            <option value="1">Janeiro</option><option value="2">Fevereiro</option><option value="3">Março</option>
-            <option value="4">Abril</option><option value="5">Maio</option><option value="6">Junho</option>
-            <option value="7">Julho</option><option value="8">Agosto</option><option value="9">Setembro</option>
-            <option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option>
-          </select>
-          <select class="form-control" id="filtro-desp-cat" onchange="renderDespesas()">
-            <option value="">Todas categorias</option>
-            <option>Condomínio</option><option>Energia Elétrica</option><option>Internet</option>
-            <option>Limpeza</option><option>Manutenção</option><option>Móveis</option>
-            <option>Taxas e Impostos</option><option>Marketing</option><option>Material de Reposição</option><option>Outros</option>
-          </select>
-          <input type="text" class="form-control filters-search" id="filtro-desp-busca" placeholder="🔍 Buscar por descrição/fornecedor..." oninput="renderDespesasDebounced()">
-        </div>
-        <span class="filters-clear" onclick="limparFiltrosDesp()">Limpar filtros</span>
+      <div class="filters" style="margin-bottom:10px">
+        <select class="form-control" id="filtro-lem" onchange="renderLembretes()">
+          <option value="abertos">Em aberto</option>
+          <option value="todos">Todos</option>
+          <option value="feitos">Concluídos</option>
+        </select>
+        <select class="form-control" id="filtro-lem-tipo" onchange="renderLembretes()">
+          <option value="">Todos os tipos</option>
+          <option value="tarefa">🔧 Tarefas</option>
+          <option value="compra">🛒 Compras</option>
+        </select>
       </div>
+      <div id="lem-list"></div>
     </div>
-    <div class="table-wrap">
-      <table><thead><tr><th>Data ▼</th><th>Descrição</th><th>Categoria</th><th>Fornecedor</th><th>Valor</th><th>Pgto</th><th>Comp.</th><th></th></tr></thead>
-      <tbody id="desp-tbody"></tbody></table>
-    </div>
+  </div>
+  <div class="card">
+    <div class="card-header bg-terra">📅 Agenda das reservas</div>
+    <div class="card-body" id="lem-agenda" style="font-size:0.85rem"></div>
   </div>
 </div>
 
 <!-- ═══════════ CONFIGURAÇÕES ═══════════ -->
 <div id="tab-config" class="tab-content">
   <div class="card">
+    <div class="card-header bg-navy">💾 Backup dos dados</div>
+    <div class="card-body">
+      <div class="info-box info-blue">💡 O backup salva <strong>todos os anos</strong>, hóspedes, despesas fixas e lembretes num arquivo .json. Guarde no Drive de vez em quando.</div>
+      <button class="btn btn-gold btn-full" style="background:var(--gold);color:var(--navy)" onclick="exportarBackup()">📥 Baixar backup</button>
+      <button class="btn btn-green btn-full" style="margin-top:8px" onclick="document.getElementById('importFile').click()">📤 Importar backup</button>
+      <input type="file" id="importFile" accept=".json" style="display:none" onchange="importarBackup(event)">
+    </div>
+  </div>
+<div class="card">
     <div class="card-header bg-navy">⚙️ Taxas das Plataformas</div>
     <div class="card-body">
       <div class="info-box info-blue">
@@ -645,95 +868,39 @@ tr:last-child td{border-bottom:none}
     </div>
   </div>
 
-  <div class="card">
-    <div class="card-header bg-navy">💬 Mensagens de WhatsApp</div>
+    <div class="card">
+    <div class="card-header bg-red">👤 Conta</div>
     <div class="card-body">
-      <div class="info-box info-blue">
-        💡 Textos dos botões <strong>👋 Boas-vindas</strong>, <strong>🏠 Durante a estadia</strong> e <strong>🧳 Lembrete check-out</strong> (card "Próximos 7 dias"). Escreva <strong>{nome}</strong> onde quiser inserir o primeiro nome do hóspede. As mensagens sincronizam entre seus aparelhos.
-      </div>
-      <div class="form-group">
-        <label class="form-label">👋 Boas-vindas (chegada)</label>
-        <textarea class="form-control" id="cfg-wa-bv" rows="10" style="resize:vertical;font-family:inherit;font-size:0.85rem;line-height:1.45"></textarea>
-      </div>
-      <div class="form-group">
-        <label class="form-label">🏠 Durante a estadia (à disposição + regras)</label>
-        <textarea class="form-control" id="cfg-wa-est" rows="10" style="resize:vertical;font-family:inherit;font-size:0.85rem;line-height:1.45"></textarea>
-      </div>
-      <div class="form-group">
-        <label class="form-label">🧳 Lembrete de check-out (saída)</label>
-        <textarea class="form-control" id="cfg-wa-co" rows="6" style="resize:vertical;font-family:inherit;font-size:0.85rem;line-height:1.45"></textarea>
-      </div>
-      <button class="btn btn-green btn-full" onclick="salvarMensagensWA()">✅ Salvar Mensagens</button>
-      <button class="btn btn-full btn-cancel" onclick="restaurarMensagensWA()">↩️ Restaurar padrão</button>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-header bg-red">💸 Despesas Fixas</div>
-    <div class="card-body">
-      <div class="info-box info-blue">
-        💡 Cadastre despesas que se repetem todo mês. Use o botão <strong>Lançar</strong> em cada uma quando o boleto chegar (ajuste o valor se variou). O sistema avisa quando algo está pra vencer ou ficou pendente.
-      </div>
-      <div id="df-list"></div>
-      <div style="background:#f5f5f5;padding:10px 13px;border-radius:9px;margin-top:10px;display:flex;justify-content:space-between;align-items:center;font-size:0.84rem">
-        <span>Total fixo mensal (referência):</span>
-        <strong id="df-total" style="color:var(--red)">R$ 0,00</strong>
-      </div>
-      <button class="btn btn-red btn-full" id="df-lancar-btn" style="margin-top:10px" onclick="lancarTodasPendentes()">📅 Lançar todas as pendentes deste mês</button>
-
-      <div style="font-size:0.78rem;font-weight:600;color:var(--silver);text-transform:uppercase;letter-spacing:0.04em;margin:18px 0 8px">➕ Adicionar nova despesa fixa</div>
-      <div class="tpl-add-form">
-        <select class="form-control full" id="df-cat">
-          <option value="">Categoria *</option>
-          <option>Condomínio</option><option>Energia Elétrica</option><option>Internet</option>
-          <option>Limpeza</option><option>Manutenção</option><option>Móveis</option>
-          <option>Taxas e Impostos</option><option>Marketing</option><option>Material de Reposição</option><option>Outros</option>
-        </select>
-        <input type="text" class="form-control full" id="df-desc" placeholder="Descrição (ex: Condomínio do prédio)">
-        <input type="text" class="form-control" id="df-forn" placeholder="Fornecedor">
-        <select class="form-control" id="df-pgto">
-          <option value="">Forma pgto.</option>
-          <option>PIX</option><option>Dinheiro</option><option>Boleto</option><option>Cartão</option>
-        </select>
-        <input type="tel" inputmode="numeric" class="form-control" id="df-valor" placeholder="R$ 0,00 (referência) *" oninput="formatCurrencyInput(this)">
-        <input type="number" min="1" max="31" class="form-control" id="df-dia" placeholder="Dia venc. (1-31)">
-        <button class="btn btn-red full" onclick="addDespFixa()">➕ Cadastrar</button>
-      </div>
+      <div style="font-size:0.85rem;margin-bottom:10px">Conectado como <strong id="cfg-email">—</strong></div>
+      <button class="btn btn-red btn-full" onclick="doLogout()">Sair da conta</button>
     </div>
   </div>
 </div>
 
-<!-- ═══════════ HÓSPEDES (CRM) ═══════════ -->
-<div id="tab-hospedes" class="tab-content">
-  <div class="kpi-grid">
-    <div class="kpi-card gold"><div class="kpi-label">👥 Total</div><div class="kpi-value gold" id="hosp-kpi-total">0</div></div>
-    <div class="kpi-card green"><div class="kpi-label">🌟 Recorrentes</div><div class="kpi-value green" id="hosp-kpi-recorrentes">0</div></div>
-    <div class="kpi-card terra"><div class="kpi-label">💰 Receita Total</div><div class="kpi-value terra" id="hosp-kpi-receita">R$ 0,00</div></div>
-    <div class="kpi-card red"><div class="kpi-label">📈 Tx. Recorrência</div><div class="kpi-value red" id="hosp-kpi-tx">0%</div></div>
-  </div>
-  <div class="card">
-    <div class="card-header bg-navy">👥 Cadastro de Hóspedes</div>
-    <div class="card-body">
-      <div class="info-box info-blue">💡 O cadastro é alimentado automaticamente pelas reservas. Hóspedes com 2+ visitas aparecem como recorrentes.</div>
-      <div class="filters" style="margin-bottom:10px">
-        <select class="form-control" id="filtro-hosp-tipo" onchange="renderHospedes()">
-          <option value="">Todos</option>
-          <option value="recorrente">🌟 Apenas recorrentes</option>
-          <option value="primeiravez">🆕 Apenas primeira vez</option>
-        </select>
-        <select class="form-control" id="filtro-hosp-ord" onchange="renderHospedes()">
-          <option value="visitas">Mais visitas</option>
-          <option value="recente">Visita mais recente</option>
-          <option value="gasto">Maior valor gasto</option>
-          <option value="nome">Nome (A-Z)</option>
-        </select>
-        <input type="text" class="form-control filters-search" id="filtro-hosp-busca" placeholder="🔍 Buscar por nome ou telefone..." oninput="renderHospedesDebounced()">
-      </div>
-      <div style="text-align:right;margin-bottom:8px">
-        <button class="btn btn-terra" style="padding:7px 14px;font-size:0.78rem" onclick="rebuildHospedesUI()">🔄 Reconstruir do histórico</button>
-      </div>
-      <div id="hosp-list"></div>
+<!-- ═══════════ MODAL AVISOS ═══════════ -->
+<div class="modal-backdrop" id="modal-avisos" onclick="closeModalOutside(event,'modal-avisos')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">🔔 Avisos</div>
+    <div id="avisos-body">
+<div id="banner-backup" style="display:none;background:#fff8e1;border:1px solid #ffd54f;border-left:4px solid var(--gold);border-radius:9px;padding:10px 13px;margin-bottom:12px;font-size:0.82rem;color:#5d4037"></div>
+  <div id="banner-df-pendentes" style="display:none;background:#fff8e1;border:1px solid #ffd54f;border-left:4px solid var(--gold);border-radius:9px;padding:10px 13px;margin-bottom:12px;font-size:0.82rem;color:#5d4037"></div>
+  <div id="banner-taxas" style="display:none;background:#fff3e0;border:1px solid #ffcc80;border-left:4px solid var(--terra);border-radius:9px;padding:10px 13px;margin-bottom:12px;font-size:0.82rem;color:#8a4b2a"></div>
+  <div class="alert-vencidos" id="alert-vencidos"></div>
+        <div class="aviso-vazio" id="avisos-vazio">Nada pendente. Tudo em dia! ✅</div>
     </div>
+    <button class="btn btn-navy btn-full" style="margin-top:10px" onclick="closeModal('modal-avisos')">Fechar</button>
+  </div>
+</div>
+
+<!-- ═══════════ BUSCA GLOBAL ═══════════ -->
+<div class="search-wrap" id="search-wrap" onclick="if(event.target===this)fecharBusca()">
+  <div class="search-panel">
+    <div class="search-top">
+      <input type="text" id="search-input" placeholder="Buscar reserva, hóspede, telefone, despesa…" oninput="rodarBuscaDebounced()">
+      <button onclick="fecharBusca()">Fechar</button>
+    </div>
+    <div class="search-results" id="search-results"></div>
   </div>
 </div>
 
@@ -799,26 +966,27 @@ tr:last-child td{border-bottom:none}
     <div class="modal-handle"></div>
     <div class="modal-title">💰 Nova Hospedagem</div>
     <div id="conflito-box" class="info-box info-red" style="display:none"></div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">Data Check-in *</label>
-        <input type="date" class="form-control" id="r-data" onchange="verificarConflito()">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Data Check-out</label>
-        <input type="date" class="form-control" id="r-checkout" onchange="verificarConflito()">
-      </div>
-    </div>
-    <div class="form-group">
+    <div class="form-group ac-wrap">
       <label class="form-label">Nome do Hóspede *</label>
-      <input type="text" class="form-control" id="r-hospede" placeholder="Ex: Maria Silva" oninput="lookupHospede()">
+      <input type="text" class="form-control" id="r-hospede" placeholder="Comece a digitar o nome…" autocomplete="off" oninput="acBuscar()" onfocus="acBuscar()">
+      <div class="ac-list" id="ac-list"></div>
       <div id="hospede-hint" style="display:none;font-size:0.72rem;color:#27ae60;margin-top:5px;padding:6px 10px;background:rgba(39,174,96,0.08);border-radius:6px"></div>
     </div>
     <div class="form-group">
       <label class="form-label">📱 Telefone do Hóspede</label>
-      <input type="tel" class="form-control" id="r-telefone" placeholder="Ex: 14 99999-9999" oninput="formatPhone(this); lookupHospedePorTel()">
-      <small style="color:#888;font-size:0.7rem">Opcional. Ajuda a identificar hóspedes recorrentes mesmo com nomes parecidos.</small>
+      <div style="display:flex;gap:6px">
+        <input type="tel" class="form-control" id="r-telefone" placeholder="Ex: 14 99999-9999" oninput="formatPhone(this); lookupHospedePorTel()">
+        <button class="btn btn-navy" id="btn-contatos" style="flex-shrink:0;padding:0 13px" onclick="pegarDosContatos()" title="Buscar nos contatos do celular">📇</button>
+      </div>
+      <small style="color:#888;font-size:0.7rem">Opcional. Identifica hóspedes recorrentes mesmo com nomes parecidos.</small>
     </div>
+    <div class="form-group">
+      <label class="form-label">Período(s) da hospedagem *</label>
+      <div id="periodos-list"></div>
+      <button class="btn btn-terra btn-full" style="padding:9px;font-size:0.8rem" onclick="addPeriodo()">➕ Adicionar outro período para o mesmo hóspede</button>
+      <small style="color:#888;font-size:0.7rem;display:block;margin-top:5px">Vários períodos = várias reservas criadas de uma vez, todas com os mesmos dados abaixo.</small>
+    </div>
+    <input type="hidden" id="r-data"><input type="hidden" id="r-checkout">
     <div class="form-row">
       <div class="form-group">
         <label class="form-label">Plataforma *</label>
@@ -836,6 +1004,7 @@ tr:last-child td{border-bottom:none}
       <div class="form-group">
         <label class="form-label">Valor Bruto (R$) *</label>
         <input type="tel" inputmode="numeric" class="form-control" id="r-valor" placeholder="R$ 0,00" oninput="formatCurrencyInput(this); updateTaxaPreview()">
+        <small style="color:#888;font-size:0.7rem" id="r-valor-hint">Valor de cada período.</small>
       </div>
       <div class="form-group">
         <label class="form-label">Forma de Pagamento</label>
@@ -1078,20 +1247,15 @@ tr:last-child td{border-bottom:none}
         <input type="tel" inputmode="numeric" class="form-control" id="edit-r-valor" placeholder="R$ 0,00" oninput="formatCurrencyInput(this);updateEditTaxaPreview()">
       </div>
       <div class="form-group">
-        <label class="form-label">Status do Pagamento</label>
-        <div class="pago-toggle" id="edit-pago-toggle">
-          <button id="edit-btn-pago" onclick="setEditPago('Pago')">✅ Pago</button>
-          <button id="edit-btn-pendente" onclick="setEditPago('Pendente')">⏳ Pendente</button>
-        </div>
-      </div>
+      <label class="form-label">Status do Pagamento</label>
+      <select class="form-control" id="edit-r-status">
+        <option value="Pendente">⏳ Pendente — ainda vou receber</option>
+        <option value="Pago">✅ Pago — já recebi</option>
+      </select>
+      <small style="color:#888;font-size:0.7rem">Só muda depois que você salvar. Nada muda com um toque na lista.</small>
+    </div>
     </div>
     <div class="info-box info-blue" id="edit-taxa-preview" style="display:none"></div>
-    <div class="form-group" style="background:rgba(231,76,60,0.06);border:1px solid rgba(231,76,60,0.25);border-radius:9px;padding:10px 12px">
-      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.82rem;color:var(--red);font-weight:600">
-        <input type="checkbox" id="edit-cancelada-toggle" style="width:auto;margin:0">
-        <span>🚫 Reserva cancelada — sai das estatísticas e libera o calendário</span>
-      </label>
-    </div>
     <div class="form-group" style="background:rgba(45,52,86,0.04);border:1px solid rgba(45,52,86,0.1);border-radius:9px;padding:10px 12px">
       <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.82rem;color:var(--navy);font-weight:600">
         <input type="checkbox" id="edit-liq-manual-toggle" onchange="toggleLiquidoManual()" style="width:auto;margin:0">
@@ -1129,7 +1293,9 @@ tr:last-child td{border-bottom:none}
   <div class="modal">
     <div class="modal-handle"></div>
     <div class="modal-title" id="cal-modal-title">📅 Dia</div>
+    <div class="cal-acao" id="cal-acao"></div>
     <div class="info-box info-blue" id="cal-auto-info" style="display:none"></div>
+    <details id="cal-manual"><summary style="font-size:0.79rem;color:var(--silver);cursor:pointer;margin:6px 0 12px">⚙️ Marcar este dia manualmente (bloqueio, reserva sem lançamento…)</summary>
     <div class="form-group">
       <label class="form-label">Status do Dia</label>
       <select class="form-control" id="cal-status">
@@ -1154,7 +1320,8 @@ tr:last-child td{border-bottom:none}
       </div>
     </div>
     <input type="hidden" id="cal-date-key">
-    <button class="btn btn-terra btn-full" onclick="saveCalDay()">✅ Salvar</button>
+    <button class="btn btn-terra btn-full" onclick="saveCalDay()">✅ Salvar marcação manual</button>
+    </details>
     <button class="btn btn-full btn-cancel" onclick="closeModal('modal-cal')">Cancelar</button>
   </div>
 </div>
@@ -1177,7 +1344,7 @@ let pagoStatus = 'Pago'; // default
 //   app/hospedes                               (sem ano, é o "CRM" de hóspedes recorrentes)
 //   app/despFixas                              (sem ano, são templates de despesas recorrentes)
 // Cache em memória: _cache[ano][rec|desp|cal] e _cache.config, _cache.hospedes, _cache.despFixas
-const _cache = { config: {}, hospedes: {}, despFixas: [] };
+const _cache = { config: {}, hospedes: {}, despFixas: [], lembretes: [] };
 let _firestoreReady = false;
 let _pendingWrites = 0;
 
@@ -1201,6 +1368,7 @@ function loadCal() { return _ensureYear(YEAR).cal || {}; }
 function loadConfig() { return _cache.config || {}; }
 function loadHospedes() { return _cache.hospedes || {}; }
 function loadDespFixas() { return _cache.despFixas || []; }
+function loadLembretes() { return _cache.lembretes || []; }
 
 // Versões "any year" para acessar dados de outros anos (ex: histórico de hóspedes recorrentes)
 function loadAny(year, k) { return (_cache[year] && _cache[year][k]) || (Array.isArray((_cache[year]||{})[k]) ? [] : {}); }
@@ -1229,7 +1397,12 @@ function saveDespFixas(d) {
   _cache.despFixas = d;
   localStorage.setItem('rl_despFixas', JSON.stringify(d));
   _pushToFirestore('despFixas', d);
+}function saveLembretes(d) {
+  _cache.lembretes = d;
+  try { localStorage.setItem('rl_lembretes', JSON.stringify(d)); } catch (e) {}
+  _pushToFirestore('lembretes', d);
 }
+
 
 async function _pushToFirestore(key, data) {
   if (!_firestoreReady) return; // será sincronizado depois (cache local já atualizado)
@@ -1252,6 +1425,7 @@ function _loadCacheFromLocal() {
   try { _cache.config    = JSON.parse(localStorage.getItem('rl_config')    || '{}'); } catch { _cache.config = {}; }
   try { _cache.hospedes  = JSON.parse(localStorage.getItem('rl_hospedes')  || '{}'); } catch { _cache.hospedes = {}; }
   try { _cache.despFixas = JSON.parse(localStorage.getItem('rl_despFixas') || '[]'); } catch { _cache.despFixas = []; }
+  try { _cache.lembretes = JSON.parse(localStorage.getItem('rl_lembretes') || '[]'); } catch { _cache.lembretes = []; }
   // Por ano: varre o localStorage atrás de chaves rl_rec_2026, rl_desp_2026, rl_cal_2026 etc.
   for (let i = 0; i < localStorage.length; i++) {
     const k = localStorage.key(i);
@@ -1471,7 +1645,6 @@ function diasEntre(d1, d2) {
 
 // Reserva é "vencida" se: pago != Pago E checkout (ou data) < hoje-30 dias
 function isVencida(rec) {
-  if (rec.cancelada) return false; // v3.16: canceladas nunca vencem
   if (rec.pago === 'Pago') return false;
   const ref = rec.checkout || rec.data;
   if (!ref) return false;
@@ -1492,14 +1665,10 @@ function getReservasVencidas() {
 function applyFiltrosRec(recs) {
   const mes = (document.getElementById('filtro-rec-mes') || {value:''}).value;
   const plat = (document.getElementById('filtro-rec-plat') || {value:''}).value;
-  const status = (document.getElementById('filtro-rec-status') || {value:''}).value;
   const busca = ((document.getElementById('filtro-rec-busca') || {value:''}).value || '').toLowerCase().trim();
   return recs.filter(r => {
     if (mes && String(r.mes) !== mes) return false;
     if (plat && r.plat !== plat) return false;
-    if (status === 'Pago' && (r.pago !== 'Pago' || r.cancelada)) return false;
-    if (status === 'Pendente' && (r.pago === 'Pago' || r.cancelada)) return false;
-    if (status === 'Cancelada' && !r.cancelada) return false;
     if (busca) {
       const hay = (r.hospede || '').toLowerCase() + ' ' + (r.telefone || '');
       if (!hay.includes(busca)) return false;
@@ -1509,7 +1678,7 @@ function applyFiltrosRec(recs) {
 }
 
 function limparFiltrosRec() {
-  ['filtro-rec-mes','filtro-rec-plat','filtro-rec-status','filtro-rec-busca'].forEach(id => { const el=document.getElementById(id); if (el) el.value=''; });
+  ['filtro-rec-mes','filtro-rec-plat','filtro-rec-busca'].forEach(id => { const el=document.getElementById(id); if (el) el.value=''; });
   renderReceitas();
 }
 
@@ -1533,126 +1702,6 @@ function limparFiltrosDesp() {
   renderDespesas();
 }
 
-// ── RESUMO MENSAL RECOLHÍVEL (v3.15)
-// Padrão: recolhido (o resumo ocupava muito scroll antes dos lançamentos).
-// Preferência fica salva no aparelho (localStorage, não sincroniza).
-function toggleResumo(kind) {
-  const wrap = document.getElementById('resumo-' + kind + '-wrap');
-  const chev = document.getElementById('resumo-' + kind + '-chev');
-  if (!wrap) return;
-  const estavaAberto = wrap.style.display !== 'none';
-  wrap.style.display = estavaAberto ? 'none' : '';
-  if (chev) chev.textContent = estavaAberto ? '▸ mostrar' : '▾ ocultar';
-  try { localStorage.setItem('rl_ui_resumo_' + kind, estavaAberto ? '0' : '1'); } catch {}
-}
-function initResumoCollapse() {
-  ['rec', 'desp'].forEach(kind => {
-    let aberto = false; // padrão: recolhido
-    try { aberto = localStorage.getItem('rl_ui_resumo_' + kind) === '1'; } catch {}
-    const wrap = document.getElementById('resumo-' + kind + '-wrap');
-    const chev = document.getElementById('resumo-' + kind + '-chev');
-    if (wrap) wrap.style.display = aberto ? '' : 'none';
-    if (chev) chev.textContent = aberto ? '▾ ocultar' : '▸ mostrar';
-  });
-}
-
-// ── ANÁLISE DETALHADA recolhível (v3.18)
-// Padrão: recolhido no celular (≤640px), aberto no desktop. Preferência salva no aparelho.
-function _analiseSet(aberto) {
-  const wrap = document.getElementById('analise-wrap');
-  const chev = document.getElementById('analise-chev');
-  if (wrap) wrap.style.display = aberto ? '' : 'none';
-  if (chev) chev.textContent = aberto ? '▾ ocultar' : '▸ mostrar';
-}
-function toggleAnalise() {
-  const wrap = document.getElementById('analise-wrap');
-  if (!wrap) return;
-  const aberto = wrap.style.display !== 'none';
-  _analiseSet(!aberto);
-  try { localStorage.setItem('rl_ui_analise', aberto ? '0' : '1'); } catch {}
-}
-function initAnaliseCollapse() {
-  let aberto;
-  try {
-    const s = localStorage.getItem('rl_ui_analise');
-    aberto = (s === null) ? (window.innerWidth > 640) : (s === '1');
-  } catch { aberto = true; }
-  _analiseSet(aberto);
-}
-
-// ── EXPORTAÇÃO CSV (v3.16) — abre direto no Excel (BOM UTF-8 + separador ;)
-function csvTxt(v) {
-  if (v === null || v === undefined) return '';
-  const s = String(v);
-  return (s.includes(';') || s.includes('"') || s.includes('\n')) ? '"' + s.replace(/"/g, '""') + '"' : s;
-}
-function exportarCSV(kind) {
-  const sep = ';';
-  const brNum = v => (typeof v === 'number' ? v.toFixed(2).replace('.', ',') : (v === undefined || v === null ? '' : v));
-  const linhas = [];
-  let nomeArq;
-  if (kind === 'rec') {
-    nomeArq = 'rota-latina-receitas-' + YEAR + '.csv';
-    linhas.push(['Mês','Airbnb Bruto','Airbnb Líquido','Booking Bruto','Booking Líquido','Particular Bruto','Particular Líquido','Total Bruto','Taxas','Total Líquido','Reservas','Hóspedes','Recebido','A Receber','Ocupação %'].join(sep));
-    monthlyRec().forEach(r => {
-      linhas.push([MONTHS[r.m-1], brNum(r.ab), brNum(r.al), brNum(r.bb), brNum(r.bl), brNum(r.pb), brNum(r.pl), brNum(r.tb), brNum(r.tt), brNum(r.tl), r.reservas, r.hospedes, brNum(r.recebido), brNum(r.pendente), (r.ocupPct*100).toFixed(1).replace('.', ',')].join(sep));
-    });
-    linhas.push('');
-    linhas.push(['Entrada','Saída','Hóspede','Telefone','Plataforma','Dias','Pessoas','Bruto','Taxa','Líquido','Forma Pgto','Status','Observações'].join(sep));
-    load('rec').slice().sort((a, b) => (a.data || '').localeCompare(b.data || '')).forEach(r => {
-      linhas.push([r.data || '', r.checkout || '', csvTxt(r.hospede), r.telefone || '', r.plat || '', r.dias || 1, r.pessoas || 1, brNum(r.valor), brNum(r.taxa), brNum(r.liquido), r.pgto || '', r.cancelada ? 'Cancelada' : (r.pago || ''), csvTxt(r.obs)].join(sep));
-    });
-  } else {
-    nomeArq = 'rota-latina-despesas-' + YEAR + '.csv';
-    linhas.push(['Mês'].concat(CATS).concat(['TOTAL']).join(sep));
-    monthlyDesp().forEach(d => {
-      linhas.push([MONTHS[d.m-1]].concat(CATS.map(c => brNum(d.cats[c]))).concat([brNum(d.total)]).join(sep));
-    });
-    linhas.push('');
-    linhas.push(['Data','Descrição','Categoria','Fornecedor','Valor','Forma Pgto','Comprovante','Observações'].join(sep));
-    load('desp').slice().sort((a, b) => (a.data || '').localeCompare(b.data || '')).forEach(d => {
-      linhas.push([d.data || '', csvTxt(d.desc), csvTxt(d.cat), csvTxt(d.forn), brNum(d.valor), d.pgto || '', d.comp || '', csvTxt(d.obs)].join(sep));
-    });
-  }
-  const blob = new Blob(['\uFEFF' + linhas.join('\r\n')], { type: 'text/csv;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = nomeArq;
-  a.click();
-  URL.revokeObjectURL(url);
-  toast('📊 Planilha exportada! Abra no Excel.');
-}
-
-// ── TOGGLE RÁPIDO DE PAGAMENTO (v3.15)
-// Clique no badge de status alterna Pago ⇄ Pendente sem abrir a edição.
-function togglePago(id) {
-  const recs = load('rec');
-  const idx = recs.findIndex(r => r.id === id);
-  if (idx === -1) { toast('⚠️ Reserva não encontrada'); return; }
-  if (recs[idx].cancelada) { toast('🚫 Reserva cancelada — reative na edição (✏️) para alterar'); return; }
-  const novo = recs[idx].pago === 'Pago' ? 'Pendente' : 'Pago';
-  recs[idx] = { ...recs[idx], pago: novo };
-  save('rec', recs);
-  // Atualiza o status nos dias do calendário desta reserva (pode cruzar anos)
-  Object.keys(_cache).forEach(k => {
-    const yr = parseInt(k);
-    if (isNaN(yr) || !_cache[yr] || !_cache[yr].cal) return;
-    const cal = { ..._cache[yr].cal };
-    let changed = false;
-    Object.keys(cal).forEach(d => {
-      if (cal[d].recId === id) { cal[d] = { ...cal[d], pago: novo }; changed = true; }
-    });
-    if (changed) {
-      _cache[yr].cal = cal;
-      localStorage.setItem('rl_cal_' + yr, JSON.stringify(cal));
-      _pushToFirestore('cal_' + yr, cal);
-    }
-  });
-  renderReceitas(); renderDashboard(); renderCalendario();
-  toast(novo === 'Pago' ? '✅ Marcado como PAGO' : '⏳ Marcado como PENDENTE');
-}
-
 // ── DUPLICAR RESERVA
 function duplicarReceita(id) {
   const rec = load('rec').find(r => r.id === id);
@@ -1660,6 +1709,7 @@ function duplicarReceita(id) {
   // Abre o modal de nova hospedagem com nome/telefone/plataforma/pessoas pré-preenchidos
   document.getElementById('r-data').value = '';
   document.getElementById('r-checkout').value = '';
+  PERIODOS = [{ inicio: '', fim: '' }]; renderPeriodos(); acFechar();
   document.getElementById('r-hospede').value = rec.hospede || '';
   const telEl = document.getElementById('r-telefone');
   if (telEl) {
@@ -1848,6 +1898,7 @@ function novaReservaPraHospede(safeKey) {
   // Pré-preenche nome e telefone
   document.getElementById('r-data').value = '';
   document.getElementById('r-checkout').value = '';
+  PERIODOS = [{ inicio: '', fim: '' }]; renderPeriodos(); acFechar();
   document.getElementById('r-hospede').value = h.nome || '';
   const telEl = document.getElementById('r-telefone');
   if (telEl) telEl.value = h.telefone ? formatPhoneDisplay(h.telefone) : '';
@@ -2313,8 +2364,7 @@ function salvarConfig() {
   const airbnb = parseFloat(document.getElementById('cfg-taxa-airbnb').value || 15);
   const booking = parseFloat(document.getElementById('cfg-taxa-booking').value || 15);
   const particular = parseFloat(document.getElementById('cfg-taxa-particular').value || 0);
-  // v3.17: mescla com a config existente para não apagar as mensagens de WhatsApp
-  saveConfig({ ...loadConfig(), Airbnb: airbnb, Booking: booking, Particular: particular });
+  saveConfig({ Airbnb: airbnb, Booking: booking, Particular: particular });
   renderConfig();
   toast('✅ Taxas salvas!');
 }
@@ -2325,9 +2375,6 @@ function renderConfig() {
   const cfg = loadConfig();
 
   // Preenche os campos
-  const taBV = document.getElementById('cfg-wa-bv'); if (taBV) taBV.value = cfg.waMsgBoasVindas || WA_TPL_PADRAO.bv;
-  const taEST = document.getElementById('cfg-wa-est'); if (taEST) taEST.value = cfg.waMsgEstadia || WA_TPL_PADRAO.estadia;
-  const taCO = document.getElementById('cfg-wa-co'); if (taCO) taCO.value = cfg.waMsgCheckout || WA_TPL_PADRAO.co;
   document.getElementById('cfg-taxa-airbnb').value = getTaxa('Airbnb');
   document.getElementById('cfg-taxa-booking').value = getTaxa('Booking');
   document.getElementById('cfg-taxa-particular').value = getTaxa('Particular');
@@ -2692,7 +2739,7 @@ function monthlyRec() {
   const ocup = diasOcupadosPorMes();
   return MONTHS.map((_, i) => {
     const m = i + 1;
-    const rows = recs.filter(r => r.mes === m && !r.cancelada); // v3.16: canceladas fora dos KPIs
+    const rows = recs.filter(r => r.mes === m);
     const ab = rows.filter(r => r.plat === 'Airbnb').reduce((a, r) => a + r.valor, 0);
     const al = rows.filter(r => r.plat === 'Airbnb').reduce((a, r) => a + r.liquido, 0);
     const bb = rows.filter(r => r.plat === 'Booking').reduce((a, r) => a + r.valor, 0);
@@ -2728,7 +2775,7 @@ function renderReceitas() {
     ? recs.map(r => {
       const venc = isVencida(r);
       return `
-      <tr class="${venc ? 'row-vencida' : ''}" style="${r.cancelada ? 'opacity:0.45' : ''}" title="${venc ? 'Pagamento pendente >30 dias após checkout' : (r.cancelada ? 'Reserva cancelada — fora das estatísticas' : '')}">
+      <tr class="${venc ? 'row-vencida' : ''}" title="${venc ? 'Pagamento pendente >30 dias após checkout' : ''}">
         <td>${r.data.split('-').reverse().join('/')}</td>
         <td>${r.checkout ? r.checkout.split('-').reverse().join('/') : '-'}</td>
         <td class="td-left">${esc(r.hospede)}${whatsappBtn(r.telefone, r.hospede)}</td>
@@ -2739,7 +2786,7 @@ function renderReceitas() {
         <td class="td-red">${r.taxa > 0 ? fmt(r.taxa) : '-'}</td>
         <td class="td-green">${fmt(r.liquido)}${r.liquidoManual ? ' <span title="Líquido ajustado manualmente" style="cursor:help">🔓</span>' : ''}</td>
         <td>${r.pgto || '-'}</td>
-        <td>${r.cancelada ? '<span class="badge" style="background:#eeeeee;color:#777;border:1px solid #ccc">🚫 Cancelada</span>' : `<span class="badge badge-click ${r.pago === 'Pago' ? 'badge-pago' : 'badge-pendente'}" onclick="togglePago('${r.id}')" title="Clique para alternar Pago/Pendente">${r.pago === 'Pago' ? '✅ Pago' : '⏳ Pendente'}</span>`}</td>
+        <td><span class="badge ${r.pago === 'Pago' ? 'badge-pago' : 'badge-pendente'}">${r.pago === 'Pago' ? '✅ Pago' : '⏳ Pendente'}</span></td>
         <td style="white-space:nowrap">
           <button class="del-btn" onclick="editReceita('${r.id}')" title="Editar">✏️</button>
           <button class="del-btn" onclick="duplicarReceita('${r.id}')" title="Duplicar">📋</button>
@@ -2811,115 +2858,6 @@ function renderDespesas() {
   }).join('') + `<tr><td class="td-navy">📌 TOTAL</td>${CATS.map(c => `<td class="td-navy">${fmt(totC[c])}</td>`).join('')}<td class="td-navy">${fmt(totT)}</td></tr>`;
 }
 
-// ── TEMPLATES WHATSAPP (v3.16)
-function waMsgLink(tel, msg) {
-  const t = normalizePhone(tel);
-  if (!t) return '';
-  const num = t.length <= 11 ? '55' + t : t;
-  return 'https://wa.me/' + num + '?text=' + encodeURIComponent(msg);
-}
-// v3.17: mensagens editáveis em ⚙️ Config (salvas na config, sincronizam via Firestore).
-// v3.18: 3ª mensagem (durante a estadia) + endereço com link do Google Maps na boas-vindas.
-// {nome} é substituído pelo primeiro nome do hóspede.
-const WA_MAPS_LINK = 'https://www.google.com/maps/search/?api=1&query=Rua+Henrique+Savi+2-63+Bauru+SP+17012205';
-const WA_TPL_PADRAO = {
-  bv: 'Olá, {nome}! 😊 Seja bem-vindo(a) à *Rota Latina*!\n\n' +
-    '📍 *Endereço*\n' +
-    'Condomínio City Residencial\n' +
-    'Rua Henrique Savi, 2-63 — Apto 608 (6º andar)\n' +
-    'Vila Nova Cidade Universitária — Bauru/SP\n' +
-    'CEP 17012-205\n' +
-    '🗺️ Localização no Google Maps:\n' + WA_MAPS_LINK + '\n\n' +
-    '🕒 Check-in: a partir das 15h\n' +
-    '📶 Wi-Fi: Wifi-Rede-Claro-2.4GHz\n' +
-    '🔑 Senha: Rot@lat1na\n\n' +
-    'Qualquer dúvida é só chamar por aqui. Boa viagem e ótima estadia!',
-  estadia: 'Oi, {nome}! 😊 Tudo certo com a chegada? Espero que já esteja se sentindo em casa.\n\n' +
-    'Passando só para dizer que estamos totalmente à disposição — qualquer coisa que precisar durante a estadia, é só chamar por aqui. 💬\n\n' +
-    'E para que a casa continue sempre aconchegante pra você e pra quem vem depois, deixo uns lembretes com carinho:\n\n' +
-    '🧽 Não cobramos taxa de limpeza — em troca, pedimos só que deixe a louça lavada. 🙏\n' +
-    '🗑️ O lixo pode ser descartado nas lixeiras do 1º andar.\n' +
-    '🛋️ Os móveis ficam onde estão — se precisar reorganizar algo, é só combinar com a gente antes. 😉\n' +
-    '🌙 A partir das 22h, um pouquinho de silêncio para respeitar os vizinhos.\n\n' +
-    'É isso! Aproveite bastante Bauru — estamos aqui para o que precisar. 🧡\n' +
-    '— Rota Latina',
-  co: 'Olá, {nome}! 😊 Passando para lembrar que o check-out é até *12h*.\n\n' +
-    'Esperamos que a estadia tenha sido ótima! Se puder deixar sua avaliação na plataforma, ajuda muito. 🙏\n\n' +
-    'Até a próxima! — Rota Latina'
-};
-function waAplicarTpl(tpl, nome) {
-  const n = (nome || '').trim().split(' ')[0] || 'tudo bem';
-  return String(tpl || '').split('{nome}').join(n);
-}
-function waBoasVindas(nome) {
-  return waAplicarTpl(loadConfig().waMsgBoasVindas || WA_TPL_PADRAO.bv, nome);
-}
-function waCheckout(nome) {
-  return waAplicarTpl(loadConfig().waMsgCheckout || WA_TPL_PADRAO.co, nome);
-}
-function waEstadia(nome) {
-  return waAplicarTpl(loadConfig().waMsgEstadia || WA_TPL_PADRAO.estadia, nome);
-}
-function salvarMensagensWA() {
-  const bv = ((document.getElementById('cfg-wa-bv') || {value:''}).value || '').trim();
-  const est = ((document.getElementById('cfg-wa-est') || {value:''}).value || '').trim();
-  const co = ((document.getElementById('cfg-wa-co') || {value:''}).value || '').trim();
-  if (!bv || !est || !co) { toast('⚠️ As mensagens não podem ficar vazias'); return; }
-  saveConfig({ ...loadConfig(), waMsgBoasVindas: bv, waMsgEstadia: est, waMsgCheckout: co });
-  renderConfig();
-  renderDashboard(); // atualiza os links dos botões no card Próximos 7 dias
-  toast('✅ Mensagens salvas!');
-}
-function restaurarMensagensWA() {
-  if (!confirmar('Restaurar as mensagens padrão?\n\nSuas edições serão perdidas.')) return;
-  const cfg = { ...loadConfig() };
-  delete cfg.waMsgBoasVindas;
-  delete cfg.waMsgEstadia;
-  delete cfg.waMsgCheckout;
-  saveConfig(cfg);
-  renderConfig();
-  renderDashboard();
-  toast('↩️ Mensagens padrão restauradas');
-}
-
-// ── CARD A RECEBER (v3.16)
-function renderAReceber() {
-  const card = document.getElementById('card-areceber');
-  const cont = document.getElementById('areceber-list');
-  const totEl = document.getElementById('areceber-total');
-  if (!card || !cont) return;
-  const hoje = new Date(); hoje.setHours(0,0,0,0);
-  const pend = [];
-  Object.keys(_cache).forEach(yk => {
-    const yr = parseInt(yk);
-    if (isNaN(yr) || !Array.isArray(_cache[yr].rec)) return;
-    _cache[yr].rec.forEach(r => { if (r.pago !== 'Pago' && !r.cancelada) pend.push({ yr, r }); });
-  });
-  if (!pend.length) { card.style.display = 'none'; return; }
-  card.style.display = '';
-  pend.sort((a, b) => ((a.r.checkout || a.r.data) || '').localeCompare((b.r.checkout || b.r.data) || ''));
-  const total = pend.reduce((a, p) => a + (p.r.liquido || 0), 0);
-  if (totEl) totEl.textContent = fmt(total);
-  cont.innerHTML = pend.map(({ yr, r }) => {
-    const ref = r.checkout || r.data;
-    const refFmt = ref ? ref.split('-').reverse().join('/') : '-';
-    const atraso = ref ? Math.round((hoje - new Date(ref + 'T00:00:00')) / 86400000) : 0;
-    let atrasoStr;
-    if (atraso > 30) atrasoStr = '<span style="color:var(--red);font-weight:700">⚠️ ' + atraso + ' dias após o checkout</span>';
-    else if (atraso > 0) atrasoStr = '<span style="color:var(--terra);font-weight:600">' + atraso + ' dia' + (atraso > 1 ? 's' : '') + ' após o checkout</span>';
-    else atrasoStr = '<span style="color:#888">checkout em ' + refFmt + '</span>';
-    const badge = yr === YEAR
-      ? '<span class="badge badge-click badge-pendente" onclick="togglePago(\'' + r.id + '\')" title="Clique para marcar como Pago">⏳ Pendente</span>'
-      : '<span class="badge badge-pendente" title="Reserva de ' + yr + ' — troque o ano para alterar">⏳ ' + yr + '</span>';
-    return '<div style="padding:8px 0;border-bottom:1px solid rgba(0,0,0,0.06);display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">' +
-      '<div><strong>' + esc(r.hospede) + '</strong>' + whatsappBtn(r.telefone, r.hospede) +
-      ' <span style="color:#888">· ' + esc(r.plat || '') + ' · entrada ' + (r.data ? r.data.split('-').reverse().join('/') : '-') + '</span>' +
-      '<div style="font-size:0.75rem;margin-top:2px">' + atrasoStr + '</div></div>' +
-      '<div style="display:flex;align-items:center;gap:8px"><strong style="color:var(--green)">' + fmt(r.liquido) + '</strong>' + badge + '</div>' +
-      '</div>';
-  }).join('');
-}
-
 // ── RENDER DASHBOARD
 // ── PRÓXIMOS 7 DIAS (chegadas + check-outs)
 function renderProximos() {
@@ -2938,7 +2876,6 @@ function renderProximos() {
     const yr = parseInt(yk);
     if (isNaN(yr) || !Array.isArray(_cache[yr].rec)) return;
     _cache[yr].rec.forEach(r => {
-      if (r.cancelada) return; // v3.16: canceladas fora da agenda
       // Chegada
       if (r.data && r.data >= hojeStr && r.data <= limiteStr) {
         eventos.push({ tipo: 'chegada', data: r.data, rec: r });
@@ -2975,26 +2912,10 @@ function renderProximos() {
     const obsStr = (r.obs && r.obs.trim())
       ? `<div style="font-size:0.74rem;color:#777;margin-top:2px;padding-left:2px">📝 ${esc(r.obs)}</div>`
       : '';
-    // v3.16/v3.18: botões de mensagem pronta no WhatsApp
-    // chegada → 👋 Boas-vindas + 🏠 Durante a estadia · saída → 🧳 Lembrete check-out
-    let tplBtn = '';
-    if (r.telefone) {
-      const btn = (link, estilo, rotulo) =>
-        ` <a href="${link}" target="_blank" rel="noopener" style="text-decoration:none;font-size:0.72rem;${estilo};border-radius:6px;padding:2px 7px;font-weight:600;white-space:nowrap;display:inline-block;margin-top:2px">${rotulo}</a>`;
-      const cGreen = 'background:#e8f5e9;border:1px solid #27ae60;color:#1e8449';
-      const cBlue  = 'background:#e3f2fd;border:1px solid #1565c0;color:#1565c0';
-      const cTerra = 'background:#fdebd0;border:1px solid #e67e22;color:#ca6f1e';
-      if (ev.tipo === 'chegada') {
-        tplBtn = btn(waMsgLink(r.telefone, waBoasVindas(r.hospede)), cGreen, '👋 Boas-vindas')
-               + btn(waMsgLink(r.telefone, waEstadia(r.hospede)), cBlue, '🏠 Durante a estadia');
-      } else {
-        tplBtn = btn(waMsgLink(r.telefone, waCheckout(r.hospede)), cTerra, '🧳 Lembrete check-out');
-      }
-    }
     return `<div style="padding:7px 0;border-bottom:1px solid rgba(0,0,0,0.06)">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
         <div>
-          <span style="color:${cor};font-weight:600">${icone}</span> · <strong>${esc(r.hospede)}</strong>${whatsappBtn(r.telefone, r.hospede)}${tplBtn}
+          <span style="color:${cor};font-weight:600">${icone}</span> · <strong>${esc(r.hospede)}</strong>${whatsappBtn(r.telefone, r.hospede)}
           <span style="color:#888"> · ${esc(r.plat||'')}</span>${pessoasStr}
         </div>
         <div style="font-size:0.78rem">${prefix} <span style="color:#888">(${dataFmt})</span></div>
@@ -3018,7 +2939,7 @@ function renderCompAno(mrAtual, mdAtual) {
   card.style.display = '';
 
   // Calcula totais do ano anterior usando as mesmas fórmulas (sem mexer no YEAR)
-  const recsAnt = (_cache[yAnt].rec || []).filter(r => !r.cancelada); // v3.16
+  const recsAnt = _cache[yAnt].rec || [];
   const despsAnt = _cache[yAnt].desp || [];
   const calAnt = _cache[yAnt].cal || {};
 
@@ -3100,7 +3021,7 @@ function renderCompAno(mrAtual, mdAtual) {
 }
 
 function applyTableLabels() {
-  document.querySelectorAll('.table-wrap table').forEach(tb => {
+  document.querySelectorAll('.table-wrap:not(.keep-table) table').forEach(tb => {
     const ths = [...tb.querySelectorAll('thead th')].map(th => th.textContent.trim());
     if (!ths.length) return;
     tb.classList.add('rtable');
@@ -3292,9 +3213,6 @@ function renderDashboard() {
   // ── Próximos 7 dias
   renderProximos();
 
-  // ── A Receber (v3.16)
-  renderAReceber();
-
   // ── Banner de despesas fixas pendentes/atrasadas
   renderBannerDespFixas();
 
@@ -3454,10 +3372,8 @@ function editReceita(id) {
   if (ck) ck.checked = !!rec.liquidoManual;
   if (liqInput) liqInput.value = rec.liquidoManual ? numberToBRLInput(rec.liquido) : '';
   toggleLiquidoManual(); // sincroniza visibilidade do box
-  const ckCanc = document.getElementById('edit-cancelada-toggle');
-  if (ckCanc) ckCanc.checked = !!rec.cancelada;
   editPagoStatus = rec.pago || 'Pendente';
-  setEditPago(editPagoStatus);
+  const stSel = document.getElementById('edit-r-status'); if (stSel) stSel.value = editPagoStatus;
   updateEditTaxaPreview();
   openModal('modal-edit-rec');
 }
@@ -3477,7 +3393,6 @@ function saveEditReceita() {
   const valor = parseBRL(document.getElementById('edit-r-valor').value);
   const pgto = document.getElementById('edit-pgto').value;
   const obs = document.getElementById('edit-obs').value;
-  const cancelada = !!((document.getElementById('edit-cancelada-toggle') || {}).checked);
 
   // Validações
   if (!data || !hospede || !plat || !valor) { toast('⚠️ Preencha os campos obrigatórios'); return; }
@@ -3496,7 +3411,7 @@ function saveEditReceita() {
       }
     });
   });
-  if (conflitos.length > 0 && !cancelada) {
+  if (conflitos.length > 0) {
     toast('⚠️ Conflito: período já ocupado por outra reserva (' + conflitos[0].split('-').reverse().join('/') + ')');
     return;
   }
@@ -3537,17 +3452,16 @@ function saveEditReceita() {
   recs[idx] = {
     ...recAntiga,
     data, checkout, hospede, telefone, plat, pessoas, valor, taxa, liquido, liquidoManual,
-    pgto, obs, pago: editPagoStatus, dias, mes, cancelada
+    pgto, obs, pago: (document.getElementById('edit-r-status') ? document.getElementById('edit-r-status').value : editPagoStatus), dias, mes
   };
   save('rec', recs);
 
   // Recria calendário desta reserva (limpa o anterior + preenche o novo)
-  // v3.16: reserva cancelada libera os dias do calendário
   clearCalendar(id);
-  if (!cancelada) fillCalendar(recs[idx]);
+  fillCalendar(recs[idx]);
 
-  // Registra hóspede novo (cria ou incrementa) — canceladas ficam fora do CRM
-  if (!cancelada) registrarHospede(recs[idx]);
+  // Registra hóspede novo (cria ou incrementa)
+  registrarHospede(recs[idx]);
 
   closeModal('modal-edit-rec');
   toast('✅ Reserva atualizada!');
@@ -3649,7 +3563,7 @@ function exportarBackup() {
     };
   });
   const data = {
-    versao: '3.18',
+    versao: '4.0',
     data: new Date().toLocaleDateString('pt-BR'),
     timestamp: new Date().toISOString(),
     anoCorrente: YEAR,
@@ -3657,6 +3571,7 @@ function exportarBackup() {
     config: loadConfig(),
     hospedes: loadHospedes(),
     despFixas: loadDespFixas(),
+    lembretes: loadLembretes(),
     // Compatibilidade retroativa: se houver só 1 ano, exporta também no formato v2
     receitas: load('rec'),
     despesas: load('desp'),
@@ -3784,6 +3699,7 @@ function importarBackup(event) {
       if (data.config)    saveConfig(data.config);
       if (data.hospedes)  saveHospedes(data.hospedes);
       if (data.despFixas) saveDespFixas(data.despFixas);
+      if (data.lembretes) saveLembretes(data.lembretes);
       // Se não veio cadastro de hóspedes mas vieram reservas, reconstrói
       if (!data.hospedes) rebuildHospedes();
 
@@ -3796,20 +3712,7 @@ function importarBackup(event) {
 }
 
 // ── INIT
-_loadCacheFromLocal(); // primeiro renderiza com cache local (instantâneo)
-initResumoCollapse(); // v3.15: resumo mensal recolhido por padrão
-initAnaliseCollapse(); // v3.18: análise detalhada recolhida no celular
-setPago('Pago');
-renderDashboard();
-renderReceitas();
-renderDespesas();
-renderCalendario();
-renderConfig();
-renderHospedes();
-renderDespFixas();
-ajustarTabBarTop(); // posiciona a tab-bar corretamente
-renderLembreteBackup(); // banner de backup se faz tempo
-renderBannerDespFixas(); // banner de despesas fixas pendentes/vencidas
+_loadCacheFromLocal(); // cache local primeiro (instantâneo) — o render acontece no boot v4 mais abaixo
 
 function copyUid() {
   const uid = document.getElementById('userUid').textContent;
@@ -3830,6 +3733,7 @@ function _hideLogin() {
   document.getElementById('loginOverlay').style.display = 'none';
 }
 function _showUserBar(email, uid) {
+  const ce = document.getElementById('cfg-email'); if (ce) ce.textContent = email || '—';
   const bar = document.getElementById('userBar');
   bar.style.display = 'flex';
   document.getElementById('userEmail').textContent = email || '';
@@ -3960,6 +3864,9 @@ async function _afterLogin(db) {
       } else if (id === 'despFixas') {
         _cache.despFixas = data;
         localStorage.setItem('rl_despFixas', JSON.stringify(data));
+      } else if (id === 'lembretes') {
+        _cache.lembretes = data;
+        localStorage.setItem('rl_lembretes', JSON.stringify(data));
       }
     });
 
@@ -4008,6 +3915,10 @@ async function _afterLogin(db) {
         } else if (id === 'despFixas') {
           if (JSON.stringify(_cache.despFixas) !== JSON.stringify(data)) {
             _cache.despFixas = data; localStorage.setItem('rl_despFixas', JSON.stringify(data)); changed = true;
+          }
+        } else if (id === 'lembretes') {
+          if (JSON.stringify(_cache.lembretes) !== JSON.stringify(data)) {
+            _cache.lembretes = data; localStorage.setItem('rl_lembretes', JSON.stringify(data)); changed = true;
           }
         }
       });
@@ -4096,11 +4007,852 @@ function irParaMesAtual() {
   toast('📌 ' + MONTHS[mesAtual-1] + '/' + anoAtual);
 }
 
+
+/* ═══════════════════════════════════════════════════════════════
+   ROTA LATINA v4 — navegação, listas compactas, busca, avisos,
+   lembretes, calendário interativo e reservas em lote.
+   (redefinições que substituem as versões anteriores)
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ───────── PERÍODO ÚNICO (ano + mês; mês 0 = ano todo) ───────── */
+function mesLabel() { return MES_SEL === 0 ? 'Ano todo' : MONTHS[MES_SEL-1]; }
+function updatePeriodoUI() {
+  const sel = document.getElementById('mes-sel'); if (sel) sel.value = String(MES_SEL);
+  const tag = document.getElementById('periodo-tag');
+  if (tag) tag.textContent = MES_SEL === 0 ? YEAR + ' · ano inteiro' : mesLabel() + '/' + YEAR;
+  const t = document.getElementById('hoje-mes-titulo');
+  if (t) t.textContent = MES_SEL === 0 ? '💵 Resumo do ano ' + YEAR : '💵 Resumo de ' + mesLabel() + '/' + YEAR;
+}
+function setMes(m) {
+  if (isNaN(m) || m < 0 || m > 12) return;
+  MES_SEL = m;
+  updatePeriodoUI();
+  renderHoje(); renderReceitas(); renderDespesas(); renderAnalises();
+}
+function mudarMes(delta) {
+  if (MES_SEL === 0) { setMes(delta > 0 ? 1 : 12); return; }
+  let m = MES_SEL + delta;
+  if (m < 1) {
+    if (YEAR - 1 < 2026) { toast('⚠️ Ano mínimo: 2026'); return; }
+    YEAR -= 1; MES_SEL = 12; _ensureYear(YEAR); rerenderAll(); toast('📅 Dezembro/' + YEAR); return;
+  }
+  if (m > 12) {
+    if (YEAR + 1 > 2099) return;
+    YEAR += 1; MES_SEL = 1; _ensureYear(YEAR); rerenderAll(); toast('📅 Janeiro/' + YEAR); return;
+  }
+  setMes(m);
+}
+function irParaMesAtual() {
+  const h = new Date(), a = h.getFullYear(), m = h.getMonth() + 1;
+  if (YEAR !== a && a >= 2026 && a <= 2099) { YEAR = a; _ensureYear(YEAR); MES_SEL = m; rerenderAll(); }
+  else setMes(m);
+  toast('📌 ' + MONTHS[m-1] + '/' + (YEAR));
+}
+
+/* ───────── NAVEGAÇÃO ───────── */
+var TABS_BARRA = ['hoje','calendario','financeiro','analises','hospedes'];
+var SUB_FIN = 'receitas';
+
+function showTab(id, btn) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  const alvo = document.getElementById('tab-' + id);
+  if (!alvo) return;
+  alvo.classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  if (!btn && TABS_BARRA.includes(id)) {
+    document.querySelectorAll('.tab-btn').forEach(b => {
+      if ((b.getAttribute('onclick') || '').includes("'" + id + "'")) btn = b;
+    });
+  }
+  if (btn) btn.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'instant' in window ? 'auto' : 'auto' });
+  if (id === 'hoje') renderHoje();
+  if (id === 'calendario') { renderCalendario(); scrollCalendarioParaHoje(); }
+  if (id === 'financeiro') { renderReceitas(); renderDespesas(); renderDespFixas(); }
+  if (id === 'analises') renderAnalises();
+  if (id === 'hospedes') renderHospedes();
+  if (id === 'config') { renderConfig(); }
+  if (id === 'lembretes') renderLembretes();
+  updateFab(id);
+}
+function showSub(id, btn) {
+  SUB_FIN = id;
+  document.querySelectorAll('#tab-financeiro .subtab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('#tab-financeiro .subtab-btn').forEach(b => b.classList.remove('active'));
+  const pan = document.getElementById('sub-' + id); if (pan) pan.classList.add('active');
+  if (!btn) btn = document.getElementById('sb-' + id);
+  if (btn) btn.classList.add('active');
+  if (id === 'receitas') renderReceitas();
+  if (id === 'despesas') renderDespesas();
+  if (id === 'fixas') renderDespFixas();
+  updateFab('financeiro');
+}
+function updateFab(id) {
+  FAB_TAB = id;
+  const fab = document.getElementById('fab'); if (!fab) return;
+  if (id === 'financeiro' && SUB_FIN === 'despesas') { fab.style.display = 'flex'; fab.className = 'fab fab-red'; fab.title = 'Nova Despesa'; }
+  else if (id === 'financeiro' || id === 'hoje' || id === 'calendario') { fab.style.display = 'flex'; fab.className = 'fab fab-green'; fab.title = 'Nova Hospedagem'; }
+  else if (id === 'lembretes') { fab.style.display = 'none'; }
+  else fab.style.display = 'none';
+}
+function fabAction() {
+  if (FAB_TAB === 'financeiro' && SUB_FIN === 'despesas') openModal('modal-desp');
+  else abrirNovaReserva();
+}
+
+/* ───────── FILTROS (mês vem do período único) ───────── */
+function applyFiltrosRec(recs) {
+  const plat = (document.getElementById('filtro-rec-plat') || {}).value || '';
+  const st = (document.getElementById('filtro-rec-status') || {}).value || '';
+  const q = ((document.getElementById('filtro-rec-busca') || {}).value || '').trim().toLowerCase();
+  return recs.filter(r => {
+    if (MES_SEL && getMes(r.data) !== MES_SEL) return false;
+    if (plat && r.plat !== plat) return false;
+    if (st && (r.pago || 'Pendente') !== st) return false;
+    if (q && !((r.hospede || '').toLowerCase().includes(q) || (r.telefone || '').includes(q) || (r.obs || '').toLowerCase().includes(q))) return false;
+    return true;
+  });
+}
+function limparFiltrosRec() {
+  ['filtro-rec-plat','filtro-rec-status','filtro-rec-busca'].forEach(id => { const e = document.getElementById(id); if (e) e.value = ''; });
+  renderReceitas();
+}
+function applyFiltrosDesp(desps) {
+  const cat = (document.getElementById('filtro-desp-cat') || {}).value || '';
+  const q = ((document.getElementById('filtro-desp-busca') || {}).value || '').trim().toLowerCase();
+  return desps.filter(d => {
+    if (MES_SEL && (d.mesRef || d.mes || getMes(d.data)) !== MES_SEL) return false;
+    if (cat && d.cat !== cat) return false;
+    if (q && !((d.desc || '').toLowerCase().includes(q) || (d.forn || '').toLowerCase().includes(q) || (d.obs || '').toLowerCase().includes(q))) return false;
+    return true;
+  });
+}
+function limparFiltrosDesp() {
+  ['filtro-desp-cat','filtro-desp-busca'].forEach(id => { const e = document.getElementById(id); if (e) e.value = ''; });
+  renderDespesas();
+}
+
+/* ───────── LISTAS COMPACTAS ───────── */
+function toggleRow(el) { el.parentElement.classList.toggle('open'); }
+var MES_ABREV = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+function dataChip(iso) {
+  if (!iso) return '<b>—</b><span></span>';
+  const [y, m, d] = iso.split('-');
+  return '<b>' + d + '</b><span>' + (MES_ABREV[parseInt(m) - 1] || '') + '</span>';
+}
+function br(iso) { return iso ? iso.split('-').reverse().join('/') : '—'; }
+
+function renderReceitas() {
+  const box = document.getElementById('rec-list'); if (!box) return;
+  const recs = applyFiltrosRec(load('rec')).slice().sort((a, b) => b.data.localeCompare(a.data));
+  box.innerHTML = recs.length ? recs.map(r => {
+    const venc = isVencida(r);
+    const pago = (r.pago === 'Pago');
+    return '<div class="crow pl-' + (r.plat || '').toLowerCase() + (venc ? ' venc' : '') + '">' +
+      '<div class="crow-head" onclick="toggleRow(this)">' +
+        '<div class="crow-date">' + dataChip(r.data) + '</div>' +
+        '<div class="crow-main">' +
+          '<div class="crow-title">' + esc(r.hospede) + (venc ? ' <span title="Pendente há mais de 30 dias">⚠️</span>' : '') + '</div>' +
+          '<div class="crow-sub">' + esc(r.plat || '') + ' · ' + (r.dias || 1) + (r.dias > 1 ? ' noites' : ' noite') + ' · 👥 ' + (r.pessoas || 1) + '</div>' +
+        '</div>' +
+        '<div class="crow-right">' +
+          '<div class="crow-val">' + fmt(r.liquido) + '</div>' +
+          '<span class="pill ' + (pago ? 'pill-pago' : 'pill-pend') + '">' + (pago ? '✅ pago' : '⏳ a receber') + '</span>' +
+        '</div>' +
+        '<div class="crow-chev">▶</div>' +
+      '</div>' +
+      '<div class="crow-body">' +
+        '<dl class="crow-kv">' +
+          '<dt>Check-in</dt><dd>' + br(r.data) + '</dd>' +
+          '<dt>Check-out</dt><dd>' + br(r.checkout) + '</dd>' +
+          '<dt>Valor bruto</dt><dd>' + fmt(r.valor) + '</dd>' +
+          (r.taxa > 0 ? '<dt>Taxa ' + esc(r.plat) + '</dt><dd style="color:var(--red)">− ' + fmt(r.taxa) + '</dd>' : '') +
+          '<dt>Líquido</dt><dd style="color:var(--green);font-weight:700">' + fmt(r.liquido) + (r.liquidoManual ? ' 🔓' : '') + '</dd>' +
+          '<dt>Pagamento</dt><dd>' + esc(r.pgto || '—') + '</dd>' +
+          '<dt>Telefone</dt><dd>' + (r.telefone ? formatPhoneDisplay(r.telefone) + whatsappBtn(r.telefone, r.hospede) : '—') + '</dd>' +
+          (r.obs ? '<dt>Obs.</dt><dd>' + esc(r.obs) + '</dd>' : '') +
+        '</dl>' +
+        '<div class="crow-acts">' +
+          '<button class="btn btn-navy" onclick="event.stopPropagation();editReceita(\'' + r.id + '\')">✏️ Editar</button>' +
+          '<button class="btn btn-terra" onclick="event.stopPropagation();duplicarReceita(\'' + r.id + '\')">📋 Duplicar</button>' +
+          '<button class="btn btn-red" onclick="event.stopPropagation();deleteReceita(\'' + r.id + '\')">🗑️ Excluir</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('') : '<div class="empty-state"><div class="icon">📋</div><p>Nenhuma reserva em ' + (MES_SEL ? mesLabel() + '/' + YEAR : YEAR) + '.<br>Toque em “Nova Hospedagem”.</p></div>';
+
+  const tot = document.getElementById('rec-total');
+  if (tot) {
+    const bruto = recs.reduce((a, r) => a + (r.valor || 0), 0);
+    const liq = recs.reduce((a, r) => a + (r.liquido || 0), 0);
+    const pend = recs.filter(r => r.pago !== 'Pago').reduce((a, r) => a + (r.liquido || 0), 0);
+    tot.innerHTML = recs.length
+      ? '<span>' + recs.length + ' reserva' + (recs.length > 1 ? 's' : '') + ' · bruto ' + fmt(bruto) + (pend > 0 ? ' · <span style="color:#ffb4a8">a receber ' + fmt(pend) + '</span>' : '') + '</span><b>' + fmt(liq) + '</b>'
+      : '<span>Sem lançamentos</span><b>R$ 0,00</b>';
+  }
+}
+
+function renderDespesas() {
+  const box = document.getElementById('desp-list'); if (!box) return;
+  const ds = applyFiltrosDesp(load('desp')).slice().sort((a, b) => b.data.localeCompare(a.data));
+  box.innerHTML = ds.length ? ds.map(d =>
+    '<div class="crow">' +
+      '<div class="crow-head" onclick="toggleRow(this)">' +
+        '<div class="crow-date">' + dataChip(d.data) + '</div>' +
+        '<div class="crow-main">' +
+          '<div class="crow-title">' + esc(d.desc || d.cat) + '</div>' +
+          '<div class="crow-sub">' + esc(d.cat) + (d.forn ? ' · ' + esc(d.forn) : '') + '</div>' +
+        '</div>' +
+        '<div class="crow-right"><div class="crow-val" style="color:var(--red)">' + fmt(d.valor) + '</div>' +
+          (d.comp === 'Sim' ? '<span class="pill pill-pago">📎 comprov.</span>' : '') + '</div>' +
+        '<div class="crow-chev">▶</div>' +
+      '</div>' +
+      '<div class="crow-body">' +
+        '<dl class="crow-kv">' +
+          '<dt>Data do pagamento</dt><dd>' + br(d.data) + '</dd>' +
+          '<dt>Mês de referência</dt><dd>' + (MONTHS[(d.mesRef || d.mes || getMes(d.data)) - 1] || '—') + '</dd>' +
+          '<dt>Categoria</dt><dd>' + esc(d.cat) + '</dd>' +
+          '<dt>Fornecedor</dt><dd>' + esc(d.forn || '—') + '</dd>' +
+          '<dt>Forma</dt><dd>' + esc(d.pgto || '—') + '</dd>' +
+          '<dt>Comprovante</dt><dd>' + esc(d.comp || '—') + '</dd>' +
+          (d.obs ? '<dt>Obs.</dt><dd>' + esc(d.obs) + '</dd>' : '') +
+        '</dl>' +
+        '<div class="crow-acts">' +
+          '<button class="btn btn-navy" onclick="event.stopPropagation();editDespesa(\'' + d.id + '\')">✏️ Editar</button>' +
+          '<button class="btn btn-red" onclick="event.stopPropagation();deleteDespesa(\'' + d.id + '\')">🗑️ Excluir</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>').join('')
+    : '<div class="empty-state"><div class="icon">📋</div><p>Nenhuma despesa em ' + (MES_SEL ? mesLabel() + '/' + YEAR : YEAR) + '.<br>Toque em “Nova Despesa”.</p></div>';
+
+  const tot = document.getElementById('desp-total');
+  if (tot) {
+    const t = ds.reduce((a, d) => a + (d.valor || 0), 0);
+    tot.innerHTML = '<span>' + ds.length + ' lançamento' + (ds.length === 1 ? '' : 's') + '</span><b style="color:#ff9e91">' + fmt(t) + '</b>';
+  }
+}
+
+/* ───────── TABELÕES (agora vivem em Análises) ───────── */
+function renderResumoRec() {
+  const el = document.getElementById('resumo-rec-tbody'); if (!el) return;
+  const mr = monthlyRec();
+  const tot = { ab:0, al:0, bb:0, bl:0, pb:0, pl:0, tb:0, tt:0, tl:0, res:0, hosp:0, rec:0, pend:0 };
+  el.innerHTML = mr.map(r => {
+    tot.ab+=r.ab; tot.al+=r.al; tot.bb+=r.bb; tot.bl+=r.bl; tot.pb+=r.pb; tot.pl+=r.pl;
+    tot.tb+=r.tb; tot.tt+=r.tt; tot.tl+=r.tl; tot.res+=r.reservas; tot.hosp+=r.hospedes;
+    tot.rec+=r.recebido; tot.pend+=r.pendente;
+    return '<tr><td class="td-left" style="background:#d6e4f0;font-weight:600">' + MONTHS[r.m-1] + '</td>' +
+      '<td>' + (r.ab>0?fmt(r.ab):'-') + '</td><td class="td-green">' + (r.al>0?fmt(r.al):'-') + '</td>' +
+      '<td>' + (r.bb>0?fmt(r.bb):'-') + '</td><td class="td-green">' + (r.bl>0?fmt(r.bl):'-') + '</td>' +
+      '<td>' + (r.pb>0?fmt(r.pb):'-') + '</td><td class="td-green">' + (r.pl>0?fmt(r.pl):'-') + '</td>' +
+      '<td class="td-orange">' + fmt(r.tb) + '</td><td class="td-red">' + (r.tt>0?fmt(r.tt):'-') + '</td>' +
+      '<td class="td-green">' + fmt(r.tl) + '</td><td>' + (r.reservas||'-') + '</td><td>' + (r.hospedes||'-') + '</td>' +
+      '<td class="td-green">' + (r.recebido>0?fmt(r.recebido):'-') + '</td><td class="td-red">' + (r.pendente>0?fmt(r.pendente):'-') + '</td></tr>';
+  }).join('') +
+  '<tr><td class="td-navy">📌 TOTAL</td><td class="td-navy">' + fmt(tot.ab) + '</td><td class="td-navy">' + fmt(tot.al) +
+  '</td><td class="td-navy">' + fmt(tot.bb) + '</td><td class="td-navy">' + fmt(tot.bl) + '</td><td class="td-navy">' + fmt(tot.pb) +
+  '</td><td class="td-navy">' + fmt(tot.pl) + '</td><td class="td-navy">' + fmt(tot.tb) + '</td><td class="td-navy">' + fmt(tot.tt) +
+  '</td><td class="td-navy">' + fmt(tot.tl) + '</td><td class="td-navy">' + tot.res + '</td><td class="td-navy">' + tot.hosp +
+  '</td><td class="td-navy">' + fmt(tot.rec) + '</td><td class="td-navy">' + fmt(tot.pend) + '</td></tr>';
+}
+function renderResumoDesp() {
+  const el = document.getElementById('resumo-desp-tbody'); if (!el) return;
+  const md = monthlyDesp();
+  const totC = {}; CATS.forEach(c => totC[c] = 0); let totT = 0;
+  el.innerHTML = md.map(d => {
+    CATS.forEach(c => totC[c] += d.cats[c]); totT += d.total;
+    return '<tr><td class="td-left" style="background:#d6e4f0;font-weight:600">' + MONTHS[d.m-1] + '</td>' +
+      CATS.map(c => '<td class="' + (d.cats[c] > 0 ? 'td-red' : '') + '">' + (d.cats[c] > 0 ? fmt(d.cats[c]) : '-') + '</td>').join('') +
+      '<td class="td-orange">' + fmt(d.total) + '</td></tr>';
+  }).join('') + '<tr><td class="td-navy">📌 TOTAL</td>' + CATS.map(c => '<td class="td-navy">' + fmt(totC[c]) + '</td>').join('') + '<td class="td-navy">' + fmt(totT) + '</td></tr>';
+}
+
+/* ───────── TELAS ───────── */
+
+/* quando o período é "Ano todo", o card de resumo mostra o ano inteiro */
+function ajustarResumoPeriodo() {
+  if (MES_SEL !== 0) return;
+  const mr = monthlyRec(), md = monthlyDesp();
+  const tb = mr.reduce((a,r)=>a+r.tb,0), tl = mr.reduce((a,r)=>a+r.tl,0);
+  const td = md.reduce((a,d)=>a+d.total,0);
+  const diasOcup = mr.reduce((a,r)=>a+(r.diasOcup||0),0);
+  const diasDisp = mr.reduce((a,r)=>a+(r.diasMes||0),0);
+  const reservas = mr.reduce((a,r)=>a+(r.reservas||0),0);
+  const set = (id,v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+  set('mes-receita', fmt(tb)); set('mes-despesas', fmt(td)); set('mes-lucro', fmt(tl-td));
+  set('mes-ocupacao', diasDisp>0 ? pct(diasOcup/diasDisp) : '0%');
+  set('mes-diaria', diasOcup>0 ? fmt(tb/diasOcup) : fmt(0));
+  set('mes-reservas', reservas);
+  set('mes-revpar', diasDisp>0 ? fmt(tb/diasDisp) : fmt(0));
+  set('mes-ticket', reservas>0 ? fmt(tb/reservas) : fmt(0));
+  set('mes-receita-var',''); set('mes-ocupacao-var','');
+}
+
+var SUB_AN = 'resumo';
+function showSubAn(id, btn) {
+  SUB_AN = id;
+  document.querySelectorAll('#tab-analises .subtab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('#tab-analises .subtab-btn').forEach(b => b.classList.remove('active'));
+  const pan = document.getElementById('san-' + id); if (pan) pan.classList.add('active');
+  if (!btn) btn = document.getElementById('sa-' + id);
+  if (btn) btn.classList.add('active');
+  window.scrollTo(0, 0);
+}
+function renderAnalises() {
+  renderDashboard();
+  ajustarResumoPeriodo();
+  renderResumoRec();
+  renderResumoDesp();
+  if (typeof applyTableLabels === 'function') applyTableLabels();
+}
+function renderHoje() {
+  renderDashboard();
+  ajustarResumoPeriodo();
+  renderLembretesHoje();
+  atualizarAvisos();
+  updatePeriodoUI();
+}
+function rerenderAll() {
+  updatePeriodoUI();
+  renderDashboard();
+  ajustarResumoPeriodo();
+  renderReceitas(); renderDespesas(); renderCalendario(); renderConfig();
+  renderHospedes(); renderDespFixas();
+  renderResumoRec(); renderResumoDesp();
+  renderLembretes(); renderLembretesHoje();
+  atualizarAvisos();
+  updateYearLabel();
+}
+
+/* ───────── PRÓXIMOS 7 DIAS (clicável → abre a reserva) ───────── */
+function renderProximos() {
+  const card = document.getElementById('card-proximos');
+  const cont = document.getElementById('proximos-list');
+  if (!card || !cont) return;
+  const hoje = new Date(); hoje.setHours(0,0,0,0);
+  const limite = new Date(hoje); limite.setDate(limite.getDate() + 7);
+  const hojeStr = todayStr();
+  const limiteStr = limite.getFullYear() + '-' + String(limite.getMonth()+1).padStart(2,'0') + '-' + String(limite.getDate()).padStart(2,'0');
+
+  const eventos = [];
+  Object.keys(_cache).forEach(yk => {
+    const yr = parseInt(yk);
+    if (isNaN(yr) || !Array.isArray(_cache[yr].rec)) return;
+    _cache[yr].rec.forEach(r => {
+      if (r.data && r.data >= hojeStr && r.data <= limiteStr) eventos.push({ tipo:'chegada', data:r.data, rec:r, ano:yr });
+      if (r.checkout && r.checkout >= hojeStr && r.checkout <= limiteStr) eventos.push({ tipo:'saida', data:r.checkout, rec:r, ano:yr });
+    });
+  });
+  card.style.display = '';
+  if (!eventos.length) {
+    cont.innerHTML = '<div style="color:var(--silver);text-align:center;padding:14px 6px;font-size:0.85rem">Nenhuma chegada ou saída nos próximos 7 dias.</div>';
+    return;
+  }
+  eventos.sort((a,b) => a.data.localeCompare(b.data) || (a.tipo === 'saida' ? -1 : 1));
+  cont.innerHTML = eventos.map(ev => {
+    const r = ev.rec;
+    const d = new Date(ev.data + 'T00:00:00');
+    const diff = Math.round((d - hoje) / 86400000);
+    const prefix = diff === 0 ? '<span style="color:var(--gold);font-weight:700">Hoje</span>'
+      : diff === 1 ? '<span style="color:var(--terra);font-weight:600">Amanhã</span>'
+      : '<span style="color:#888">em ' + diff + ' dias</span>';
+    const icone = ev.tipo === 'chegada' ? '🛬 Chegada' : '🛫 Check-out';
+    const cor = ev.tipo === 'chegada' ? 'var(--green)' : 'var(--red)';
+    const pago = r.pago === 'Pago';
+    return '<div class="prox-item" onclick="abrirReservaDeQualquerAno(\'' + r.id + '\',' + ev.ano + ')">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">' +
+        '<div><span style="color:' + cor + ';font-weight:600">' + icone + '</span> · <strong>' + esc(r.hospede) + '</strong>' +
+          '<span style="color:#888"> · ' + esc(r.plat||'') + '</span>' + (r.pessoas ? ' <span style="color:#888">· 👥 ' + r.pessoas + '</span>' : '') + '</div>' +
+        '<div style="font-size:0.78rem">' + prefix + ' <span style="color:#888">(' + br(ev.data) + ')</span></div>' +
+      '</div>' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:3px">' +
+        '<div style="font-size:0.74rem;color:#777">' + (r.obs ? '📝 ' + esc(r.obs) : '') + '</div>' +
+        '<div style="font-size:0.74rem"><span class="pill ' + (pago?'pill-pago':'pill-pend') + '">' + (pago?'✅ pago':'⏳ ' + fmt(r.liquido)) + '</span> <span style="color:var(--silver)">✏️</span></div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+function abrirReservaDeQualquerAno(id, ano) {
+  if (ano && ano !== YEAR) { YEAR = ano; _ensureYear(YEAR); updateYearLabel(); rerenderAll(); }
+  editReceita(id);
+}
+
+/* ───────── CENTRAL DE AVISOS ───────── */
+function contarAvisos() {
+  let n = 0;
+  const vis = id => { const e = document.getElementById(id); return e && e.style.display !== 'none' && e.offsetParent !== null || (e && e.style.display === 'block'); };
+  ['banner-backup','banner-df-pendentes','banner-taxas'].forEach(id => {
+    const e = document.getElementById(id);
+    if (e && e.style.display && e.style.display !== 'none') n++;
+  });
+  const av = document.getElementById('alert-vencidos');
+  if (av && av.classList.contains('show')) n++;
+  const hojeS = todayStr();
+  const lem = loadLembretes().filter(l => !l.feito && l.data && l.data <= hojeS).length;
+  return { total: n + lem, lembretes: lem, sistema: n };
+}
+function atualizarAvisos() {
+  const c = contarAvisos();
+  const badge = document.getElementById('avisos-badge');
+  if (badge) { badge.textContent = c.total; badge.style.display = c.total > 0 ? 'flex' : 'none'; }
+  const vazio = document.getElementById('avisos-vazio');
+  if (vazio) vazio.style.display = c.sistema > 0 ? 'none' : 'block';
+  const faixa = document.getElementById('hoje-alerta');
+  const txt = document.getElementById('hoje-alerta-txt');
+  if (faixa && txt) {
+    if (c.total === 0) { faixa.className = 'hoje-alerta zero'; faixa.querySelector('span').textContent = '✅'; txt.textContent = 'Tudo em dia por aqui.'; }
+    else {
+      faixa.className = 'hoje-alerta';
+      faixa.querySelector('span').textContent = '⚠️';
+      const partes = [];
+      if (c.sistema > 0) partes.push(c.sistema + ' aviso' + (c.sistema > 1 ? 's' : '') + ' do sistema');
+      if (c.lembretes > 0) partes.push(c.lembretes + ' lembrete' + (c.lembretes > 1 ? 's' : '') + ' pra hoje');
+      txt.textContent = partes.join(' · ') + ' — toque para ver';
+    }
+  }
+}
+function abrirAvisos() { renderDashboard(); atualizarAvisos(); openModal('modal-avisos'); }
+
+/* ───────── BUSCA GLOBAL ───────── */
+function abrirBusca() {
+  document.getElementById('search-wrap').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  const i = document.getElementById('search-input');
+  i.value = ''; document.getElementById('search-results').innerHTML =
+    '<div style="color:var(--silver);font-size:0.85rem;padding:20px 4px;text-align:center">Digite o nome de um hóspede, telefone, valor, descrição de despesa ou lembrete.</div>';
+  setTimeout(() => i.focus(), 60);
+}
+function fecharBusca() { document.getElementById('search-wrap').classList.remove('open'); document.body.style.overflow = ''; }
+var rodarBuscaDebounced = debounce(() => rodarBusca(), 'busca', 180);
+function rodarBusca() {
+  const q = (document.getElementById('search-input').value || '').trim().toLowerCase();
+  const out = document.getElementById('search-results');
+  if (q.length < 2) { out.innerHTML = '<div style="color:var(--silver);font-size:0.85rem;padding:20px 4px;text-align:center">Digite pelo menos 2 letras.</div>'; return; }
+  const qd = q.replace(/\D/g, '');
+  const reservas = [], despesas = [], lembretes = [];
+  Object.keys(_cache).forEach(yk => {
+    const yr = parseInt(yk); if (isNaN(yr)) return;
+    (_cache[yr].rec || []).forEach(r => {
+      if ((r.hospede || '').toLowerCase().includes(q) || (qd && (r.telefone || '').includes(qd)) ||
+          (r.obs || '').toLowerCase().includes(q) || (r.plat || '').toLowerCase().includes(q) || (r.data || '').includes(q))
+        reservas.push({ r, yr });
+    });
+    (_cache[yr].desp || []).forEach(d => {
+      if ((d.desc || '').toLowerCase().includes(q) || (d.forn || '').toLowerCase().includes(q) ||
+          (d.cat || '').toLowerCase().includes(q) || (d.obs || '').toLowerCase().includes(q))
+        despesas.push({ d, yr });
+    });
+  });
+  const hosp = Object.entries(loadHospedes()).filter(([k, h]) =>
+    (h.nome || '').toLowerCase().includes(q) || (qd && (h.telefone || '').includes(qd)));
+  loadLembretes().forEach(l => { if ((l.txt || '').toLowerCase().includes(q)) lembretes.push(l); });
+
+  reservas.sort((a, b) => (b.r.data || '').localeCompare(a.r.data || ''));
+  despesas.sort((a, b) => (b.d.data || '').localeCompare(a.d.data || ''));
+  let h = '';
+  if (hosp.length) {
+    h += '<div class="search-sec">👥 Hóspedes (' + hosp.length + ')</div>';
+    h += hosp.slice(0, 8).map(([k, x]) =>
+      '<div class="search-item" onclick="fecharBusca();showTab(\'hospedes\');setTimeout(()=>{var f=document.getElementById(\'filtro-hosp-busca\');if(f){f.value=' + JSON.stringify(x.nome || '') + ';renderHospedes();}},120)">' +
+      '<div class="si-t">' + esc(x.nome) + '</div><div class="si-s">' + (x.visitas || 1) + ' visita(s) · ' + fmt(x.totalGasto || 0) + (x.telefone ? ' · ' + formatPhoneDisplay(x.telefone) : '') + '</div></div>').join('');
+  }
+  if (reservas.length) {
+    h += '<div class="search-sec">💰 Reservas (' + reservas.length + ')</div>';
+    h += reservas.slice(0, 15).map(o =>
+      '<div class="search-item" onclick="fecharBusca();abrirReservaDeQualquerAno(\'' + o.r.id + '\',' + o.yr + ')">' +
+      '<div class="si-t">' + esc(o.r.hospede) + ' — ' + fmt(o.r.liquido) + '</div>' +
+      '<div class="si-s">' + br(o.r.data) + (o.r.checkout ? ' → ' + br(o.r.checkout) : '') + ' · ' + esc(o.r.plat || '') + ' · ' + (o.r.pago === 'Pago' ? '✅ pago' : '⏳ a receber') + '</div></div>').join('');
+  }
+  if (despesas.length) {
+    h += '<div class="search-sec">💸 Despesas (' + despesas.length + ')</div>';
+    h += despesas.slice(0, 15).map(o =>
+      '<div class="search-item" onclick="fecharBusca();irParaDespesa(\'' + o.d.id + '\',' + o.yr + ')">' +
+      '<div class="si-t">' + esc(o.d.desc || o.d.cat) + ' — ' + fmt(o.d.valor) + '</div>' +
+      '<div class="si-s">' + br(o.d.data) + ' · ' + esc(o.d.cat) + (o.d.forn ? ' · ' + esc(o.d.forn) : '') + '</div></div>').join('');
+  }
+  if (lembretes.length) {
+    h += '<div class="search-sec">📝 Lembretes (' + lembretes.length + ')</div>';
+    h += lembretes.slice(0, 8).map(l =>
+      '<div class="search-item" onclick="fecharBusca();showTab(\'lembretes\')">' +
+      '<div class="si-t">' + esc(l.txt) + '</div><div class="si-s">' + (l.feito ? '✅ concluído' : '⏳ em aberto') + (l.data ? ' · ' + br(l.data) : '') + '</div></div>').join('');
+  }
+  out.innerHTML = h || '<div style="color:var(--silver);font-size:0.85rem;padding:24px 4px;text-align:center">Nada encontrado para “' + esc(q) + '”.</div>';
+}
+function irParaDespesa(id, ano) {
+  if (ano && ano !== YEAR) { YEAR = ano; _ensureYear(YEAR); updateYearLabel(); rerenderAll(); }
+  MES_SEL = 0; updatePeriodoUI();
+  showTab('financeiro'); showSub('despesas');
+  setTimeout(() => editDespesa(id), 150);
+}
+
+/* ───────── LEMBRETES ───────── */
+function addLembrete() {
+  const t = document.getElementById('lem-txt');
+  const txt = (t.value || '').trim();
+  if (!txt) { toast('⚠️ Escreva o lembrete'); return; }
+  const l = {
+    id: uid(), txt: txt,
+    tipo: document.getElementById('lem-tipo').value || 'tarefa',
+    data: document.getElementById('lem-data').value || '',
+    feito: false, criado: new Date().toISOString()
+  };
+  const arr = loadLembretes(); arr.push(l); saveLembretes(arr);
+  t.value = ''; document.getElementById('lem-data').value = '';
+  renderLembretes(); renderLembretesHoje(); atualizarAvisos();
+  toast('✅ Lembrete adicionado');
+}
+function toggleLembrete(id) {
+  const arr = loadLembretes();
+  const l = arr.find(x => x.id === id); if (!l) return;
+  l.feito = !l.feito;
+  l.concluidoEm = l.feito ? new Date().toISOString() : null;
+  saveLembretes(arr);
+  renderLembretes(); renderLembretesHoje(); atualizarAvisos();
+}
+function delLembrete(id) {
+  const arr = loadLembretes();
+  const l = arr.find(x => x.id === id);
+  if (l && !confirmar('Excluir “' + l.txt + '”?')) return;
+  saveLembretes(arr.filter(x => x.id !== id));
+  renderLembretes(); renderLembretesHoje(); atualizarAvisos();
+  toast('🗑️ Removido');
+}
+function limparLembretesFeitos() {
+  const arr = loadLembretes();
+  const n = arr.filter(l => l.feito).length;
+  if (!n) { toast('Nada concluído pra limpar'); return; }
+  if (!confirmar('Remover ' + n + ' lembrete(s) já concluído(s)?')) return;
+  saveLembretes(arr.filter(l => !l.feito));
+  renderLembretes(); renderLembretesHoje(); atualizarAvisos();
+}
+function lemHTML(l) {
+  const hojeS = todayStr();
+  const late = !l.feito && l.data && l.data < hojeS;
+  const hoje = !l.feito && l.data === hojeS;
+  const quando = !l.data ? 'sem data'
+    : l.data === hojeS ? '📌 hoje'
+    : l.data < hojeS ? '⚠️ atrasado desde ' + br(l.data)
+    : '📅 ' + br(l.data);
+  return '<div class="lem-row' + (l.feito ? ' done' : '') + (late ? ' late' : '') + '">' +
+    '<div class="lem-check" onclick="toggleLembrete(\'' + l.id + '\')">' + (l.feito ? '✓' : '') + '</div>' +
+    '<div class="lem-body"><div class="lem-txt">' + esc(l.txt) + '</div>' +
+    '<div class="lem-meta"><span class="lem-tag ' + (l.tipo === 'compra' ? 'compra' : 'tarefa') + '">' + (l.tipo === 'compra' ? '🛒 compra' : '🔧 tarefa') + '</span>' + quando + '</div></div>' +
+    '<button class="lem-del" onclick="delLembrete(\'' + l.id + '\')">🗑️</button></div>';
+}
+function renderLembretes() {
+  const box = document.getElementById('lem-list'); if (!box) return;
+  const f = (document.getElementById('filtro-lem') || {}).value || 'abertos';
+  const ft = (document.getElementById('filtro-lem-tipo') || {}).value || '';
+  let arr = loadLembretes().slice();
+  if (f === 'abertos') arr = arr.filter(l => !l.feito);
+  if (f === 'feitos') arr = arr.filter(l => l.feito);
+  if (ft) arr = arr.filter(l => (l.tipo || 'tarefa') === ft);
+  arr.sort((a, b) => {
+    if (!!a.feito !== !!b.feito) return a.feito ? 1 : -1;
+    const ad = a.data || '9999-12-31', bd = b.data || '9999-12-31';
+    return ad.localeCompare(bd);
+  });
+  box.innerHTML = arr.length ? arr.map(lemHTML).join('')
+    : '<div class="empty-state"><div class="icon">📝</div><p>Nenhum lembrete por aqui.</p></div>';
+  renderAgendaLembretes();
+}
+function renderLembretesHoje() {
+  const box = document.getElementById('lembretes-hoje'); if (!box) return;
+  const hojeS = todayStr();
+  const arr = loadLembretes().filter(l => !l.feito && (!l.data || l.data <= hojeS))
+    .sort((a, b) => (a.data || '9999').localeCompare(b.data || '9999'));
+  const futuros = loadLembretes().filter(l => !l.feito && l.data > hojeS).length;
+  if (!arr.length) {
+    box.innerHTML = '<div style="color:var(--silver);font-size:0.84rem;text-align:center;padding:8px 4px">Nada pra hoje.' +
+      (futuros ? ' <span style="color:var(--terra)">' + futuros + ' agendado(s) pra frente.</span>' : '') + '</div>';
+    return;
+  }
+  box.innerHTML = arr.slice(0, 5).map(lemHTML).join('') +
+    (arr.length > 5 ? '<div style="text-align:center;font-size:0.78rem;color:var(--silver);margin-top:6px">…e mais ' + (arr.length - 5) + '</div>' : '');
+}
+function renderAgendaLembretes() {
+  const box = document.getElementById('lem-agenda'); if (!box) return;
+  const hoje = new Date(); hoje.setHours(0,0,0,0);
+  const hojeS = todayStr();
+  const fim = new Date(hoje); fim.setDate(fim.getDate() + 30);
+  const fimS = fim.getFullYear() + '-' + String(fim.getMonth()+1).padStart(2,'0') + '-' + String(fim.getDate()).padStart(2,'0');
+  const evs = [];
+  Object.keys(_cache).forEach(yk => {
+    const yr = parseInt(yk); if (isNaN(yr) || !Array.isArray(_cache[yr].rec)) return;
+    _cache[yr].rec.forEach(r => {
+      if (r.data && r.data >= hojeS && r.data <= fimS) evs.push({ d: r.data, t: '🛬 Chegada de ' + r.hospede, id: r.id, yr });
+      if (r.checkout && r.checkout >= hojeS && r.checkout <= fimS) evs.push({ d: r.checkout, t: '🛫 Saída de ' + r.hospede, id: r.id, yr });
+    });
+  });
+  loadLembretes().filter(l => !l.feito && l.data && l.data >= hojeS && l.data <= fimS)
+    .forEach(l => evs.push({ d: l.data, t: (l.tipo === 'compra' ? '🛒 ' : '🔧 ') + l.txt, lem: true }));
+  evs.sort((a, b) => a.d.localeCompare(b.d));
+  box.innerHTML = evs.length ? evs.map(e =>
+    '<div style="display:flex;justify-content:space-between;gap:10px;padding:7px 2px;border-bottom:1px solid rgba(0,0,0,0.06)' + (e.lem ? '' : ';cursor:pointer') + '"' +
+    (e.lem ? '' : ' onclick="abrirReservaDeQualquerAno(\'' + e.id + '\',' + e.yr + ')"') + '>' +
+    '<span>' + esc(e.t) + '</span><span style="color:var(--silver);white-space:nowrap">' + br(e.d) + '</span></div>').join('')
+    : '<div style="color:var(--silver);text-align:center;padding:10px">Nada nos próximos 30 dias.</div>';
+}
+
+/* ───────── CALENDÁRIO: clique no dia abre a reserva ───────── */
+function reservaDoDia(key) {
+  const cal = loadCal();
+  const info = cal[key] || {};
+  if (info.recId) {
+    const r = load('rec').find(x => x.id === info.recId);
+    if (r) return r;
+  }
+  return load('rec').find(r => {
+    if (!r.data) return false;
+    const fim = r.checkout && r.checkout > r.data ? r.checkout : r.data;
+    return key >= r.data && (key < fim || key === r.data);
+  }) || null;
+}
+function openCalDay(key, label) {
+  const cal = loadCal();
+  const info = cal[key] || {};
+  const r = reservaDoDia(key);
+  document.getElementById('cal-modal-title').textContent = '📅 ' + label;
+  document.getElementById('cal-date-key').value = key;
+  document.getElementById('cal-status').value = info.status || '';
+  document.getElementById('cal-hospede').value = info.hospede || '';
+  document.getElementById('cal-pessoas').value = info.pessoas || '';
+  document.getElementById('cal-valor').value = numberToBRLInput(info.valor);
+  const ai = document.getElementById('cal-auto-info');
+  const acao = document.getElementById('cal-acao');
+  const det = document.getElementById('cal-manual');
+  if (det) det.open = false;
+  if (r) {
+    const pago = r.pago === 'Pago';
+    ai.style.display = 'block';
+    ai.innerHTML = '<strong>👤 ' + esc(r.hospede) + '</strong> · ' + esc(r.plat || '') + '<br>' +
+      '📅 ' + br(r.data) + (r.checkout ? ' → ' + br(r.checkout) : '') + ' · ' + (r.dias || 1) + ' noite(s) · 👥 ' + (r.pessoas || 1) + '<br>' +
+      '💰 ' + fmt(r.liquido) + ' · ' + (pago ? '✅ pago' : '⏳ a receber');
+    acao.innerHTML =
+      '<button class="btn btn-navy btn-full" onclick="closeModal(\'modal-cal\');editReceita(\'' + r.id + '\')">✏️ Editar esta reserva</button>' +
+      (r.telefone ? '<a class="btn btn-green btn-full" style="text-decoration:none;text-align:center" target="_blank" href="' + whatsappLink(r.telefone) + '">💬 Falar no WhatsApp</a>' : '') +
+      '<button class="btn btn-terra btn-full" onclick="closeModal(\'modal-cal\');novaReservaNaData(\'' + key + '\')">➕ Nova reserva a partir deste dia</button>';
+  } else {
+    ai.style.display = 'none';
+    acao.innerHTML = '<button class="btn btn-green btn-full" onclick="closeModal(\'modal-cal\');novaReservaNaData(\'' + key + '\')">➕ Criar reserva começando em ' + br(key) + '</button>';
+  }
+  openModal('modal-cal');
+}
+function novaReservaNaData(key) {
+  abrirNovaReserva();
+  PERIODOS = [{ inicio: key, fim: '' }];
+  renderPeriodos();
+}
+
+/* ───────── NOVA RESERVA: autocomplete, contatos, vários períodos ───────── */
+var PERIODOS = [{ inicio: '', fim: '' }];
+function renderPeriodos() {
+  const box = document.getElementById('periodos-list'); if (!box) return;
+  box.innerHTML = PERIODOS.map((p, i) => {
+    let dias = '';
+    if (p.inicio && p.fim && p.fim > p.inicio) dias = Math.round((new Date(p.fim + 'T00:00:00') - new Date(p.inicio + 'T00:00:00')) / 86400000) + 'n';
+    return '<div class="per-row">' +
+      '<input type="date" class="form-control" value="' + (p.inicio || '') + '" onchange="setPeriodo(' + i + ',\'inicio\',this.value)" title="Check-in">' +
+      '<input type="date" class="form-control" value="' + (p.fim || '') + '" onchange="setPeriodo(' + i + ',\'fim\',this.value)" title="Check-out">' +
+      '<span class="per-dias">' + dias + '</span>' +
+      (PERIODOS.length > 1 ? '<button class="per-del" onclick="delPeriodo(' + i + ')" title="Remover">✕</button>' : '<span style="width:34px"></span>') +
+    '</div>';
+  }).join('');
+  const hid = document.getElementById('r-data'), hoc = document.getElementById('r-checkout');
+  if (hid) hid.value = PERIODOS[0].inicio || '';
+  if (hoc) hoc.value = PERIODOS[0].fim || '';
+  const hint = document.getElementById('r-valor-hint');
+  if (hint) hint.textContent = PERIODOS.length > 1 ? 'Este valor será usado em CADA um dos ' + PERIODOS.length + ' períodos.' : 'Valor desta hospedagem.';
+  verificarConflito();
+}
+function setPeriodo(i, campo, v) { PERIODOS[i][campo] = v; renderPeriodos(); }
+function addPeriodo() {
+  const ult = PERIODOS[PERIODOS.length - 1];
+  PERIODOS.push({ inicio: ult.fim || '', fim: '' });
+  renderPeriodos();
+}
+function delPeriodo(i) { PERIODOS.splice(i, 1); if (!PERIODOS.length) PERIODOS = [{ inicio:'', fim:'' }]; renderPeriodos(); }
+
+function abrirNovaReserva() {
+  ['r-hospede','r-telefone','r-plat','r-pessoas','r-valor','r-pgto','r-obs'].forEach(id => { const e = document.getElementById(id); if (e) e.value = ''; });
+  PERIODOS = [{ inicio: '', fim: '' }];
+  renderPeriodos();
+  const tp = document.getElementById('taxa-preview'); if (tp) tp.textContent = '💡 Preencha plataforma e valor para calcular a taxa';
+  const cb = document.getElementById('conflito-box'); if (cb) cb.style.display = 'none';
+  const bs = document.getElementById('btn-salvar-rec'); if (bs) { bs.disabled = false; bs.style.opacity = '1'; }
+  const hint = document.getElementById('hospede-hint'); if (hint) hint.style.display = 'none';
+  acFechar();
+  setPago('Pago');
+  openModal('modal-rec');
+}
+
+/* autocomplete a partir do CRM de hóspedes */
+function acFechar() { const l = document.getElementById('ac-list'); if (l) l.classList.remove('open'); }
+function acBuscar() {
+  const inp = document.getElementById('r-hospede'), lst = document.getElementById('ac-list');
+  if (!inp || !lst) return;
+  const q = (inp.value || '').trim().toLowerCase();
+  const hs = Object.entries(loadHospedes());
+  let res = q.length === 0
+    ? hs.slice().sort((a, b) => (b[1].ultimaVisita || '').localeCompare(a[1].ultimaVisita || '')).slice(0, 6)
+    : hs.filter(([k, h]) => (h.nome || '').toLowerCase().includes(q) || (h.telefone || '').includes(q.replace(/\D/g, ''))).slice(0, 8);
+  if (!res.length) { acFechar(); lookupHospede(); return; }
+  lst.innerHTML = (q.length === 0 ? '<div class="ac-item" style="color:var(--silver);font-size:0.75rem;cursor:default">Hóspedes recentes</div>' : '') +
+    res.map(([k, h]) =>
+      '<div class="ac-item" onclick="acEscolher(' + JSON.stringify(k).replace(/"/g, '&quot;') + ')">' +
+      '<strong>' + esc(h.nome) + '</strong>' + ((h.visitas || 1) >= 2 ? ' 🌟' : '') +
+      '<small>' + (h.telefone ? formatPhoneDisplay(h.telefone) + ' · ' : '') + (h.visitas || 1) + ' visita(s) · ' + fmt(h.totalGasto || 0) + '</small></div>').join('');
+  lst.classList.add('open');
+}
+function acEscolher(key) {
+  const h = loadHospedes()[key]; if (!h) return;
+  document.getElementById('r-hospede').value = h.nome || '';
+  const tel = document.getElementById('r-telefone');
+  if (tel && h.telefone) { tel.value = formatPhoneDisplay(h.telefone); }
+  if ((h.plataformasUsadas || []).length === 1) {
+    const ps = document.getElementById('r-plat');
+    if (ps && !ps.value) { ps.value = h.plataformasUsadas[0]; updateTaxaPreview(); }
+  }
+  acFechar();
+  const hint = document.getElementById('hospede-hint');
+  if (hint) {
+    hint.style.display = 'block';
+    hint.innerHTML = '🌟 <strong>' + esc(h.nome) + '</strong> — ' + (h.visitas || 1) + ' visita(s), total ' + fmt(h.totalGasto || 0) +
+      (h.ultimaVisita ? ' · última em ' + br(h.ultimaVisita) : '') + '. Dados preenchidos automaticamente.';
+  }
+}
+document.addEventListener('click', function (e) {
+  const w = e.target.closest ? e.target.closest('.ac-wrap') : null;
+  if (!w) acFechar();
+});
+/* contatos do celular (Chrome Android; iPhone não suporta) */
+async function pegarDosContatos() {
+  if (!('contacts' in navigator) || !navigator.contacts.select) {
+    toast('📇 Seu navegador não abre a agenda. Use a busca por nome acima.', 3800); return;
+  }
+  try {
+    const c = await navigator.contacts.select(['name', 'tel'], { multiple: false });
+    if (!c || !c.length) return;
+    const p = c[0];
+    if (p.name && p.name.length) document.getElementById('r-hospede').value = p.name[0];
+    if (p.tel && p.tel.length) {
+      const el = document.getElementById('r-telefone');
+      el.value = p.tel[0]; formatPhone(el); lookupHospedePorTel();
+    }
+    acFechar();
+  } catch (err) { console.warn(err); }
+}
+
+/* conflito considerando todos os períodos */
+function verificarConflito() {
+  const box = document.getElementById('conflito-box');
+  const btn = document.getElementById('btn-salvar-rec');
+  if (!box || !btn) return;
+  const cal = loadCal();
+  const recs = load('rec');
+  const problemas = [];
+  const vistos = {};
+  PERIODOS.forEach((p, i) => {
+    if (!p.inicio) return;
+    if (p.fim && p.fim < p.inicio) { problemas.push('Período ' + (i+1) + ': check-out antes do check-in.'); return; }
+    getDatesInRange(p.inicio, p.fim).forEach(d => {
+      if (vistos[d]) problemas.push('Os períodos ' + vistos[d] + ' e ' + (i+1) + ' se sobrepõem em ' + br(d) + '.');
+      vistos[d] = (i+1);
+      const info = cal[d];
+      if (info && (info.status === 'occupied' || info.status === 'reserved' || info.status === 'blocked')) {
+        const dono = info.hospede ? ' (' + info.hospede + ')' : '';
+        problemas.push('Dia ' + br(d) + ' já está ocupado' + dono + '.');
+      }
+    });
+  });
+  const uniq = [...new Set(problemas)];
+  if (uniq.length) {
+    box.style.display = 'block';
+    box.innerHTML = '⚠️ <strong>Atenção:</strong><br>' + uniq.slice(0, 6).map(x => '• ' + esc(x)).join('<br>') +
+      (uniq.length > 6 ? '<br>…e mais ' + (uniq.length - 6) : '') +
+      '<br><small>Você ainda pode salvar, mas confira as datas.</small>';
+  } else box.style.display = 'none';
+  btn.disabled = false; btn.style.opacity = '1';
+}
+
+/* salvar 1..N reservas de uma vez */
+function saveReceita() {
+  const hospede = (document.getElementById('r-hospede').value || '').trim();
+  const telefone = normalizePhone((document.getElementById('r-telefone') || { value: '' }).value);
+  const plat = document.getElementById('r-plat').value;
+  const pessoas = parseInt(document.getElementById('r-pessoas').value || 1);
+  const valor = parseBRL(document.getElementById('r-valor').value);
+  const pgto = document.getElementById('r-pgto').value;
+  const obs = document.getElementById('r-obs').value;
+  const periodos = PERIODOS.filter(p => p.inicio);
+
+  if (!hospede || !plat || !valor) { toast('⚠️ Preencha hóspede, plataforma e valor'); return; }
+  if (!periodos.length) { toast('⚠️ Informe pelo menos uma data de check-in'); return; }
+  if (valor <= 0) { toast('⚠️ Valor precisa ser maior que zero'); return; }
+  for (const p of periodos) if (p.fim && p.fim < p.inicio) { toast('⚠️ Check-out antes do check-in'); return; }
+  if (periodos.length > 1 && !confirmar('Criar ' + periodos.length + ' reservas para ' + hospede + ', de ' + fmt(valor) + ' cada?\n\nTotal: ' + fmt(valor * periodos.length))) return;
+
+  const taxa = calcTaxa(plat, valor);
+  const criadas = [];
+  periodos.forEach(p => {
+    let dias = 1;
+    if (p.fim && p.fim > p.inicio) dias = Math.round((new Date(p.fim + 'T00:00:00') - new Date(p.inicio + 'T00:00:00')) / 86400000);
+    const rec = {
+      id: uid(), data: p.inicio, checkout: p.fim || '', hospede, telefone, plat, dias, pessoas,
+      valor, taxa, liquido: valor - taxa, pgto, pago: pagoStatus, obs, mes: getMes(p.inicio)
+    };
+    criadas.push(rec);
+  });
+
+  /* agrupa por ano para não misturar dados de anos diferentes */
+  const porAno = {};
+  criadas.forEach(r => { const y = parseInt(r.data.slice(0, 4)); (porAno[y] = porAno[y] || []).push(r); });
+  Object.keys(porAno).forEach(y => {
+    const yr = parseInt(y);
+    _ensureYear(yr);
+    const arr = (_cache[yr].rec || []).concat(porAno[y]);
+    _cache[yr].rec = arr;
+    try { localStorage.setItem('rl_rec_' + yr, JSON.stringify(arr)); } catch (e) {}
+    _pushToFirestore('rec_' + yr, arr);
+  });
+  criadas.forEach(r => { fillCalendar(r); registrarHospede(r); });
+
+  closeModal('modal-rec');
+  PERIODOS = [{ inicio: '', fim: '' }];
+  toast(criadas.length > 1 ? '✅ ' + criadas.length + ' reservas salvas! 📅' : '✅ Hospedagem salva! Calendário atualizado 📅', 3200);
+  rerenderAll();
+}
+
+/* ───────── AJUSTES FINAIS ───────── */
+function scrollCalendarioParaHoje() {
+  const hoje = new Date(), anoHoje = hoje.getFullYear();
+  if (YEAR !== anoHoje && anoHoje >= 2026 && anoHoje <= 2099) { YEAR = anoHoje; _ensureYear(YEAR); rerenderAll(); }
+  scrollCalendarioParaMes(hoje.getMonth() + 1);
+}
+
+/* ───────── BOOT v4 ───────── */
+setPago('Pago');
+MES_SEL = (new Date()).getMonth() + 1;
+updatePeriodoUI();
+renderPeriodos();
+renderDashboard();
+ajustarResumoPeriodo();
+renderReceitas();
+renderDespesas();
+renderCalendario();
+renderConfig();
+renderHospedes();
+renderDespFixas();
+renderResumoRec();
+renderResumoDesp();
+renderLembretes();
+renderLembretesHoje();
+renderLembreteBackup();
+renderBannerDespFixas();
+atualizarAvisos();
+updateFab('hoje');
+
 _initFirebase();
-// v3.15 — resumo mensal recolhível + toggle rápido de pagamento + filtro de status
-// v3.16 — card A Receber + status Cancelada + templates WhatsApp + exportação CSV
-// v3.17 — mensagens de WhatsApp editáveis em Config (com {nome} e padrão restaurável)
-// v3.18 — 3ª mensagem (durante a estadia + regras da casa) · endereço + link Google Maps na boas-vindas · dashboard mobile reorganizado (Análise detalhada recolhível)
 </script>
 </body>
 </html>
