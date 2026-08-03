@@ -436,6 +436,22 @@ details#cal-manual summary::-webkit-details-marker{display:none}
   .table-wrap.keep-table th{position:sticky;top:0}
 }
 @media print{ .subtab-panel{display:block!important} .subtab-bar,.search-wrap{display:none!important} }
+
+/* mensagens para hóspedes */
+.msg-tabs{display:flex;gap:6px;margin-bottom:10px}
+.msg-tab{flex:1;padding:9px 4px;border:1px solid var(--gray2);background:#fff;border-radius:9px;font-family:'Outfit',sans-serif;font-size:0.76rem;font-weight:600;color:var(--silver);cursor:pointer}
+.msg-tab.active{background:var(--navy);color:var(--gold);border-color:var(--navy)}
+.msg-lang{display:flex;gap:6px;margin-bottom:10px}
+.msg-lang button{flex:1;padding:7px;border:1px solid var(--gray2);background:#fff;border-radius:8px;font-size:0.76rem;font-family:'Outfit',sans-serif;cursor:pointer;color:var(--silver);font-weight:600}
+.msg-lang button.active{background:var(--gold);color:var(--navy);border-color:var(--gold)}
+.msg-area{width:100%;min-height:190px;padding:12px;border:2px solid var(--gray2);border-radius:10px;font-family:'Outfit',sans-serif;font-size:0.86rem;line-height:1.5;resize:vertical;color:var(--text)}
+.msg-vars{font-size:0.7rem;color:var(--silver);margin-top:6px;line-height:1.6}
+.msg-vars code{background:var(--gray);padding:1px 5px;border-radius:4px;color:var(--navy);font-size:0.68rem}
+.msg-btn{background:none;border:none;color:var(--green);font-size:0.95rem;cursor:pointer;padding:2px 4px;vertical-align:middle}
+.tpl-box{border:1px solid var(--gray2);border-radius:10px;padding:11px;margin-bottom:10px}
+.tpl-box h4{font-size:0.83rem;color:var(--navy);margin-bottom:7px;font-weight:600}
+.tpl-box textarea{width:100%;min-height:120px;padding:9px;border:1px solid var(--gray2);border-radius:8px;font-family:'Outfit',sans-serif;font-size:0.78rem;line-height:1.45;resize:vertical}
+.tpl-box label{font-size:0.7rem;color:var(--silver);font-weight:600;display:block;margin:7px 0 3px}
 </style>
 </head>
 <body>
@@ -827,6 +843,21 @@ details#cal-manual summary::-webkit-details-marker{display:none}
       <input type="file" id="importFile" accept=".json" style="display:none" onchange="importarBackup(event)">
     </div>
   </div>
+  <div class="card">
+    <div class="card-header bg-green">💬 Mensagens para hóspedes</div>
+    <div class="card-body">
+      <div class="info-box info-blue">
+        💡 Estes são os textos que aparecem no botão 💬 do <strong>Próximos 7 dias</strong> e das reservas.
+        Use as variáveis: <code>{nome}</code> <code>{primeiroNome}</code> <code>{checkin}</code>
+        <code>{checkout}</code> <code>{dias}</code> <code>{pessoas}</code> <code>{plataforma}</code>
+        <code>{valor}</code> <code>{senha}</code> (4 últimos dígitos do celular do hóspede).
+      </div>
+      <div id="cfg-msgs"></div>
+      <button class="btn btn-green btn-full" onclick="salvarMsgs()">✅ Salvar mensagens</button>
+      <button class="btn btn-full btn-cancel" onclick="restaurarMsgs()">↺ Voltar aos textos padrão</button>
+    </div>
+  </div>
+
 <div class="card">
     <div class="card-header bg-navy">⚙️ Taxas das Plataformas</div>
     <div class="card-body">
@@ -874,6 +905,29 @@ details#cal-manual summary::-webkit-details-marker{display:none}
       <div style="font-size:0.85rem;margin-bottom:10px">Conectado como <strong id="cfg-email">—</strong></div>
       <button class="btn btn-red btn-full" onclick="doLogout()">Sair da conta</button>
     </div>
+  </div>
+</div>
+
+<!-- ═══════════ MODAL MENSAGEM AO HÓSPEDE ═══════════ -->
+<div class="modal-backdrop" id="modal-msg" onclick="closeModalOutside(event,'modal-msg')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">💬 Mensagem ao hóspede</div>
+    <div class="info-box info-blue" id="msg-info"></div>
+    <div class="msg-tabs">
+      <button class="msg-tab" id="mt-boasvindas" onclick="setMsgTipo('boasvindas')">👋 Boas-vindas</button>
+      <button class="msg-tab" id="mt-checkin" onclick="setMsgTipo('checkin')">🔑 Check-in</button>
+      <button class="msg-tab" id="mt-checkout" onclick="setMsgTipo('checkout')">🛫 Check-out</button>
+    </div>
+    <div class="msg-lang">
+      <button id="ml-pt" onclick="setMsgLang('pt')">🇧🇷 Português</button>
+      <button id="ml-es" onclick="setMsgLang('es')">🇪🇸 Español</button>
+    </div>
+    <textarea class="msg-area" id="msg-texto" oninput="atualizarLinkMsg()"></textarea>
+    <div class="msg-vars">Pode editar antes de enviar — o texto salvo em ⚙️ Config não muda.</div>
+    <a class="btn btn-green btn-full" id="msg-wa" style="margin-top:10px;text-decoration:none;text-align:center" target="_blank" rel="noopener">💬 Abrir no WhatsApp</a>
+    <button class="btn btn-navy btn-full" style="margin-top:8px" onclick="copiarMsg()">📋 Copiar texto</button>
+    <button class="btn btn-full btn-cancel" onclick="closeModal('modal-msg')">Fechar</button>
   </div>
 </div>
 
@@ -4071,7 +4125,7 @@ function showTab(id, btn) {
   if (id === 'financeiro') { renderReceitas(); renderDespesas(); renderDespFixas(); }
   if (id === 'analises') renderAnalises();
   if (id === 'hospedes') renderHospedes();
-  if (id === 'config') { renderConfig(); }
+  if (id === 'config') { renderConfig(); renderMsgsConfig(); }
   if (id === 'lembretes') renderLembretes();
   updateFab(id);
 }
@@ -4173,6 +4227,7 @@ function renderReceitas() {
           (r.obs ? '<dt>Obs.</dt><dd>' + esc(r.obs) + '</dd>' : '') +
         '</dl>' +
         '<div class="crow-acts">' +
+          '<button class="btn btn-green" onclick="event.stopPropagation();abrirMsg(\'' + r.id + '\',' + YEAR + ',\'checkin\')">💬 Mensagem</button>' +
           '<button class="btn btn-navy" onclick="event.stopPropagation();editReceita(\'' + r.id + '\')">✏️ Editar</button>' +
           '<button class="btn btn-terra" onclick="event.stopPropagation();duplicarReceita(\'' + r.id + '\')">📋 Duplicar</button>' +
           '<button class="btn btn-red" onclick="event.stopPropagation();deleteReceita(\'' + r.id + '\')">🗑️ Excluir</button>' +
@@ -4362,12 +4417,18 @@ function renderProximos() {
     return '<div class="prox-item" onclick="abrirReservaDeQualquerAno(\'' + r.id + '\',' + ev.ano + ')">' +
       '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">' +
         '<div><span style="color:' + cor + ';font-weight:600">' + icone + '</span> · <strong>' + esc(r.hospede) + '</strong>' +
+          whatsappBtn(r.telefone, r.hospede) +
           '<span style="color:#888"> · ' + esc(r.plat||'') + '</span>' + (r.pessoas ? ' <span style="color:#888">· 👥 ' + r.pessoas + '</span>' : '') + '</div>' +
         '<div style="font-size:0.78rem">' + prefix + ' <span style="color:#888">(' + br(ev.data) + ')</span></div>' +
       '</div>' +
       '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:3px">' +
         '<div style="font-size:0.74rem;color:#777">' + (r.obs ? '📝 ' + esc(r.obs) : '') + '</div>' +
-        '<div style="font-size:0.74rem"><span class="pill ' + (pago?'pill-pago':'pill-pend') + '">' + (pago?'✅ pago':'⏳ ' + fmt(r.liquido)) + '</span> <span style="color:var(--silver)">✏️</span></div>' +
+        '<div style="font-size:0.74rem;display:flex;align-items:center;gap:6px;flex-wrap:wrap">' +
+          (ev.tipo === 'chegada'
+            ? '<button class="btn btn-green" style="padding:5px 9px;font-size:0.7rem" onclick="event.stopPropagation();abrirMsg(\'' + r.id + '\',' + ev.ano + ',\'boasvindas\')">👋 Boas-vindas</button>' +
+              '<button class="btn btn-navy" style="padding:5px 9px;font-size:0.7rem" onclick="event.stopPropagation();abrirMsg(\'' + r.id + '\',' + ev.ano + ',\'checkin\')">🔑 Check-in</button>'
+            : '<button class="btn btn-terra" style="padding:5px 9px;font-size:0.7rem" onclick="event.stopPropagation();abrirMsg(\'' + r.id + '\',' + ev.ano + ',\'checkout\')">🛫 Check-out</button>') +
+          '<span class="pill ' + (pago?'pill-pago':'pill-pend') + '">' + (pago?'✅ pago':'⏳ ' + fmt(r.liquido)) + '</span> <span style="color:var(--silver)">✏️</span></div>' +
       '</div>' +
     '</div>';
   }).join('');
@@ -4443,8 +4504,8 @@ function rodarBusca() {
         despesas.push({ d, yr });
     });
   });
-  const hosp = Object.entries(loadHospedes()).filter(([k, h]) =>
-    (h.nome || '').toLowerCase().includes(q) || (qd && (h.telefone || '').includes(qd)));
+  const hosp = indiceHospedes().filter(h =>
+    semAcento(h.nome).includes(semAcento(q)) || (qd && (h.telefone || '').includes(qd)));
   loadLembretes().forEach(l => { if ((l.txt || '').toLowerCase().includes(q)) lembretes.push(l); });
 
   reservas.sort((a, b) => (b.r.data || '').localeCompare(a.r.data || ''));
@@ -4452,7 +4513,7 @@ function rodarBusca() {
   let h = '';
   if (hosp.length) {
     h += '<div class="search-sec">👥 Hóspedes (' + hosp.length + ')</div>';
-    h += hosp.slice(0, 8).map(([k, x]) =>
+    h += hosp.slice(0, 8).map(x =>
       '<div class="search-item" onclick="fecharBusca();showTab(\'hospedes\');setTimeout(()=>{var f=document.getElementById(\'filtro-hosp-busca\');if(f){f.value=' + JSON.stringify(x.nome || '') + ';renderHospedes();}},120)">' +
       '<div class="si-t">' + esc(x.nome) + '</div><div class="si-s">' + (x.visitas || 1) + ' visita(s) · ' + fmt(x.totalGasto || 0) + (x.telefone ? ' · ' + formatPhoneDisplay(x.telefone) : '') + '</div></div>').join('');
   }
@@ -4630,7 +4691,7 @@ function openCalDay(key, label) {
       '💰 ' + fmt(r.liquido) + ' · ' + (pago ? '✅ pago' : '⏳ a receber');
     acao.innerHTML =
       '<button class="btn btn-navy btn-full" onclick="closeModal(\'modal-cal\');editReceita(\'' + r.id + '\')">✏️ Editar esta reserva</button>' +
-      (r.telefone ? '<a class="btn btn-green btn-full" style="text-decoration:none;text-align:center" target="_blank" href="' + whatsappLink(r.telefone) + '">💬 Falar no WhatsApp</a>' : '') +
+      '<button class="btn btn-green btn-full" onclick="closeModal(\'modal-cal\');abrirMsg(\'' + r.id + '\',' + YEAR + ',\'checkin\')">💬 Mandar mensagem</button>' +
       '<button class="btn btn-terra btn-full" onclick="closeModal(\'modal-cal\');novaReservaNaData(\'' + key + '\')">➕ Nova reserva a partir deste dia</button>';
   } else {
     ai.style.display = 'none';
@@ -4686,39 +4747,98 @@ function abrirNovaReserva() {
   openModal('modal-rec');
 }
 
-/* autocomplete a partir do CRM de hóspedes */
+/* autocomplete: junta o cadastro (CRM) com TODAS as reservas de todos os anos */
+function semAcento(t) {
+  return (t || '').toString().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+}
+function indiceHospedes() {
+  const idx = {};
+  const chave = (nome, tel) => (normalizePhone(tel) || 'nome:' + semAcento(nome));
+  Object.entries(loadHospedes()).forEach(([k, h]) => {
+    if (!h || !h.nome) return;
+    const key = chave(h.nome, h.telefone);
+    idx[key] = {
+      key: k, nome: h.nome, telefone: h.telefone || '',
+      visitas: h.visitas || 0, totalGasto: h.totalGasto || 0,
+      ultima: h.ultimaVisita || '', plats: (h.plataformasUsadas || []).slice(), doCRM: true
+    };
+  });
+  Object.keys(_cache).forEach(yk => {
+    const yr = parseInt(yk); if (isNaN(yr) || !Array.isArray(_cache[yr].rec)) return;
+    _cache[yr].rec.forEach(r => {
+      if (!r.hospede) return;
+      const key = chave(r.hospede, r.telefone);
+      if (!idx[key]) {
+        idx[key] = { key: null, nome: r.hospede, telefone: r.telefone || '', visitas: 0, totalGasto: 0, ultima: '', plats: [], doCRM: false };
+      }
+      const e = idx[key];
+      if (!e.doCRM) {
+        e.visitas += 1;
+        e.totalGasto += (r.valor || 0);
+        if (!e.telefone && r.telefone) e.telefone = r.telefone;
+        if (r.plat && !e.plats.includes(r.plat)) e.plats.push(r.plat);
+      }
+      if ((r.data || '') > (e.ultima || '')) e.ultima = r.data || e.ultima;
+    });
+  });
+  return Object.values(idx);
+}
 function acFechar() { const l = document.getElementById('ac-list'); if (l) l.classList.remove('open'); }
 function acBuscar() {
   const inp = document.getElementById('r-hospede'), lst = document.getElementById('ac-list');
   if (!inp || !lst) return;
-  const q = (inp.value || '').trim().toLowerCase();
-  const hs = Object.entries(loadHospedes());
-  let res = q.length === 0
-    ? hs.slice().sort((a, b) => (b[1].ultimaVisita || '').localeCompare(a[1].ultimaVisita || '')).slice(0, 6)
-    : hs.filter(([k, h]) => (h.nome || '').toLowerCase().includes(q) || (h.telefone || '').includes(q.replace(/\D/g, ''))).slice(0, 8);
-  if (!res.length) { acFechar(); lookupHospede(); return; }
+  const bruto = (inp.value || '');
+  const q = semAcento(bruto);
+  const qd = bruto.replace(/\D/g, '');
+  const todos = indiceHospedes();
+  let res;
+  if (q.length === 0) {
+    res = todos.slice().sort((a, b) => (b.ultima || '').localeCompare(a.ultima || '')).slice(0, 6);
+  } else {
+    res = todos.filter(h => {
+      const n = semAcento(h.nome);
+      if (n.includes(q)) return true;
+      if (qd.length >= 3 && (h.telefone || '').includes(qd)) return true;
+      /* também casa por partes do nome, em qualquer ordem: "silva maria" acha "Maria Silva" */
+      const partes = q.split(/\s+/).filter(Boolean);
+      return partes.length > 1 && partes.every(pt => n.includes(pt));
+    }).sort((a, b) => {
+      const an = semAcento(a.nome), bn = semAcento(b.nome);
+      const ap = an.startsWith(q) ? 0 : 1, bp = bn.startsWith(q) ? 0 : 1;
+      if (ap !== bp) return ap - bp;
+      if ((b.visitas || 0) !== (a.visitas || 0)) return (b.visitas || 0) - (a.visitas || 0);
+      return an.localeCompare(bn);
+    }).slice(0, 10);
+  }
+  if (!res.length) {
+    lst.innerHTML = '<div class="ac-item" style="cursor:default;color:var(--silver)">Nenhum hóspede com “' + esc(bruto) + '”.<small>É a primeira vez dele — pode seguir digitando o nome normalmente.</small></div>';
+    lst.classList.add('open');
+    return;
+  }
+  window._acRes = res;
   lst.innerHTML = (q.length === 0 ? '<div class="ac-item" style="color:var(--silver);font-size:0.75rem;cursor:default">Hóspedes recentes</div>' : '') +
-    res.map(([k, h]) =>
-      '<div class="ac-item" onclick="acEscolher(' + JSON.stringify(k).replace(/"/g, '&quot;') + ')">' +
+    res.map((h, i) =>
+      '<div class="ac-item" onclick="acEscolher(' + i + ')">' +
       '<strong>' + esc(h.nome) + '</strong>' + ((h.visitas || 1) >= 2 ? ' 🌟' : '') +
-      '<small>' + (h.telefone ? formatPhoneDisplay(h.telefone) + ' · ' : '') + (h.visitas || 1) + ' visita(s) · ' + fmt(h.totalGasto || 0) + '</small></div>').join('');
+      '<small>' + (h.telefone ? formatPhoneDisplay(h.telefone) + ' · ' : '') + (h.visitas || 1) + ' visita(s) · ' + fmt(h.totalGasto || 0) +
+      (h.ultima ? ' · última ' + br(h.ultima) : '') + '</small></div>').join('');
   lst.classList.add('open');
 }
-function acEscolher(key) {
-  const h = loadHospedes()[key]; if (!h) return;
+function acEscolher(i) {
+  const h = (window._acRes || [])[i]; if (!h) return;
   document.getElementById('r-hospede').value = h.nome || '';
   const tel = document.getElementById('r-telefone');
-  if (tel && h.telefone) { tel.value = formatPhoneDisplay(h.telefone); }
-  if ((h.plataformasUsadas || []).length === 1) {
+  if (tel && h.telefone) tel.value = formatPhoneDisplay(h.telefone);
+  if ((h.plats || []).length === 1) {
     const ps = document.getElementById('r-plat');
-    if (ps && !ps.value) { ps.value = h.plataformasUsadas[0]; updateTaxaPreview(); }
+    if (ps && !ps.value) { ps.value = h.plats[0]; updateTaxaPreview(); }
   }
   acFechar();
   const hint = document.getElementById('hospede-hint');
   if (hint) {
     hint.style.display = 'block';
     hint.innerHTML = '🌟 <strong>' + esc(h.nome) + '</strong> — ' + (h.visitas || 1) + ' visita(s), total ' + fmt(h.totalGasto || 0) +
-      (h.ultimaVisita ? ' · última em ' + br(h.ultimaVisita) : '') + '. Dados preenchidos automaticamente.';
+      (h.ultima ? ' · última em ' + br(h.ultima) : '') + '. Dados preenchidos automaticamente.';
   }
 }
 document.addEventListener('click', function (e) {
@@ -4823,6 +4943,136 @@ function saveReceita() {
   rerenderAll();
 }
 
+
+/* ═══════════ MENSAGENS PARA HÓSPEDES ═══════════ */
+var MSG_TIPOS = [
+  { id: 'boasvindas', nome: '👋 Boas-vindas', desc: 'Logo depois que a reserva é confirmada' },
+  { id: 'checkin',    nome: '🔑 Check-in',    desc: 'Um ou dois dias antes da chegada — acesso e senha' },
+  { id: 'checkout',   nome: '🛫 Check-out',   desc: 'Véspera da saída — horário e despedida' }
+];
+var MSGS_PADRAO = {
+  boasvindas: {
+    pt: 'Olá {primeiroNome}, aqui é o Érico, do Rota Latina! 😊\n\nSua reserva está confirmada:\n📅 Entrada {checkin} · Saída {checkout}\n🛏️ {dias} noite(s) · 👥 {pessoas} pessoa(s)\n\nFico à disposição para o que você precisar. Uns dias antes da sua chegada eu te mando todas as instruções de acesso ao prédio e ao apartamento.\n\nSeja muito bem-vindo!',
+    es: '¡Hola {primeiroNome}! Soy Érico, de Rota Latina 😊\n\nTu reserva está confirmada:\n📅 Entrada {checkin} · Salida {checkout}\n🛏️ {dias} noche(s) · 👥 {pessoas} persona(s)\n\nQuedo a tu disposición para lo que necesites. Unos días antes de tu llegada te envío todas las instrucciones de acceso al edificio y al apartamento.\n\n¡Bienvenido!'
+  },
+  checkin: {
+    pt: 'Oi {primeiroNome}, está tudo pronto para a sua chegada em {checkin}! 🔑\n\n📍 City Residencial — Bauru/SP\n🏢 Apartamento 608, 6º andar\n🕒 Check-in a partir das 15h\n\nAté o elevador são duas portas: a primeira de vidro e a segunda uma grade. Aponte a câmera do celular no QR Code do link que te enviei e elas destravam. Se não abrir, é só chamar no interfone — a portaria funciona 24 horas.\n\nA fechadura do apartamento é eletrônica: encoste a mão no teclado que ele acende, digite {senha} e confirme.\n\n⚠️ Importante: a porta não tranca sozinha. Ao entrar, trave pelo botão de dentro; ao sair, passe a mão no teclado e confira se ficou fechada.\n\nQualquer coisa me chama por aqui. Boa viagem!',
+    es: '¡Hola {primeiroNome}! Todo listo para tu llegada el {checkin} 🔑\n\n📍 City Residencial — Bauru/SP\n🏢 Apartamento 608, sexto piso\n🕒 Check-in a partir de las 15h\n\nHasta el elevador hay dos puertas: la primera de vidrio y la segunda una reja. Apunta la cámara de tu celular al código QR del enlace que te envié y se destraban. Si no abre, llama por el intercomunicador — la portería funciona 24 horas.\n\nLa cerradura del apartamento es electrónica: toca el teclado para que se ilumine, escribe {senha} y confirma.\n\n⚠️ Importante: la puerta no se traba sola. Al entrar, trábala con el botón de adentro; al salir, pasa la mano por el teclado y confirma que quedó cerrada.\n\nCualquier cosa me escribes por aquí. ¡Buen viaje!'
+  },
+  checkout: {
+    pt: 'Oi {primeiroNome}! Passando só pra lembrar que seu check-out é {checkout}, até as 12h. 🛫\n\nAntes de sair, confira se não esqueceu nada, feche as janelas e passe a mão no teclado da fechadura pra trancar a porta.\n\nFoi um prazer receber você! Se puder deixar uma avaliação, ajuda muito. Boa viagem e volte sempre! 🙏',
+    es: '¡Hola {primeiroNome}! Solo para recordarte que tu check-out es el {checkout}, hasta las 12h. 🛫\n\nAntes de salir, revisa que no olvides nada, cierra las ventanas y pasa la mano por el teclado de la cerradura para trabar la puerta.\n\n¡Fue un gusto recibirte! Si puedes dejar una reseña, me ayuda mucho. ¡Buen viaje y vuelve pronto! 🙏'
+  }
+};
+function getMsgs() {
+  const c = loadConfig();
+  const m = (c && c.msgs) ? c.msgs : {};
+  const out = {};
+  MSG_TIPOS.forEach(t => {
+    out[t.id] = {
+      pt: (m[t.id] && m[t.id].pt) || MSGS_PADRAO[t.id].pt,
+      es: (m[t.id] && m[t.id].es) || MSGS_PADRAO[t.id].es
+    };
+  });
+  return out;
+}
+function preencherMsg(txt, r) {
+  const nome = (r.hospede || '').trim();
+  const primeiro = nome.split(/\s+/)[0] || nome;
+  const tel = normalizePhone(r.telefone || '');
+  const senha = tel ? tel.slice(-4) : '（os 4 últimos dígitos do seu celular）';
+  return (txt || '')
+    .replace(/\{nome\}/g, nome)
+    .replace(/\{primeiroNome\}/g, primeiro)
+    .replace(/\{checkin\}/g, br(r.data))
+    .replace(/\{checkout\}/g, r.checkout ? br(r.checkout) : '—')
+    .replace(/\{dias\}/g, r.dias || 1)
+    .replace(/\{pessoas\}/g, r.pessoas || 1)
+    .replace(/\{plataforma\}/g, r.plat || '')
+    .replace(/\{valor\}/g, fmt(r.valor))
+    .replace(/\{senha\}/g, senha);
+}
+var MSG_REC = null, MSG_TIPO = 'checkin', MSG_LANG = 'pt';
+function abrirMsg(id, ano, tipo) {
+  if (ano && ano !== YEAR) { YEAR = ano; _ensureYear(YEAR); updateYearLabel(); rerenderAll(); }
+  const r = load('rec').find(x => x.id === id);
+  if (!r) { toast('⚠️ Reserva não encontrada'); return; }
+  MSG_REC = r;
+  MSG_TIPO = tipo || 'checkin';
+  MSG_LANG = (loadConfig().idiomaPadrao) || 'pt';
+  document.getElementById('msg-info').innerHTML =
+    '<strong>👤 ' + esc(r.hospede) + '</strong>' + (r.telefone ? ' · ' + formatPhoneDisplay(r.telefone) : ' · <span style="color:var(--red)">sem telefone cadastrado</span>') +
+    '<br>📅 ' + br(r.data) + (r.checkout ? ' → ' + br(r.checkout) : '') + ' · ' + esc(r.plat || '');
+  renderMsg();
+  openModal('modal-msg');
+}
+function setMsgTipo(t) { MSG_TIPO = t; renderMsg(); }
+function setMsgLang(l) { MSG_LANG = l; renderMsg(); }
+function renderMsg() {
+  MSG_TIPOS.forEach(t => {
+    const b = document.getElementById('mt-' + t.id);
+    if (b) b.className = 'msg-tab' + (t.id === MSG_TIPO ? ' active' : '');
+  });
+  ['pt','es'].forEach(l => {
+    const b = document.getElementById('ml-' + l);
+    if (b) b.className = (l === MSG_LANG ? 'active' : '');
+  });
+  const txt = preencherMsg(getMsgs()[MSG_TIPO][MSG_LANG], MSG_REC || {});
+  document.getElementById('msg-texto').value = txt;
+  atualizarLinkMsg();
+}
+function atualizarLinkMsg() {
+  const a = document.getElementById('msg-wa');
+  const txt = document.getElementById('msg-texto').value;
+  const tel = normalizePhone((MSG_REC || {}).telefone || '');
+  const base = tel ? whatsappLink(tel) : 'https://wa.me/';
+  a.href = base + '?text=' + encodeURIComponent(txt);
+  a.textContent = tel ? '💬 Abrir no WhatsApp' : '💬 Abrir WhatsApp (escolher contato)';
+}
+function copiarMsg() {
+  const t = document.getElementById('msg-texto');
+  t.select(); t.setSelectionRange(0, 999999);
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t.value);
+    else document.execCommand('copy');
+    toast('📋 Mensagem copiada');
+  } catch (e) { toast('⚠️ Copie manualmente'); }
+}
+function msgBtn(r, ano, tipo) {
+  return ' <button class="msg-btn" title="Enviar mensagem" onclick="event.stopPropagation();abrirMsg(\'' + r.id + '\',' + (ano || YEAR) + ',\'' + tipo + '\')">💬</button>';
+}
+/* ── edição dos textos em Config ── */
+function renderMsgsConfig() {
+  const box = document.getElementById('cfg-msgs'); if (!box) return;
+  const m = getMsgs();
+  box.innerHTML = MSG_TIPOS.map(t =>
+    '<div class="tpl-box"><h4>' + t.nome + '</h4>' +
+    '<div style="font-size:0.72rem;color:var(--silver);margin-bottom:6px">' + t.desc + '</div>' +
+    '<label>🇧🇷 Português</label><textarea id="msgc-' + t.id + '-pt">' + esc(m[t.id].pt) + '</textarea>' +
+    '<label>🇪🇸 Español</label><textarea id="msgc-' + t.id + '-es">' + esc(m[t.id].es) + '</textarea></div>').join('');
+}
+function salvarMsgs() {
+  const c = loadConfig();
+  c.msgs = c.msgs || {};
+  MSG_TIPOS.forEach(t => {
+    c.msgs[t.id] = {
+      pt: (document.getElementById('msgc-' + t.id + '-pt') || {}).value || MSGS_PADRAO[t.id].pt,
+      es: (document.getElementById('msgc-' + t.id + '-es') || {}).value || MSGS_PADRAO[t.id].es
+    };
+  });
+  saveConfig(c);
+  toast('✅ Mensagens salvas');
+  renderMsgsConfig();
+}
+function restaurarMsgs() {
+  if (!confirmar('Voltar as três mensagens para os textos padrão? Os seus textos atuais serão perdidos.')) return;
+  const c = loadConfig();
+  delete c.msgs;
+  saveConfig(c);
+  renderMsgsConfig();
+  toast('↺ Textos padrão restaurados');
+}
+
 /* ───────── AJUSTES FINAIS ───────── */
 function scrollCalendarioParaHoje() {
   const hoje = new Date(), anoHoje = hoje.getFullYear();
@@ -4841,6 +5091,7 @@ renderReceitas();
 renderDespesas();
 renderCalendario();
 renderConfig();
+renderMsgsConfig();
 renderHospedes();
 renderDespFixas();
 renderResumoRec();
