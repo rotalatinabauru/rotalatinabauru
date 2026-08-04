@@ -122,6 +122,8 @@ select.form-control{background-image:url("data:image/svg+xml,%3Csvg xmlns='http:
 /* BUTTONS */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 18px;border:none;border-radius:9px;font-family:'Outfit',sans-serif;font-size:0.88rem;font-weight:600;cursor:pointer;transition:all 0.2s}
 .btn-green{background:var(--green);color:white}.btn-red{background:var(--red);color:white}.btn-terra{background:var(--terra);color:white}
+.btn-navy{background:var(--navy);color:white}
+.btn-gold{background:var(--gold);color:var(--navy)}
 .btn-full{width:100%}.btn:active{transform:scale(0.98)}
 .btn-cancel{background:#eee;color:#333;margin-top:8px}
 
@@ -453,6 +455,14 @@ details#cal-manual summary::-webkit-details-marker{display:none}
 .tpl-box h4{font-size:0.83rem;color:var(--navy);margin-bottom:7px;font-weight:600}
 .tpl-box textarea{width:100%;min-height:120px;padding:9px;border:1px solid var(--gray2);border-radius:8px;font-family:'Outfit',sans-serif;font-size:0.78rem;line-height:1.45;resize:vertical}
 .tpl-box label{font-size:0.7rem;color:var(--silver);font-weight:600;display:block;margin:7px 0 3px}
+
+.tel-row{display:flex;gap:6px;align-items:stretch}
+.tel-row .ddi-sel{flex:0 0 132px;min-width:0;padding-right:26px}
+.tel-row .ddi-outro{flex:0 0 74px;min-width:0;text-align:center}
+.tel-row .tel-num{flex:1 1 0;min-width:0;width:auto}
+.tel-hint{font-size:0.7rem;color:var(--silver);margin-top:4px;display:block}
+.tel-full{font-size:0.72rem;color:var(--navy);font-weight:600;margin-top:4px;display:block}
+@media(max-width:430px){ .tel-row{flex-wrap:wrap} .tel-row .ddi-sel{flex:1 1 100%} .tel-row .ddi-outro{flex:0 0 84px} .tel-row .tel-num{flex:1 1 0;min-width:0;width:auto} .tel-row .btn{flex:0 0 54px;padding:0} }
 </style>
 </head>
 <body>
@@ -989,7 +999,12 @@ details#cal-manual summary::-webkit-details-marker{display:none}
     </div>
     <div class="form-group">
       <label class="form-label">Telefone</label>
-      <input type="tel" inputmode="numeric" class="form-control" id="eh-telefone" placeholder="(14) 99999-9999" oninput="formatPhone(this)">
+      <div class="tel-row">
+        <select class="form-control ddi-sel" id="eh-ddi" onchange="onDDIChange('eh')"></select>
+        <input type="tel" inputmode="numeric" class="form-control ddi-outro" id="eh-ddi-outro" placeholder="DDI" style="display:none" oninput="onDDIOutro('eh')">
+        <input type="tel" class="form-control tel-num" id="eh-telefone" placeholder="99999-9999" oninput="formatPhone(this,'eh')">
+      </div>
+      <small class="tel-full" id="eh-tel-full"></small>
       <small style="color:#888;font-size:0.7rem;display:block;margin-top:3px">Adicionar um telefone que faltava também é permitido.</small>
     </div>
     <input type="hidden" id="eh-key">
@@ -1034,11 +1049,14 @@ details#cal-manual summary::-webkit-details-marker{display:none}
     </div>
     <div class="form-group">
       <label class="form-label">📱 Telefone do Hóspede</label>
-      <div style="display:flex;gap:6px">
-        <input type="tel" class="form-control" id="r-telefone" placeholder="Ex: 14 99999-9999" oninput="formatPhone(this); lookupHospedePorTel()">
+      <div class="tel-row">
+        <select class="form-control ddi-sel" id="r-ddi" onchange="onDDIChange('r')"></select>
+        <input type="tel" inputmode="numeric" class="form-control ddi-outro" id="r-ddi-outro" placeholder="DDI" style="display:none" oninput="onDDIOutro('r')">
+        <input type="tel" class="form-control tel-num" id="r-telefone" placeholder="99999-9999" oninput="formatPhone(this,'r'); lookupHospedePorTel()">
         <button class="btn btn-navy" id="btn-contatos" style="flex-shrink:0;padding:0 13px" onclick="pegarDosContatos()" title="Buscar nos contatos do celular">📇</button>
       </div>
-      <small style="color:#888;font-size:0.7rem">Opcional. Identifica hóspedes recorrentes mesmo com nomes parecidos.</small>
+      <small class="tel-full" id="r-tel-full"></small>
+      <small class="tel-hint">Opcional. Escolha o país do hóspede — o WhatsApp e a senha da porta usam este número.</small>
     </div>
     <div class="form-group">
       <label class="form-label">Período(s) da hospedagem *</label>
@@ -1286,7 +1304,12 @@ details#cal-manual summary::-webkit-details-marker{display:none}
     </div>
     <div class="form-group">
       <label class="form-label">Telefone</label>
-      <input type="tel" inputmode="numeric" class="form-control" id="edit-r-telefone" placeholder="(14) 99999-9999" oninput="formatPhone(this)">
+      <div class="tel-row">
+        <select class="form-control ddi-sel" id="edit-r-ddi" onchange="onDDIChange('edit-r')"></select>
+        <input type="tel" inputmode="numeric" class="form-control ddi-outro" id="edit-r-ddi-outro" placeholder="DDI" style="display:none" oninput="onDDIOutro('edit-r')">
+        <input type="tel" class="form-control tel-num" id="edit-r-telefone" placeholder="99999-9999" oninput="formatPhone(this,'edit-r')">
+      </div>
+      <small class="tel-full" id="edit-r-tel-full"></small>
     </div>
     <div class="form-row">
       <div class="form-group">
@@ -1587,7 +1610,8 @@ function registrarHospede(rec) {
   const hosp = {...loadHospedes()};
   const key = rec.telefone || ('nome:' + rec.hospede.toLowerCase().trim());
   if (!key || key === 'nome:') return;
-  const existente = hosp[key] || { nome: rec.hospede, telefone: rec.telefone || '', visitas: 0, primeiraVisita: rec.data, ultimaVisita: rec.data, totalGasto: 0, plataformasUsadas: [] };
+  const existente = hosp[key] || { nome: rec.hospede, telefone: rec.telefone || '', ddi: rec.ddi || '', visitas: 0, primeiraVisita: rec.data, ultimaVisita: rec.data, totalGasto: 0, plataformasUsadas: [] };
+  if (!existente.ddi && rec.ddi) existente.ddi = rec.ddi;
   existente.nome = rec.hospede; // atualiza com nome mais recente
   if (rec.telefone) existente.telefone = rec.telefone;
   existente.visitas = (existente.visitas || 0) + 1;
@@ -1629,7 +1653,7 @@ function lookupHospede() {
   if (matches.length === 1) {
     const h = matches[0];
     hint.style.display = 'block';
-    hint.innerHTML = `🌟 <strong>${esc(h.nome)}</strong> já se hospedou ${h.visitas}x ${h.telefone ? '(' + formatPhoneDisplay(h.telefone) + ')' : ''}. Última: ${h.ultimaVisita.split('-').reverse().join('/')}`;
+    hint.innerHTML = `🌟 <strong>${esc(h.nome)}</strong> já se hospedou ${h.visitas}x ${h.telefone ? '(' + formatPhoneDisplay(h.telefone, h.ddi) + ')' : ''}. Última: ${h.ultimaVisita.split('-').reverse().join('/')}`;
   } else if (matches.length > 1) {
     hint.style.display = 'block';
     hint.innerHTML = `⚠️ <strong>${matches.length} hóspedes</strong> com nome parecido. Preencha o telefone para identificar.`;
@@ -1671,7 +1695,8 @@ function rebuildHospedes() {
     _cache[yr].rec.forEach(rec => {
       const key = rec.telefone || ('nome:' + (rec.hospede||'').toLowerCase().trim());
       if (!key || key === 'nome:') return;
-      const ex = hosp[key] || { nome: rec.hospede, telefone: rec.telefone || '', visitas: 0, primeiraVisita: rec.data, ultimaVisita: rec.data, totalGasto: 0, plataformasUsadas: [] };
+      const ex = hosp[key] || { nome: rec.hospede, telefone: rec.telefone || '', ddi: rec.ddi || '', visitas: 0, primeiraVisita: rec.data, ultimaVisita: rec.data, totalGasto: 0, plataformasUsadas: [] };
+      if (!ex.ddi && rec.ddi) ex.ddi = rec.ddi;
       ex.nome = rec.hospede;
       if (rec.telefone) ex.telefone = rec.telefone;
       ex.visitas++;
@@ -1771,10 +1796,7 @@ function duplicarReceita(id) {
   document.getElementById('r-checkout').value = '';
   PERIODOS = [{ inicio: '', fim: '' }]; renderPeriodos(); acFechar();
   document.getElementById('r-hospede').value = rec.hospede || '';
-  const telEl = document.getElementById('r-telefone');
-  if (telEl) {
-    telEl.value = rec.telefone ? formatPhoneDisplay(rec.telefone) : '';
-  }
+  preencherTel('r', rec.telefone, rec.ddi);
   document.getElementById('r-plat').value = rec.plat || '';
   document.getElementById('r-pessoas').value = rec.pessoas || '';
   document.getElementById('r-valor').value = '';
@@ -1862,13 +1884,13 @@ function renderHospedes() {
     const platBadges = (h.plataformasUsadas||[]).map(p => `<span class="badge badge-${p.toLowerCase()}">${p}</span>`).join('');
     const ultStr = h.ultimaVisita ? h.ultimaVisita.split('-').reverse().join('/') : '-';
     const priStr = h.primeiraVisita ? h.primeiraVisita.split('-').reverse().join('/') : '-';
-    const tel = h.telefone ? formatPhoneDisplay(h.telefone) : '— sem telefone —';
+    const tel = h.telefone ? formatPhoneDisplay(h.telefone, h.ddi) : '— sem telefone —';
     const safeKey = encodeURIComponent(h.key);
     return `<div class="hospede-card ${isRec ? 'recorrente' : ''}">
       <div class="hospede-row1">
         <div>
           <div class="hospede-nome">👤 ${esc(h.nome)}</div>
-          <div class="hospede-tel">📱 ${tel}${whatsappBtn(h.telefone, h.nome)}</div>
+          <div class="hospede-tel">📱 ${tel}${whatsappBtn(h.telefone, h.nome, h.ddi)}</div>
         </div>
         ${isRec ? '<span class="hospede-recorrente-tag">🌟 RECORRENTE</span>' : ''}
       </div>
@@ -1916,7 +1938,7 @@ function verHistoricoHospede(safeKey) {
   matches.sort((a,b) => (b.data||'').localeCompare(a.data||''));
 
   document.getElementById('hosp-detail-title').textContent = '👤 ' + h.nome;
-  const tel = h.telefone ? formatPhoneDisplay(h.telefone) : '— sem telefone —';
+  const tel = h.telefone ? formatPhoneDisplay(h.telefone, h.ddi) : '— sem telefone —';
   const platBadges = (h.plataformasUsadas||[]).map(p => `<span class="badge badge-${p.toLowerCase()}">${p}</span>`).join(' ');
   document.getElementById('hosp-detail-info').innerHTML = `
     <div style="background:var(--gray);border-radius:9px;padding:10px 13px;font-size:0.84rem">
@@ -1960,8 +1982,7 @@ function novaReservaPraHospede(safeKey) {
   document.getElementById('r-checkout').value = '';
   PERIODOS = [{ inicio: '', fim: '' }]; renderPeriodos(); acFechar();
   document.getElementById('r-hospede').value = h.nome || '';
-  const telEl = document.getElementById('r-telefone');
-  if (telEl) telEl.value = h.telefone ? formatPhoneDisplay(h.telefone) : '';
+  preencherTel('r', h.telefone, h.ddi);
   document.getElementById('r-plat').value = (h.plataformasUsadas && h.plataformasUsadas[0]) || '';
   document.getElementById('r-pessoas').value = '';
   document.getElementById('r-valor').value = '';
@@ -1999,14 +2020,15 @@ function editHospede(safeKey) {
   if (!h) return;
   document.getElementById('eh-key').value = key;
   document.getElementById('eh-nome').value = h.nome || '';
-  document.getElementById('eh-telefone').value = h.telefone ? formatPhoneDisplay(h.telefone) : '';
+  preencherTel('eh', h.telefone, h.ddi);
   openModal('modal-edit-hosp');
 }
 
 function saveEditHospede() {
   const key = document.getElementById('eh-key').value;
   const novoNome = document.getElementById('eh-nome').value.trim();
-  const novoTel = normalizePhone(document.getElementById('eh-telefone').value);
+  const novoTel = telCompleto('eh');
+  const novoDDI = getDDI('eh');
   if (!novoNome) { toast('⚠️ Nome obrigatório'); return; }
 
   const hospAtual = loadHospedes()[key];
@@ -2067,7 +2089,8 @@ function saveEditHospede() {
   const novoHosp = {
     ...hospAtual,
     nome: novoNome,
-    telefone: novoTel
+    telefone: novoTel,
+    ddi: novoDDI
   };
   delete hosp[key];
   hosp[novaChave] = novoHosp;
@@ -2086,7 +2109,7 @@ function abrirMesclar(safeKey) {
   if (!h) return;
   document.getElementById('mesclar-origem').value = key;
   document.getElementById('mesclar-origem-info').innerHTML =
-    `Mesclando: <strong>${esc(h.nome)}</strong> ${h.telefone ? '(' + formatPhoneDisplay(h.telefone) + ')' : '(sem tel)'}<br>` +
+    `Mesclando: <strong>${esc(h.nome)}</strong> ${h.telefone ? '(' + formatPhoneDisplay(h.telefone, h.ddi) + ')' : '(sem tel)'}<br>` +
     `${h.visitas||0} visita${(h.visitas||0)===1?'':'s'} · ${fmt(h.totalGasto||0)}`;
 
   // Popula select com todos os outros hóspedes
@@ -2095,7 +2118,7 @@ function abrirMesclar(safeKey) {
   outros.sort((a,b) => (a[1].nome||'').localeCompare(b[1].nome||''));
   sel.innerHTML = '<option value="">Selecione...</option>' +
     outros.map(([k, v]) => {
-      const tel = v.telefone ? formatPhoneDisplay(v.telefone) : 'sem tel';
+      const tel = v.telefone ? formatPhoneDisplay(v.telefone, v.ddi) : 'sem tel';
       return `<option value="${esc(k)}">${esc(v.nome)} — ${tel} (${v.visitas||0}x)</option>`;
     }).join('');
   openModal('modal-mesclar');
@@ -2838,7 +2861,7 @@ function renderReceitas() {
       <tr class="${venc ? 'row-vencida' : ''}" title="${venc ? 'Pagamento pendente >30 dias após checkout' : ''}">
         <td>${r.data.split('-').reverse().join('/')}</td>
         <td>${r.checkout ? r.checkout.split('-').reverse().join('/') : '-'}</td>
-        <td class="td-left">${esc(r.hospede)}${whatsappBtn(r.telefone, r.hospede)}</td>
+        <td class="td-left">${esc(r.hospede)}${whatsappBtn(r.telefone, r.hospede, r.ddi)}</td>
         <td><span class="badge badge-${r.plat.toLowerCase()}">${r.plat}</span></td>
         <td>${r.dias || 1}</td>
         <td>${r.pessoas || 1}</td>
@@ -2975,7 +2998,7 @@ function renderProximos() {
     return `<div style="padding:7px 0;border-bottom:1px solid rgba(0,0,0,0.06)">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
         <div>
-          <span style="color:${cor};font-weight:600">${icone}</span> · <strong>${esc(r.hospede)}</strong>${whatsappBtn(r.telefone, r.hospede)}
+          <span style="color:${cor};font-weight:600">${icone}</span> · <strong>${esc(r.hospede)}</strong>${whatsappBtn(r.telefone, r.hospede, r.ddi)}
           <span style="color:#888"> · ${esc(r.plat||'')}</span>${pessoasStr}
         </div>
         <div style="font-size:0.78rem">${prefix} <span style="color:#888">(${dataFmt})</span></div>
@@ -3420,7 +3443,7 @@ function editReceita(id) {
   document.getElementById('edit-r-data').value = rec.data || '';
   document.getElementById('edit-r-checkout').value = rec.checkout || '';
   document.getElementById('edit-r-hospede').value = rec.hospede || '';
-  document.getElementById('edit-r-telefone').value = rec.telefone ? formatPhoneDisplay(rec.telefone) : '';
+  preencherTel('edit-r', rec.telefone, rec.ddi);
   document.getElementById('edit-r-plat').value = rec.plat || '';
   document.getElementById('edit-r-pessoas').value = rec.pessoas || '';
   document.getElementById('edit-r-valor').value = numberToBRLInput(rec.valor);
@@ -3447,7 +3470,8 @@ function saveEditReceita() {
   const data = document.getElementById('edit-r-data').value;
   const checkout = document.getElementById('edit-r-checkout').value;
   const hospede = document.getElementById('edit-r-hospede').value.trim();
-  const telefone = normalizePhone(document.getElementById('edit-r-telefone').value);
+  const telefone = telCompleto('edit-r');
+  const ddiEdit = getDDI('edit-r');
   const plat = document.getElementById('edit-r-plat').value;
   const pessoas = parseInt(document.getElementById('edit-r-pessoas').value) || 0;
   const valor = parseBRL(document.getElementById('edit-r-valor').value);
@@ -3512,7 +3536,7 @@ function saveEditReceita() {
   recs[idx] = {
     ...recAntiga,
     data, checkout, hospede, telefone, plat, pessoas, valor, taxa, liquido, liquidoManual,
-    pgto, obs, pago: (document.getElementById('edit-r-status') ? document.getElementById('edit-r-status').value : editPagoStatus), dias, mes
+    ddi: ddiEdit, pgto, obs, pago: (document.getElementById('edit-r-status') ? document.getElementById('edit-r-status').value : editPagoStatus), dias, mes
   };
   save('rec', recs);
 
@@ -4229,7 +4253,7 @@ function renderReceitas() {
           (r.taxa > 0 ? '<dt>Taxa ' + esc(r.plat) + '</dt><dd style="color:var(--red)">− ' + fmt(r.taxa) + '</dd>' : '') +
           '<dt>Líquido</dt><dd style="color:var(--green);font-weight:700">' + fmt(r.liquido) + (r.liquidoManual ? ' 🔓' : '') + '</dd>' +
           '<dt>Pagamento</dt><dd>' + esc(r.pgto || '—') + '</dd>' +
-          '<dt>Telefone</dt><dd>' + (r.telefone ? formatPhoneDisplay(r.telefone) + whatsappBtn(r.telefone, r.hospede) : '—') + '</dd>' +
+          '<dt>Telefone</dt><dd>' + (r.telefone ? formatPhoneDisplay(r.telefone, r.ddi) + whatsappBtn(r.telefone, r.hospede, r.ddi) : '—') + '</dd>' +
           (r.obs ? '<dt>Obs.</dt><dd>' + esc(r.obs) + '</dd>' : '') +
         '</dl>' +
         '<div class="crow-acts">' +
@@ -4423,7 +4447,7 @@ function renderProximos() {
     return '<div class="prox-item" onclick="abrirReservaDeQualquerAno(\'' + r.id + '\',' + ev.ano + ')">' +
       '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">' +
         '<div><span style="color:' + cor + ';font-weight:600">' + icone + '</span> · <strong>' + esc(r.hospede) + '</strong>' +
-          whatsappBtn(r.telefone, r.hospede) +
+          whatsappBtn(r.telefone, r.hospede, r.ddi) +
           '<span style="color:#888"> · ' + esc(r.plat||'') + '</span>' + (r.pessoas ? ' <span style="color:#888">· 👥 ' + r.pessoas + '</span>' : '') + '</div>' +
         '<div style="font-size:0.78rem">' + prefix + ' <span style="color:#888">(' + br(ev.data) + ')</span></div>' +
       '</div>' +
@@ -4522,7 +4546,7 @@ function rodarBusca() {
     h += '<div class="search-sec">👥 Hóspedes (' + hosp.length + ')</div>';
     h += hosp.slice(0, 8).map(x =>
       '<div class="search-item" onclick="fecharBusca();showTab(\'hospedes\');setTimeout(()=>{var f=document.getElementById(\'filtro-hosp-busca\');if(f){f.value=' + JSON.stringify(x.nome || '') + ';renderHospedes();}},120)">' +
-      '<div class="si-t">' + esc(x.nome) + '</div><div class="si-s">' + (x.visitas || 1) + ' visita(s) · ' + fmt(x.totalGasto || 0) + (x.telefone ? ' · ' + formatPhoneDisplay(x.telefone) : '') + '</div></div>').join('');
+      '<div class="si-t">' + esc(x.nome) + '</div><div class="si-s">' + (x.visitas || 1) + ' visita(s) · ' + fmt(x.totalGasto || 0) + (x.telefone ? ' · ' + formatPhoneDisplay(x.telefone, x.ddi) : '') + '</div></div>').join('');
   }
   if (reservas.length) {
     h += '<div class="search-sec">💰 Reservas (' + reservas.length + ')</div>';
@@ -4745,6 +4769,7 @@ function abrirNovaReserva() {
   ['r-hospede','r-telefone','r-plat','r-pessoas','r-valor','r-pgto','r-obs'].forEach(id => { const e = document.getElementById(id); if (e) e.value = ''; });
   PERIODOS = [{ inicio: '', fim: '' }];
   renderPeriodos();
+  preencherTel('r', '', '55');
   const tp = document.getElementById('taxa-preview'); if (tp) tp.textContent = '💡 Preencha plataforma e valor para calcular a taxa';
   const cb = document.getElementById('conflito-box'); if (cb) cb.style.display = 'none';
   const bs = document.getElementById('btn-salvar-rec'); if (bs) { bs.disabled = false; bs.style.opacity = '1'; }
@@ -4765,7 +4790,7 @@ function indiceHospedes() {
     if (!h || !h.nome) return;
     const key = chave(h.nome, h.telefone);
     idx[key] = {
-      key: k, nome: h.nome, telefone: h.telefone || '',
+      key: k, nome: h.nome, telefone: h.telefone || '', ddi: h.ddi || '',
       visitas: h.visitas || 0, totalGasto: h.totalGasto || 0,
       ultima: h.ultimaVisita || '', plats: (h.plataformasUsadas || []).slice(), doCRM: true
     };
@@ -4776,13 +4801,13 @@ function indiceHospedes() {
       if (!r.hospede) return;
       const key = chave(r.hospede, r.telefone);
       if (!idx[key]) {
-        idx[key] = { key: null, nome: r.hospede, telefone: r.telefone || '', visitas: 0, totalGasto: 0, ultima: '', plats: [], doCRM: false };
+        idx[key] = { key: null, nome: r.hospede, telefone: r.telefone || '', ddi: r.ddi || '', visitas: 0, totalGasto: 0, ultima: '', plats: [], doCRM: false };
       }
       const e = idx[key];
       if (!e.doCRM) {
         e.visitas += 1;
         e.totalGasto += (r.valor || 0);
-        if (!e.telefone && r.telefone) e.telefone = r.telefone;
+        if (!e.telefone && r.telefone) { e.telefone = r.telefone; e.ddi = r.ddi || e.ddi; }
         if (r.plat && !e.plats.includes(r.plat)) e.plats.push(r.plat);
       }
       if ((r.data || '') > (e.ultima || '')) e.ultima = r.data || e.ultima;
@@ -4827,15 +4852,14 @@ function acBuscar() {
     res.map((h, i) =>
       '<div class="ac-item" onclick="acEscolher(' + i + ')">' +
       '<strong>' + esc(h.nome) + '</strong>' + ((h.visitas || 1) >= 2 ? ' 🌟' : '') +
-      '<small>' + (h.telefone ? formatPhoneDisplay(h.telefone) + ' · ' : '') + (h.visitas || 1) + ' visita(s) · ' + fmt(h.totalGasto || 0) +
+      '<small>' + (h.telefone ? formatPhoneDisplay(h.telefone, h.ddi) + ' · ' : '') + (h.visitas || 1) + ' visita(s) · ' + fmt(h.totalGasto || 0) +
       (h.ultima ? ' · última ' + br(h.ultima) : '') + '</small></div>').join('');
   lst.classList.add('open');
 }
 function acEscolher(i) {
   const h = (window._acRes || [])[i]; if (!h) return;
   document.getElementById('r-hospede').value = h.nome || '';
-  const tel = document.getElementById('r-telefone');
-  if (tel && h.telefone) tel.value = formatPhoneDisplay(h.telefone);
+  if (h.telefone) preencherTel('r', h.telefone, h.ddi);
   if ((h.plats || []).length === 1) {
     const ps = document.getElementById('r-plat');
     if (ps && !ps.value) { ps.value = h.plats[0]; updateTaxaPreview(); }
@@ -4863,8 +4887,10 @@ async function pegarDosContatos() {
     const p = c[0];
     if (p.name && p.name.length) document.getElementById('r-hospede').value = p.name[0];
     if (p.tel && p.tel.length) {
-      const el = document.getElementById('r-telefone');
-      el.value = p.tel[0]; formatPhone(el); lookupHospedePorTel();
+      const bruto = String(p.tel[0]).trim();
+      if (bruto.startsWith('+')) preencherTel('r', normalizePhone(bruto), null);
+      else { const el = document.getElementById('r-telefone'); el.value = bruto; formatPhone(el, 'r'); }
+      lookupHospedePorTel();
     }
     acFechar();
   } catch (err) { console.warn(err); }
@@ -4905,7 +4931,8 @@ function verificarConflito() {
 /* salvar 1..N reservas de uma vez */
 function saveReceita() {
   const hospede = (document.getElementById('r-hospede').value || '').trim();
-  const telefone = normalizePhone((document.getElementById('r-telefone') || { value: '' }).value);
+  const ddiSel = getDDI('r');
+  const telefone = telCompleto('r');
   const plat = document.getElementById('r-plat').value;
   const pessoas = parseInt(document.getElementById('r-pessoas').value || 1);
   const valor = parseBRL(document.getElementById('r-valor').value);
@@ -4925,7 +4952,7 @@ function saveReceita() {
     let dias = 1;
     if (p.fim && p.fim > p.inicio) dias = Math.round((new Date(p.fim + 'T00:00:00') - new Date(p.inicio + 'T00:00:00')) / 86400000);
     const rec = {
-      id: uid(), data: p.inicio, checkout: p.fim || '', hospede, telefone, plat, dias, pessoas,
+      id: uid(), data: p.inicio, checkout: p.fim || '', hospede, telefone, ddi: ddiSel, plat, dias, pessoas,
       valor, taxa, liquido: valor - taxa, pgto, pago: pagoStatus, obs, mes: getMes(p.inicio)
     };
     criadas.push(rec);
@@ -4992,7 +5019,7 @@ function preencherMsg(txt, r) {
   const nome = (r.hospede || '').trim();
   const primeiro = nome.split(/\s+/)[0] || nome;
   const tel = normalizePhone(r.telefone || '');
-  const senha = tel ? tel.slice(-4) : '（os 4 últimos dígitos do seu celular）';
+  const senha = tel ? tel.slice(-4) : '(os 4 últimos dígitos do seu celular)';
   return (txt || '')
     .replace(/\{nome\}/g, nome)
     .replace(/\{primeiroNome\}/g, primeiro)
@@ -5007,6 +5034,7 @@ function preencherMsg(txt, r) {
 }
 var MSG_REC = null, MSG_TIPO = 'checkin', MSG_LANG = 'pt';
 function abrirMsg(id, ano, tipo) {
+  montarDDISelects();
   if (ano && ano !== YEAR) { YEAR = ano; _ensureYear(YEAR); updateYearLabel(); rerenderAll(); }
   const r = load('rec').find(x => x.id === id);
   if (!r) { toast('⚠️ Reserva não encontrada'); return; }
@@ -5014,7 +5042,7 @@ function abrirMsg(id, ano, tipo) {
   MSG_TIPO = tipo || 'checkin';
   MSG_LANG = (loadConfig().idiomaPadrao) || 'pt';
   document.getElementById('msg-info').innerHTML =
-    '<strong>👤 ' + esc(r.hospede) + '</strong>' + (r.telefone ? ' · ' + formatPhoneDisplay(r.telefone) : ' · <span style="color:var(--red)">sem telefone cadastrado</span>') +
+    '<strong>👤 ' + esc(r.hospede) + '</strong>' + (r.telefone ? ' · ' + formatPhoneDisplay(r.telefone, r.ddi) : ' · <span style="color:var(--red)">sem telefone cadastrado</span>') +
     '<br>📅 ' + br(r.data) + (r.checkout ? ' → ' + br(r.checkout) : '') + ' · ' + esc(r.plat || '');
   renderMsg();
   openModal('modal-msg');
@@ -5038,7 +5066,7 @@ function atualizarLinkMsg() {
   const a = document.getElementById('msg-wa');
   const txt = document.getElementById('msg-texto').value;
   const tel = normalizePhone((MSG_REC || {}).telefone || '');
-  const base = tel ? whatsappLink(tel) : 'https://wa.me/';
+  const base = tel ? whatsappLink(tel, (MSG_REC || {}).ddi) : 'https://wa.me/';
   a.href = base + '?text=' + encodeURIComponent(txt);
   a.textContent = tel ? '💬 Abrir no WhatsApp' : '💬 Abrir WhatsApp (escolher contato)';
 }
@@ -5090,6 +5118,165 @@ function restaurarMsgs() {
   toast('↺ Textos padrão restaurados');
 }
 
+
+/* ═══════════ TELEFONE INTERNACIONAL ═══════════ */
+var PAISES = [
+  { ddi:'55',  nome:'🇧🇷 Brasil' },      { ddi:'54',  nome:'🇦🇷 Argentina' },
+  { ddi:'598', nome:'🇺🇾 Uruguai' },     { ddi:'595', nome:'🇵🇾 Paraguai' },
+  { ddi:'56',  nome:'🇨🇱 Chile' },       { ddi:'591', nome:'🇧🇴 Bolívia' },
+  { ddi:'51',  nome:'🇵🇪 Peru' },        { ddi:'593', nome:'🇪🇨 Equador' },
+  { ddi:'57',  nome:'🇨🇴 Colômbia' },    { ddi:'58',  nome:'🇻🇪 Venezuela' },
+  { ddi:'52',  nome:'🇲🇽 México' },      { ddi:'506', nome:'🇨🇷 Costa Rica' },
+  { ddi:'507', nome:'🇵🇦 Panamá' },      { ddi:'502', nome:'🇬🇹 Guatemala' },
+  { ddi:'503', nome:'🇸🇻 El Salvador' }, { ddi:'504', nome:'🇭🇳 Honduras' },
+  { ddi:'505', nome:'🇳🇮 Nicarágua' },   { ddi:'53',  nome:'🇨🇺 Cuba' },
+  { ddi:'1',   nome:'🇺🇸 EUA / Canadá' },{ ddi:'351', nome:'🇵🇹 Portugal' },
+  { ddi:'34',  nome:'🇪🇸 Espanha' },     { ddi:'33',  nome:'🇫🇷 França' },
+  { ddi:'39',  nome:'🇮🇹 Itália' },      { ddi:'49',  nome:'🇩🇪 Alemanha' },
+  { ddi:'44',  nome:'🇬🇧 Reino Unido' }, { ddi:'41',  nome:'🇨🇭 Suíça' },
+  { ddi:'31',  nome:'🇳🇱 Holanda' },     { ddi:'353', nome:'🇮🇪 Irlanda' },
+  { ddi:'61',  nome:'🇦🇺 Austrália' },   { ddi:'81',  nome:'🇯🇵 Japão' },
+  { ddi:'86',  nome:'🇨🇳 China' },       { ddi:'972', nome:'🇮🇱 Israel' },
+  { ddi:'961', nome:'🇱🇧 Líbano' },      { ddi:'971', nome:'🇦🇪 Emirados' },
+  { ddi:'212', nome:'🇲🇦 Marrocos' },    { ddi:'27',  nome:'🇿🇦 África do Sul' }
+];
+var DDI_ORDENADOS = PAISES.map(p => p.ddi).sort((a, b) => b.length - a.length);
+function nomePais(ddi) {
+  const p = PAISES.find(x => x.ddi === String(ddi));
+  return p ? p.nome : '🌐 +' + ddi;
+}
+function montarDDISelects() {
+  const opts = PAISES.map(p => '<option value="' + p.ddi + '">' + p.nome + ' +' + p.ddi + '</option>').join('') +
+    '<option value="__outro">🌐 Outro país…</option>';
+  ['r-ddi','edit-r-ddi','eh-ddi'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && !el.dataset.pronto) { el.innerHTML = opts; el.value = '55'; el.dataset.pronto = '1'; }
+  });
+}
+function getDDI(pref) {
+  const sel = document.getElementById(pref + '-ddi');
+  if (!sel) return '55';
+  if (sel.value === '__outro') {
+    const o = document.getElementById(pref + '-ddi-outro');
+    return normalizePhone(o ? o.value : '') || '55';
+  }
+  return sel.value || '55';
+}
+function setDDI(pref, ddi) {
+  const sel = document.getElementById(pref + '-ddi'); if (!sel) return;
+  const o = document.getElementById(pref + '-ddi-outro');
+  ddi = String(ddi || '55');
+  if (PAISES.some(p => p.ddi === ddi)) {
+    sel.value = ddi;
+    if (o) { o.style.display = 'none'; o.value = ''; }
+  } else {
+    sel.value = '__outro';
+    if (o) { o.style.display = ''; o.value = ddi; }
+  }
+}
+function onDDIChange(pref) {
+  const sel = document.getElementById(pref + '-ddi');
+  const o = document.getElementById(pref + '-ddi-outro');
+  if (o) o.style.display = (sel.value === '__outro') ? '' : 'none';
+  const inp = document.getElementById(pref === 'eh' ? 'eh-telefone' : pref + '-telefone');
+  if (inp) formatPhone(inp, pref);
+}
+function onDDIOutro(pref) {
+  const inp = document.getElementById(pref === 'eh' ? 'eh-telefone' : pref + '-telefone');
+  if (inp) formatPhone(inp, pref);
+}
+/* separa um número completo (só dígitos) em { ddi, local } */
+function splitTel(dig, ddiConhecido) {
+  const d = normalizePhone(dig);
+  if (!d) return { ddi: '55', local: '' };
+  if (ddiConhecido) {
+    const k = String(ddiConhecido);
+    return { ddi: k, local: d.startsWith(k) ? d.slice(k.length) : d };
+  }
+  /* legado: 10 ou 11 dígitos sem DDI = Brasil */
+  if (d.length <= 11) return { ddi: '55', local: d };
+  for (const c of DDI_ORDENADOS) {
+    if (d.startsWith(c) && d.length - c.length >= 6) return { ddi: c, local: d.slice(c.length) };
+  }
+  return { ddi: '55', local: d.startsWith('55') ? d.slice(2) : d };
+}
+/* máscara: só usa o formato brasileiro quando o país é o Brasil */
+function formatPhone(el, pref) {
+  const ddi = pref ? getDDI(pref) : '55';
+  let d = normalizePhone(el.value);
+  if (!d) { el.value = ''; atualizarTelFull(pref); return; }
+  if (ddi === '55') {
+    if (d.length > 11) d = d.slice(0, 11);
+    let out;
+    if (d.length <= 2) out = '(' + d;
+    else if (d.length <= 6) out = '(' + d.slice(0,2) + ') ' + d.slice(2);
+    else if (d.length <= 10) out = '(' + d.slice(0,2) + ') ' + d.slice(2,6) + '-' + d.slice(6);
+    else out = '(' + d.slice(0,2) + ') ' + d.slice(2,7) + '-' + d.slice(7,11);
+    el.value = out;
+  } else {
+    if (d.length > 15) d = d.slice(0, 15);
+    el.value = d;
+  }
+  atualizarTelFull(pref);
+}
+function atualizarTelFull(pref) {
+  if (!pref) return;
+  const box = document.getElementById(pref + '-tel-full'); if (!box) return;
+  const inp = document.getElementById(pref === 'eh' ? 'eh-telefone' : pref + '-telefone');
+  const local = normalizePhone(inp ? inp.value : '');
+  if (!local) { box.textContent = ''; return; }
+  const ddi = getDDI(pref);
+  box.textContent = '📱 Vai ser salvo como +' + ddi + ' ' + local + '  ·  ' + nomePais(ddi);
+}
+/* número completo pronto pra salvar (DDI + número, só dígitos) */
+function telCompleto(pref) {
+  const inp = document.getElementById(pref === 'eh' ? 'eh-telefone' : pref + '-telefone');
+  const local = normalizePhone(inp ? inp.value : '');
+  if (!local) return '';
+  const ddi = getDDI(pref);
+  return local.startsWith(ddi) && local.length > 10 ? local : (ddi + local);
+}
+/* exibição amigável em qualquer país */
+function formatPhoneDisplay(d, ddiConhecido) {
+  if (!d) return '';
+  const { ddi, local } = splitTel(d, ddiConhecido);
+  if (ddi === '55') {
+    if (local.length === 11) return '(' + local.slice(0,2) + ') ' + local.slice(2,7) + '-' + local.slice(7);
+    if (local.length === 10) return '(' + local.slice(0,2) + ') ' + local.slice(2,6) + '-' + local.slice(6);
+    return '+55 ' + local;
+  }
+  if (ddi === '1' && local.length === 10) return '+1 (' + local.slice(0,3) + ') ' + local.slice(3,6) + '-' + local.slice(6);
+  return '+' + ddi + ' ' + agruparDireita(local);
+}
+function agruparDireita(d) {
+  const out = [];
+  let i = d.length;
+  while (i > 0) { const ini = Math.max(0, i - 4); out.unshift(d.slice(ini, i)); i = ini; }
+  return out.join(' ');
+}
+/* link do WhatsApp sem forçar +55 */
+function whatsappLink(tel, ddiConhecido) {
+  const d = normalizePhone(tel);
+  if (!d || d.length < 8) return '';
+  const { ddi, local } = splitTel(d, ddiConhecido);
+  if (!local || local.length < 6) return '';
+  return 'https://wa.me/' + ddi + local;
+}
+function whatsappBtn(tel, nome, ddi) {
+  const link = whatsappLink(tel, ddi);
+  if (!link) return '';
+  const titulo = nome ? ('Conversar com ' + esc(nome) + ' no WhatsApp') : 'Abrir no WhatsApp';
+  return ' <a href="' + link + '" target="_blank" rel="noopener" title="' + titulo + '" style="text-decoration:none;cursor:pointer" onclick="event.stopPropagation()">💬</a>';
+}
+
+function preencherTel(pref, telefone, ddi) {
+  montarDDISelects();
+  const r = splitTel(telefone || '', ddi);
+  setDDI(pref, r.ddi);
+  const inp = document.getElementById(pref === 'eh' ? 'eh-telefone' : pref + '-telefone');
+  if (inp) { inp.value = r.local; formatPhone(inp, pref); }
+}
+
 /* ───────── AJUSTES FINAIS ───────── */
 function scrollCalendarioParaHoje() {
   const hoje = new Date(), anoHoje = hoje.getFullYear();
@@ -5099,6 +5286,7 @@ function scrollCalendarioParaHoje() {
 
 /* ───────── BOOT v4 ───────── */
 setPago('Pago');
+montarDDISelects();
 MES_SEL = (new Date()).getMonth() + 1;
 updatePeriodoUI();
 renderPeriodos();
