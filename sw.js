@@ -1,7 +1,7 @@
 /* Rota Latina — service worker
    Estratégia: REDE PRIMEIRO para o app, cache só como rede de segurança.
    Assim nunca fica preso numa versão antiga; o cache só entra em cena sem sinal. */
-const CACHE = 'rota-latina-v1';
+const CACHE = 'rota-latina-v2';
 const APP = 'rota_latina_app.html';
 
 self.addEventListener('install', e => {
