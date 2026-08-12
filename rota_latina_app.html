@@ -489,6 +489,65 @@ details#cal-manual summary::-webkit-details-marker{display:none}
   .rd-val{width:78px;font-size:0.71rem}
 }
 .chart-vazio{text-align:center;color:var(--silver);font-size:0.84rem;padding:18px 8px}
+
+/* ═══════════ v5.0 · MULTI-QUARTOS ═══════════ */
+.quarto-sel{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.28);color:#fff;font-family:'Outfit',sans-serif;
+  font-size:0.8rem;font-weight:600;padding:5px 8px;border-radius:7px;max-width:150px}
+.quarto-sel option{color:#1a1a2e}
+.q-tag{display:inline-block;background:var(--navy);color:var(--gold);font-size:0.62rem;font-weight:700;padding:2px 7px;border-radius:5px;letter-spacing:0.02em}
+.q-tag.geral{background:var(--gray2);color:#555}
+
+/* mapa do calendário */
+.mapa-nav{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:10px}
+.mapa-nav b{font-family:'Cormorant Garamond',serif;font-size:1.15rem;color:var(--navy);min-width:132px;text-align:center}
+.mapa-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--gray2);border-radius:10px;background:#fff}
+.mapa{border-collapse:separate;border-spacing:0;min-width:max-content}
+.mapa th,.mapa td{padding:0;margin:0}
+.mapa .mp-q{position:sticky;left:0;z-index:3;background:#fff;border-right:2px solid var(--gray2);
+  padding:0 9px;font-size:0.74rem;font-weight:700;color:var(--navy);white-space:nowrap;text-align:left;min-width:74px;cursor:pointer}
+.mapa thead .mp-q{background:var(--navy);color:var(--gold);z-index:4}
+.mapa thead th{background:var(--navy);color:#fff;font-size:0.6rem;font-weight:600;height:32px;width:24px;text-align:center;
+  border-left:1px solid rgba(255,255,255,0.08)}
+.mapa thead th.wknd{background:#2c3a63}
+.mapa thead th small{display:block;font-size:0.52rem;opacity:0.6;font-weight:400}
+.mapa tbody tr:nth-child(even) .mp-q{background:#fafbfc}
+.mapa tbody td.mp-d{height:34px;width:24px;border-left:1px solid #eef0f4;border-bottom:1px solid #eef0f4;cursor:pointer;position:relative}
+.mapa tbody td.mp-d.wknd{background:#f7f8fb}
+.mapa tbody td.mp-d.hoje{box-shadow:inset 0 0 0 2px var(--gold)}
+.mapa tbody td.mp-d.ocup{background:var(--green)}
+.mapa tbody td.mp-d.ocup.pend{background:#f0a848}
+.mapa tbody td.mp-d.reserved{background:#f5d76e}
+.mapa tbody td.mp-d.blocked{background:#e08a80}
+.mapa tbody td.mp-d.ini{border-top-left-radius:8px;border-bottom-left-radius:8px}
+.mapa tbody td.mp-d.fim{border-top-right-radius:8px;border-bottom-right-radius:8px}
+.mapa tbody td.mp-d .mp-nome{position:absolute;left:4px;top:50%;transform:translateY(-50%);white-space:nowrap;
+  font-size:0.62rem;font-weight:700;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.35);pointer-events:none;z-index:2}
+.mapa-legenda{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:10px;font-size:0.7rem;color:#666}
+.mapa-legenda i{width:12px;height:12px;border-radius:3px;display:inline-block;margin-right:4px;vertical-align:-2px}
+.mapa-hint{font-size:0.72rem;color:var(--silver);text-align:center;margin-top:8px}
+
+/* buracos na agenda */
+.bur-card{background:#fff;border:1px solid var(--gray2);border-left:4px solid var(--gold);border-radius:10px;padding:11px 13px;margin-bottom:8px;cursor:pointer}
+.bur-card.curto{border-left-color:var(--terra);background:#fffaf6}
+.bur-card.longo{border-left-color:var(--red)}
+.bur-top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.bur-q{font-weight:700;color:var(--navy);font-size:0.88rem}
+.bur-n{font-size:0.74rem;font-weight:700;padding:2px 8px;border-radius:20px;background:var(--gray);color:#555}
+.bur-n.curto{background:var(--orange-l);color:#a35a00}
+.bur-datas{font-size:0.8rem;color:#444;margin-top:3px}
+.bur-ctx{font-size:0.72rem;color:var(--silver);margin-top:3px}
+.bur-resumo{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.bur-kpi{flex:1;min-width:96px;background:#fff;border:1px solid var(--gray2);border-radius:10px;padding:10px 12px;text-align:center}
+.bur-kpi b{display:block;font-family:'Cormorant Garamond',serif;font-size:1.5rem;color:var(--navy)}
+.bur-kpi span{font-size:0.66rem;color:var(--silver);text-transform:uppercase;letter-spacing:0.04em}
+
+/* cadastro de quartos */
+.q-row{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--gray2);border-radius:9px;padding:9px 11px;margin-bottom:7px}
+.q-row.inativo{opacity:0.55}
+.q-row .q-nome{flex:1;font-weight:600;font-size:0.88rem;color:var(--navy)}
+.q-row .q-info{font-size:0.7rem;color:var(--silver)}
+.q-row button{background:none;border:none;cursor:pointer;font-size:0.9rem;padding:3px 5px}
+@media(max-width:430px){ .quarto-sel{max-width:118px;font-size:0.74rem} }
 </style>
 </head>
 <body>
@@ -549,6 +608,7 @@ details#cal-manual summary::-webkit-details-marker{display:none}
     </select>
     <button class="mes-nav-btn" onclick="mudarMes(1)" title="Próximo mês">▶</button>
     <button class="mes-hoje-btn" onclick="irParaMesAtual()" title="Ir pro mês atual">📌 Hoje</button>
+    <select class="quarto-sel" id="quarto-sel" onchange="setQuarto(this.value)" title="Filtrar por quarto"></select>
     <span class="periodo-tag" id="periodo-tag"></span>
   </div>
 </div>
@@ -598,7 +658,51 @@ details#cal-manual summary::-webkit-details-marker{display:none}
 
 <!-- ═══════════ CALENDÁRIO ═══════════ -->
 <div id="tab-calendario" class="tab-content">
-  <div class="cal-year-title">📅 <span id="cal-year-num">2026</span></div>
+  <div class="subtab-bar">
+    <button class="subtab-btn active" id="sc-mapa" onclick="showSubCal('mapa',this)">🗺️ Mapa</button>
+    <button class="subtab-btn" id="sc-buracos" onclick="showSubCal('buracos',this)">🕳️ Buracos</button>
+    <button class="subtab-btn" id="sc-ano" onclick="showSubCal('ano',this)">📅 Ano</button>
+  </div>
+
+  <div class="subtab-panel active" id="scal-mapa">
+    <div class="mapa-nav">
+      <button class="mes-nav-btn" onclick="mudarMes(-1)">◀</button>
+      <b id="mapa-titulo">Agosto 2026</b>
+      <button class="mes-nav-btn" onclick="mudarMes(1)">▶</button>
+      <button class="mes-hoje-btn" style="background:var(--navy);color:var(--gold)" onclick="irParaMesAtual()">📌 Hoje</button>
+    </div>
+    <div class="mapa-wrap" id="mapa-wrap"></div>
+    <div class="mapa-legenda">
+      <span><i style="background:var(--green)"></i>Ocupado (pago)</span>
+      <span><i style="background:#f0a848"></i>Ocupado (a receber)</span>
+      <span><i style="background:#f5d76e"></i>Reservado</span>
+      <span><i style="background:#e08a80"></i>Bloqueado</span>
+      <span><i style="background:#fff;border:1px solid #ddd"></i>Livre</span>
+    </div>
+    <div class="mapa-hint">Toque num dia para abrir a reserva ou criar uma nova. Toque no nome do quarto para ver o ano inteiro dele.</div>
+  </div>
+
+  <div class="subtab-panel" id="scal-buracos">
+    <div class="info-box info-blue" style="margin-bottom:10px">
+      💡 Noites livres nos próximos <strong id="bur-horizonte">60</strong> dias. Os vãos curtos, espremidos entre duas reservas, são os mais difíceis de vender — e os que mais valem uma promoção.
+    </div>
+    <div class="bur-resumo" id="bur-resumo"></div>
+    <div class="filters" style="margin-bottom:10px">
+      <select class="form-control" id="bur-dias" onchange="renderBuracos()">
+        <option value="30">Próximos 30 dias</option>
+        <option value="60" selected>Próximos 60 dias</option>
+        <option value="90">Próximos 90 dias</option>
+      </select>
+      <select class="form-control" id="bur-tipo" onchange="renderBuracos()">
+        <option value="">Todos os vãos</option>
+        <option value="curto">Só os curtos (1 a 2 noites)</option>
+      </select>
+    </div>
+    <div id="bur-list"></div>
+  </div>
+
+  <div class="subtab-panel" id="scal-ano">
+<div class="cal-year-title">📅 <span id="cal-year-num">2026</span></div>
   <div class="cal-quick-nav">
     <button class="cal-quick-btn" onclick="scrollCalendarioParaHoje()" title="Ir para o mês atual">📌 Hoje</button>
     <select class="cal-quick-sel" id="cal-jump-mes" onchange="scrollCalendarioParaMes(parseInt(this.value));this.value=''">
@@ -617,6 +721,7 @@ details#cal-manual summary::-webkit-details-marker{display:none}
     <div class="legend-item"><div class="legend-dot" style="background:white;border:1px solid #ddd"></div>Livre</div>
   </div>
   <div id="cal-container"></div>
+  </div>
 </div>
 
 <!-- ═══════════ FINANCEIRO ═══════════ -->
@@ -733,6 +838,16 @@ details#cal-manual summary::-webkit-details-marker{display:none}
     <div class="kpi-card"><div class="kpi-label">📊 RevPAR</div><div class="kpi-value" id="kpi-revpar">R$ 0,00</div><div class="kpi-sub">receita ÷ diária disponível</div></div>
     <div class="kpi-card"><div class="kpi-label">🎟️ Ticket Médio</div><div class="kpi-value" id="kpi-ticket">R$ 0,00</div><div class="kpi-sub">por reserva</div></div>
     <div class="kpi-card"><div class="kpi-label">🔁 Recorrência</div><div class="kpi-value" id="kpi-recorrencia">0%</div><div class="kpi-sub">hóspedes que voltaram</div></div>
+  </div>
+  <div class="card" id="card-por-quarto" style="display:none">
+    <div class="card-header bg-terra">🛏️ Desempenho por quarto <span id="pq-ano" style="font-weight:400;font-size:0.85rem;opacity:.85"></span></div>
+    <div class="card-body" style="padding:10px 14px">
+      <div class="summary-note">💡 "Rateio" é a parte das despesas gerais (condomínio, internet, energia) que cabe a cada quarto, dividida pelas diárias ocupadas.</div>
+      <div class="table-wrap keep-table">
+        <table><thead><tr><th>Quarto</th><th>Rec. Bruta</th><th>Rec. Líq.</th><th>Reservas</th><th>Diárias</th><th>Ocupação</th><th>Desp. diretas</th><th>Rateio</th><th>Lucro</th><th>Diária média</th></tr></thead>
+        <tbody id="por-quarto-tbody"></tbody></table>
+      </div>
+    </div>
   </div>
   <div class="card">
     <div class="card-header bg-navy">📊 Comparativo Mensal <span id="dash-year">2026</span></div>
@@ -880,6 +995,21 @@ details#cal-manual summary::-webkit-details-marker{display:none}
       <input type="file" id="importFile" accept=".json" style="display:none" onchange="importarBackup(event)">
     </div>
   </div>
+  <div class="card">
+    <div class="card-header bg-navy">🛏️ Quartos</div>
+    <div class="card-body">
+      <div class="info-box info-blue">
+        💡 Cada reserva pertence a um quarto. Despesas podem ser de um quarto específico ou <strong>Gerais</strong> (condomínio, internet, energia) — nas análises as gerais são divididas entre os quartos conforme as diárias ocupadas.
+      </div>
+      <div id="q-list"></div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <input type="text" class="form-control" id="q-novo" placeholder="Nome do quarto (ex: 201)" onkeydown="if(event.key==='Enter')addQuarto()">
+        <button class="btn btn-green" style="flex-shrink:0" onclick="addQuarto()">➕ Add</button>
+      </div>
+      <small style="color:#888;font-size:0.7rem;display:block;margin-top:6px">Desativar um quarto o esconde dos formulários e do mapa, mas mantém o histórico dele nas análises.</small>
+    </div>
+  </div>
+
   <div class="card">
     <div class="card-header bg-green">💬 Mensagens para hóspedes</div>
     <div class="card-body">
@@ -1085,6 +1215,10 @@ details#cal-manual summary::-webkit-details-marker{display:none}
       <small class="tel-hint">Opcional. Escolha o país do hóspede — o WhatsApp e a senha da porta usam este número.</small>
     </div>
     <div class="form-group">
+      <label class="form-label">🛏️ Quarto *</label>
+      <select class="form-control" id="r-quarto" onchange="verificarConflito()"></select>
+    </div>
+    <div class="form-group">
       <label class="form-label">Período(s) da hospedagem *</label>
       <div id="periodos-list"></div>
       <button class="btn btn-terra btn-full" style="padding:9px;font-size:0.8rem" onclick="addPeriodo()">➕ Adicionar outro período para o mesmo hóspede</button>
@@ -1147,6 +1281,11 @@ details#cal-manual summary::-webkit-details-marker{display:none}
         <input type="date" class="form-control" id="d-data">
       </div>
       <div class="form-group">
+      <label class="form-label">🛏️ Quarto</label>
+      <select class="form-control" id="d-quarto"></select>
+      <small style="color:#888;font-size:0.7rem">Deixe em "Geral (casa toda)" para condomínio, internet, energia etc.</small>
+    </div>
+    <div class="form-group">
         <label class="form-label">Categoria *</label>
         <select class="form-control" id="d-cat">
           <option value="">Selecione...</option>
@@ -1213,6 +1352,11 @@ details#cal-manual summary::-webkit-details-marker{display:none}
         <input type="date" class="form-control" id="ed-data">
       </div>
       <div class="form-group">
+      <label class="form-label">🛏️ Quarto</label>
+      <select class="form-control" id="ed-quarto"></select>
+      <small style="color:#888;font-size:0.7rem">Deixe em "Geral (casa toda)" para condomínio, internet, energia etc.</small>
+    </div>
+    <div class="form-group">
         <label class="form-label">Categoria *</label>
         <select class="form-control" id="ed-cat">
           <option value="">Selecione...</option>
@@ -1336,6 +1480,10 @@ details#cal-manual summary::-webkit-details-marker{display:none}
         <input type="tel" class="form-control tel-num" id="edit-r-telefone" placeholder="99999-9999" oninput="formatPhone(this,'edit-r')">
       </div>
       <small class="tel-full" id="edit-r-tel-full"></small>
+    </div>
+    <div class="form-group">
+      <label class="form-label">🛏️ Quarto</label>
+      <select class="form-control" id="edit-r-quarto"></select>
     </div>
     <div class="form-row">
       <div class="form-group">
@@ -2672,7 +2820,7 @@ function fillCalendar(rec) {
     _ensureYear(yr);
     const cal = (_cache[yr].cal && Object.keys(_cache[yr].cal).length) ? {..._cache[yr].cal} : {};
     byYear[y].forEach(({dateStr, i}) => {
-      cal[dateStr] = {
+      cal[calKey(rec.quarto, dateStr)] = {
         status: 'occupied',
         hospede: rec.hospede,
         pessoas: rec.pessoas,
@@ -2763,6 +2911,7 @@ function deleteReceita(id) {
 
 // ── SAVE DESPESA
 function saveDespesa() {
+  const quartoDesp = (document.getElementById('d-quarto') || {}).value || '';
   const data = document.getElementById('d-data').value;
   const cat = document.getElementById('d-cat').value;
   const desc = document.getElementById('d-desc').value.trim();
@@ -2776,7 +2925,7 @@ function saveDespesa() {
   if (valor <= 0) { toast('⚠️ Valor precisa ser maior que zero'); return; }
   const mes = mesRefRaw ? parseInt(mesRefRaw) : getMes(data);
   const desps = load('desp');
-  desps.push({ id: uid(), data, cat, desc, forn, valor, pgto, comp, obs, mes, mesRef: mesRefRaw ? parseInt(mesRefRaw) : null });
+  desps.push({ id: uid(), data, cat, desc, forn, valor, pgto, comp, obs, mes, quarto: quartoDesp, mesRef: mesRefRaw ? parseInt(mesRefRaw) : null });
   save('desp', desps);
   ['d-data','d-cat','d-desc','d-forn','d-valor','d-pgto','d-comp','d-obs','d-mes-ref'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   closeModal('modal-desp');
@@ -2808,6 +2957,8 @@ function editDespesa(id) {
   document.getElementById('ed-comp').value = desp.comp || '';
   document.getElementById('ed-obs').value = desp.obs || '';
   document.getElementById('ed-mes-ref').value = desp.mesRef ? String(desp.mesRef) : '';
+  montarQuartoSelects();
+  const edq = document.getElementById('ed-quarto'); if (edq) edq.value = desp.quarto || '';
   openModal('modal-edit-desp');
 }
 
@@ -2834,6 +2985,7 @@ function saveEditDespesa() {
   recs[idx] = {
     ...recs[idx],
     data, cat, desc, forn, valor, pgto, comp, obs, mes,
+    quarto: (document.getElementById('ed-quarto') ? document.getElementById('ed-quarto').value : (recs[idx].quarto || '')),
     mesRef: mesRefRaw ? parseInt(mesRefRaw) : null
   };
   save('desp', recs);
@@ -3476,6 +3628,8 @@ function editReceita(id) {
   document.getElementById('edit-r-checkout').value = rec.checkout || '';
   document.getElementById('edit-r-hospede').value = rec.hospede || '';
   preencherTel('edit-r', rec.telefone, rec.ddi);
+  montarQuartoSelects();
+  const eq = document.getElementById('edit-r-quarto'); if (eq) eq.value = rec.quarto || primeiroQuarto();
   document.getElementById('edit-r-plat').value = rec.plat || '';
   document.getElementById('edit-r-pessoas').value = rec.pessoas || '';
   document.getElementById('edit-r-valor').value = numberToBRLInput(rec.valor);
@@ -3568,7 +3722,7 @@ function saveEditReceita() {
   recs[idx] = {
     ...recAntiga,
     data, checkout, hospede, telefone, plat, pessoas, valor, taxa, liquido, liquidoManual,
-    ddi: ddiEdit, pgto, obs, pago: (document.getElementById('edit-r-status') ? document.getElementById('edit-r-status').value : editPagoStatus), dias, mes
+    ddi: ddiEdit, quarto: (document.getElementById('edit-r-quarto') ? document.getElementById('edit-r-quarto').value : (recs[idx].quarto || primeiroQuarto())), pgto, obs, pago: (document.getElementById('edit-r-status') ? document.getElementById('edit-r-status').value : editPagoStatus), dias, mes
   };
   save('rec', recs);
 
@@ -4222,6 +4376,7 @@ function applyFiltrosRec(recs) {
   const st = (document.getElementById('filtro-rec-status') || {}).value || '';
   const q = ((document.getElementById('filtro-rec-busca') || {}).value || '').trim().toLowerCase();
   return recs.filter(r => {
+    if (QUARTO_SEL && (r.quarto || primeiroQuarto()) !== QUARTO_SEL) return false;
     if (MES_SEL && getMes(r.data) !== MES_SEL) return false;
     if (plat && r.plat !== plat) return false;
     if (st && (r.pago || 'Pendente') !== st) return false;
@@ -4237,6 +4392,8 @@ function applyFiltrosDesp(desps) {
   const cat = (document.getElementById('filtro-desp-cat') || {}).value || '';
   const q = ((document.getElementById('filtro-desp-busca') || {}).value || '').trim().toLowerCase();
   return desps.filter(d => {
+    /* com um quarto escolhido, mostra as dele + as gerais da casa */
+    if (QUARTO_SEL && d.quarto && d.quarto !== QUARTO_SEL) return false;
     if (MES_SEL && (d.mesRef || d.mes || getMes(d.data)) !== MES_SEL) return false;
     if (cat && d.cat !== cat) return false;
     if (q && !((d.desc || '').toLowerCase().includes(q) || (d.forn || '').toLowerCase().includes(q) || (d.obs || '').toLowerCase().includes(q))) return false;
@@ -4268,7 +4425,7 @@ function renderReceitas() {
       '<div class="crow-head" onclick="toggleRow(this)">' +
         '<div class="crow-date">' + dataChip(r.data) + '</div>' +
         '<div class="crow-main">' +
-          '<div class="crow-title">' + esc(r.hospede) + (venc ? ' <span title="Pendente há mais de 30 dias">⚠️</span>' : '') + '</div>' +
+          '<div class="crow-title">' + esc(r.hospede) + tagQuarto(r.quarto) + (venc ? ' <span title="Pendente há mais de 30 dias">⚠️</span>' : '') + '</div>' +
           '<div class="crow-sub">' + esc(r.plat || '') + ' · ' + (r.dias || 1) + (r.dias > 1 ? ' noites' : ' noite') + ' · 👥 ' + (r.pessoas || 1) + '</div>' +
         '</div>' +
         '<div class="crow-right">' +
@@ -4317,7 +4474,7 @@ function renderDespesas() {
       '<div class="crow-head" onclick="toggleRow(this)">' +
         '<div class="crow-date">' + dataChip(d.data) + '</div>' +
         '<div class="crow-main">' +
-          '<div class="crow-title">' + esc(d.desc || d.cat) + '</div>' +
+          '<div class="crow-title">' + esc(d.desc || d.cat) + tagQuarto(d.quarto, true) + '</div>' +
           '<div class="crow-sub">' + esc(d.cat) + (d.forn ? ' · ' + esc(d.forn) : '') + '</div>' +
         '</div>' +
         '<div class="crow-right"><div class="crow-val" style="color:var(--red)">' + fmt(d.valor) + '</div>' +
@@ -4456,6 +4613,7 @@ function renderProximos() {
     const yr = parseInt(yk);
     if (isNaN(yr) || !Array.isArray(_cache[yr].rec)) return;
     _cache[yr].rec.forEach(r => {
+      if (QUARTO_SEL && (r.quarto || primeiroQuarto()) !== QUARTO_SEL) return;
       if (r.data && r.data >= hojeStr && r.data <= limiteStr) eventos.push({ tipo:'chegada', data:r.data, rec:r, ano:yr });
       if (r.checkout && r.checkout >= hojeStr && r.checkout <= limiteStr) eventos.push({ tipo:'saida', data:r.checkout, rec:r, ano:yr });
     });
@@ -4480,7 +4638,7 @@ function renderProximos() {
       '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">' +
         '<div><span style="color:' + cor + ';font-weight:600">' + icone + '</span> · <strong>' + esc(r.hospede) + '</strong>' +
           whatsappBtn(r.telefone, r.hospede, r.ddi) +
-          '<span style="color:#888"> · ' + esc(r.plat||'') + '</span>' + (r.pessoas ? ' <span style="color:#888">· 👥 ' + r.pessoas + '</span>' : '') + '</div>' +
+          '<span style="color:#888"> · ' + esc(r.plat||'') + '</span>' + tagQuarto(r.quarto) + (r.pessoas ? ' <span style="color:#888">· 👥 ' + r.pessoas + '</span>' : '') + '</div>' +
         '<div style="font-size:0.78rem">' + prefix + ' <span style="color:#888">(' + br(ev.data) + ')</span></div>' +
       '</div>' +
       '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:3px">' +
@@ -4800,6 +4958,8 @@ function delPeriodo(i) { PERIODOS.splice(i, 1); if (!PERIODOS.length) PERIODOS =
 function abrirNovaReserva() {
   ['r-hospede','r-telefone','r-plat','r-pessoas','r-valor','r-pgto','r-obs'].forEach(id => { const e = document.getElementById(id); if (e) e.value = ''; });
   PERIODOS = [{ inicio: '', fim: '' }];
+  montarQuartoSelects();
+  const rq = document.getElementById('r-quarto'); if (rq) rq.value = QUARTO_SEL || primeiroQuarto();
   renderPeriodos();
   preencherTel('r', '', '55');
   const tp = document.getElementById('taxa-preview'); if (tp) tp.textContent = '💡 Preencha plataforma e valor para calcular a taxa';
@@ -4966,6 +5126,7 @@ function saveReceita() {
   const ddiSel = getDDI('r');
   const telefone = telCompleto('r');
   const plat = document.getElementById('r-plat').value;
+  const quartoSelecionado = (document.getElementById('r-quarto') || {}).value || primeiroQuarto();
   const pessoas = parseInt(document.getElementById('r-pessoas').value || 1);
   const valor = parseBRL(document.getElementById('r-valor').value);
   const pgto = document.getElementById('r-pgto').value;
@@ -4984,7 +5145,7 @@ function saveReceita() {
     let dias = 1;
     if (p.fim && p.fim > p.inicio) dias = Math.round((new Date(p.fim + 'T00:00:00') - new Date(p.inicio + 'T00:00:00')) / 86400000);
     const rec = {
-      id: uid(), data: p.inicio, checkout: p.fim || '', hospede, telefone, ddi: ddiSel, plat, dias, pessoas,
+      id: uid(), data: p.inicio, checkout: p.fim || '', hospede, telefone, ddi: ddiSel, quarto: quartoSelecionado, plat, dias, pessoas,
       valor, taxa, liquido: valor - taxa, pgto, pago: pagoStatus, obs, mes: getMes(p.inicio)
     };
     criadas.push(rec);
@@ -5326,9 +5487,674 @@ function scrollCalendarioParaHoje() {
   scrollCalendarioParaMes(hoje.getMonth() + 1);
 }
 
+
+/* ═══════════════════════════════════════════════════════════════
+   v5.0 — MULTI-QUARTOS
+   Cada reserva pertence a um quarto. Despesas podem ser de um
+   quarto ou Gerais (rateadas por diárias). Calendário vira mapa.
+   ═══════════════════════════════════════════════════════════════ */
+
+var QUARTO_SEL = '';           /* '' = todos os quartos */
+var SUB_CAL = 'mapa';
+
+function loadQuartos() {
+  const c = loadConfig();
+  return (c.quartos && c.quartos.length) ? c.quartos : [{ id: 'q1', nome: 'Apto 608', ativo: true }];
+}
+function quartosAtivos() { return loadQuartos().filter(q => q.ativo !== false); }
+function quartoNome(id) {
+  if (!id) return 'Geral';
+  const q = loadQuartos().find(x => x.id === id);
+  return q ? q.nome : '(quarto removido)';
+}
+function primeiroQuarto() { const a = quartosAtivos(); return (a[0] || loadQuartos()[0]).id; }
+function temVariosQuartos() { return quartosAtivos().length > 1; }
+
+/* ── migração: dados antigos ganham o primeiro quarto ── */
+function migrarQuartos() {
+  const c = loadConfig();
+  let mudouCfg = false;
+  if (!c.quartos || !c.quartos.length) { c.quartos = [{ id: 'q1', nome: 'Apto 608', ativo: true }]; mudouCfg = true; }
+  if (mudouCfg) saveConfig(c);
+  const primeiro = (c.quartos[0] || {}).id || 'q1';
+
+  Object.keys(_cache).forEach(yk => {
+    const yr = parseInt(yk); if (isNaN(yr)) return;
+    const ano = _cache[yr];
+    let mudouRec = false, mudouDesp = false, mudouCal = false;
+
+    (ano.rec || []).forEach(r => { if (!r.quarto) { r.quarto = primeiro; mudouRec = true; } });
+    (ano.desp || []).forEach(d => { if (d.quarto === undefined) { d.quarto = ''; mudouDesp = true; } });
+
+    const cal = ano.cal || {};
+    Object.keys(cal).forEach(k => {
+      if (/^\d{4}-\d{2}-\d{2}$/.test(k)) {            /* chave antiga, sem quarto */
+        cal[primeiro + '|' + k] = cal[k];
+        delete cal[k];
+        mudouCal = true;
+      }
+    });
+
+    if (mudouRec)  { localStorage.setItem('rl_rec_'  + yr, JSON.stringify(ano.rec));  _pushToFirestore('rec_'  + yr, ano.rec); }
+    if (mudouDesp) { localStorage.setItem('rl_desp_' + yr, JSON.stringify(ano.desp)); _pushToFirestore('desp_' + yr, ano.desp); }
+    if (mudouCal)  { ano.cal = cal; localStorage.setItem('rl_cal_' + yr, JSON.stringify(cal)); _pushToFirestore('cal_' + yr, cal); }
+  });
+}
+
+/* ── calendário passa a ser indexado por quarto|data ── */
+function calKey(q, data) { return (q || primeiroQuarto()) + '|' + data; }
+function calInfo(q, data) { return loadCal()[calKey(q, data)] || null; }
+function calDataDaChave(k) { const i = k.indexOf('|'); return i < 0 ? k : k.slice(i + 1); }
+function calQuartoDaChave(k) { const i = k.indexOf('|'); return i < 0 ? primeiroQuarto() : k.slice(0, i); }
+function diaOcupado(info) {
+  if (!info) return false;
+  return !!(info.autoFilled || info.status);
+}
+
+function diasOcupadosPorMes(qFiltro) {
+  const cal = loadCal();
+  const out = MONTHS.map(() => 0);
+  Object.keys(cal).forEach(k => {
+    if (!diaOcupado(cal[k])) return;
+    if (qFiltro && calQuartoDaChave(k) !== qFiltro) return;
+    const d = calDataDaChave(k);
+    const m = parseInt(d.slice(5, 7));
+    if (m >= 1 && m <= 12) out[m - 1]++;
+  });
+  return out;
+}
+function diariasDisponiveisNoMes(m) {
+  const n = QUARTO_SEL ? 1 : Math.max(1, quartosAtivos().length);
+  return diasNoMes(YEAR, m) * n;
+}
+
+/* ── filtro por quarto ── */
+function filtrarQ(arr) { return QUARTO_SEL ? arr.filter(x => x.quarto === QUARTO_SEL) : arr; }
+
+function setQuarto(v) {
+  QUARTO_SEL = v || '';
+  montarQuartoSel();
+  rerenderAll();
+  toast(v ? '🛏️ ' + quartoNome(v) : '🛏️ Todos os quartos');
+}
+function montarQuartoSel() {
+  const sel = document.getElementById('quarto-sel'); if (!sel) return;
+  const qs = quartosAtivos();
+  sel.style.display = qs.length > 1 ? '' : 'none';
+  sel.innerHTML = '<option value="">🛏️ Todos</option>' +
+    qs.map(q => '<option value="' + q.id + '">' + esc(q.nome) + '</option>').join('');
+  sel.value = QUARTO_SEL;
+}
+function montarQuartoSelects() {
+  const qs = quartosAtivos();
+  const opts = qs.map(q => '<option value="' + q.id + '">' + esc(q.nome) + '</option>').join('');
+  ['r-quarto', 'edit-r-quarto'].forEach(id => {
+    const el = document.getElementById(id); if (!el) return;
+    const antes = el.value;
+    el.innerHTML = opts;
+    if (antes && qs.some(q => q.id === antes)) el.value = antes;
+  });
+  ['d-quarto', 'ed-quarto'].forEach(id => {
+    const el = document.getElementById(id); if (!el) return;
+    const antes = el.value;
+    el.innerHTML = '<option value="">🏠 Geral (casa toda)</option>' + opts;
+    if (antes !== null && antes !== undefined) el.value = antes;
+  });
+}
+
+/* ── cadastro de quartos em Config ── */
+function renderQuartos() {
+  const box = document.getElementById('q-list'); if (!box) return;
+  const qs = loadQuartos();
+  const recs = [];
+  Object.keys(_cache).forEach(yk => { const y = parseInt(yk); if (!isNaN(y)) recs.push(...(_cache[y].rec || [])); });
+  box.innerHTML = qs.map((q, i) =>
+    '<div class="q-row' + (q.ativo === false ? ' inativo' : '') + '">' +
+      '<div class="q-nome">' + esc(q.nome) +
+        (q.ativo === false ? ' <span class="q-info">(inativo)</span>' : '') +
+        '<div class="q-info">' + recs.filter(r => r.quarto === q.id).length + ' reserva(s) no histórico</div>' +
+      '</div>' +
+      '<button onclick="renomearQuarto(\'' + q.id + '\')" title="Renomear">✏️</button>' +
+      '<button onclick="alternarQuarto(\'' + q.id + '\')" title="' + (q.ativo === false ? 'Reativar' : 'Desativar') + '">' + (q.ativo === false ? '🔓' : '🚫') + '</button>' +
+      (qs.length > 1 ? '<button onclick="removerQuarto(\'' + q.id + '\')" title="Remover">🗑️</button>' : '') +
+    '</div>').join('');
+}
+function addQuarto() {
+  const inp = document.getElementById('q-novo');
+  const nome = (inp.value || '').trim();
+  if (!nome) { toast('⚠️ Dê um nome ao quarto'); return; }
+  const c = loadConfig();
+  c.quartos = loadQuartos().slice();
+  if (c.quartos.some(q => q.nome.toLowerCase() === nome.toLowerCase())) { toast('⚠️ Já existe um quarto com esse nome'); return; }
+  c.quartos.push({ id: 'q' + uid(), nome: nome, ativo: true });
+  saveConfig(c);
+  inp.value = '';
+  renderQuartos(); montarQuartoSel(); montarQuartoSelects(); rerenderAll();
+  toast('✅ Quarto "' + nome + '" criado');
+}
+function renomearQuarto(id) {
+  const c = loadConfig(); c.quartos = loadQuartos().slice();
+  const q = c.quartos.find(x => x.id === id); if (!q) return;
+  const novo = prompt('Novo nome para "' + q.nome + '":', q.nome);
+  if (novo === null) return;
+  const nome = novo.trim(); if (!nome) return;
+  q.nome = nome; saveConfig(c);
+  renderQuartos(); montarQuartoSel(); montarQuartoSelects(); rerenderAll();
+  toast('✅ Renomeado');
+}
+function alternarQuarto(id) {
+  const c = loadConfig(); c.quartos = loadQuartos().slice();
+  const q = c.quartos.find(x => x.id === id); if (!q) return;
+  if (q.ativo !== false && c.quartos.filter(x => x.ativo !== false).length <= 1) { toast('⚠️ Precisa ter pelo menos um quarto ativo'); return; }
+  q.ativo = (q.ativo === false);
+  saveConfig(c);
+  if (QUARTO_SEL === id && q.ativo === false) QUARTO_SEL = '';
+  renderQuartos(); montarQuartoSel(); montarQuartoSelects(); rerenderAll();
+  toast(q.ativo === false ? '🚫 Quarto desativado' : '🔓 Quarto reativado');
+}
+function removerQuarto(id) {
+  const recs = [];
+  Object.keys(_cache).forEach(yk => { const y = parseInt(yk); if (!isNaN(y)) recs.push(...(_cache[y].rec || [])); });
+  const n = recs.filter(r => r.quarto === id).length;
+  if (n > 0) { toast('⚠️ Esse quarto tem ' + n + ' reserva(s). Desative em vez de remover.', 3600); return; }
+  const q = loadQuartos().find(x => x.id === id);
+  if (!confirmar('Remover o quarto "' + (q ? q.nome : '') + '"?')) return;
+  const c = loadConfig();
+  c.quartos = loadQuartos().filter(x => x.id !== id);
+  saveConfig(c);
+  if (QUARTO_SEL === id) QUARTO_SEL = '';
+  renderQuartos(); montarQuartoSel(); montarQuartoSelects(); rerenderAll();
+  toast('🗑️ Quarto removido');
+}
+
+/* ── agregações com quarto + rateio das despesas gerais ── */
+function monthlyRec() {
+  const recs = filtrarQ(load('rec'));
+  const ocup = diasOcupadosPorMes(QUARTO_SEL);
+  return MONTHS.map((_, i) => {
+    const m = i + 1;
+    const rows = recs.filter(r => r.mes === m);
+    const soma = (f, g) => rows.filter(f).reduce((a, r) => a + g(r), 0);
+    const ab = soma(r => r.plat === 'Airbnb', r => r.valor), al = soma(r => r.plat === 'Airbnb', r => r.liquido);
+    const bb = soma(r => r.plat === 'Booking', r => r.valor), bl = soma(r => r.plat === 'Booking', r => r.liquido);
+    const pb = soma(r => r.plat === 'Particular', r => r.valor), pl = soma(r => r.plat === 'Particular', r => r.liquido);
+    const tt = rows.reduce((a, r) => a + r.taxa, 0);
+    const recebido = soma(r => r.pago === 'Pago', r => r.liquido);
+    const pendente = soma(r => r.pago !== 'Pago', r => r.liquido);
+    const diasMes = diariasDisponiveisNoMes(m);
+    const diasOcup = ocup[i];
+    return { m, ab, al, bb, bl, pb, pl, tb: ab + bb + pb, tt, tl: al + bl + pl,
+             reservas: rows.length, hospedes: rows.reduce((a, r) => a + r.pessoas, 0),
+             recebido, pendente, diasOcup, diasMes, ocupPct: diasMes > 0 ? diasOcup / diasMes : 0 };
+  });
+}
+/* fatia do quarto nas despesas gerais de um mês: diárias dele ÷ diárias de todos */
+function fatiaDoQuarto(q, m) {
+  const doQuarto = diasOcupadosPorMes(q)[m - 1] || 0;
+  const total = diasOcupadosPorMes('')[m - 1] || 0;
+  if (total > 0) return doQuarto / total;
+  const n = Math.max(1, quartosAtivos().length);
+  return 1 / n;
+}
+function monthlyDesp() {
+  const desps = load('desp');
+  const q = QUARTO_SEL;
+  return MONTHS.map((_, i) => {
+    const m = i + 1;
+    const rows = desps.filter(d => d.mes === m);
+    const cats = {}; CATS.forEach(c => cats[c] = 0);
+    let total = 0;
+    if (!q) {
+      rows.forEach(d => { cats[d.cat] = (cats[d.cat] || 0) + d.valor; total += d.valor; });
+    } else {
+      const fatia = fatiaDoQuarto(q, m);
+      rows.forEach(d => {
+        let v = 0;
+        if (d.quarto === q) v = d.valor;
+        else if (!d.quarto) v = d.valor * fatia;
+        else return;
+        cats[d.cat] = (cats[d.cat] || 0) + v; total += v;
+      });
+    }
+    return { m, cats, total };
+  });
+}
+
+/* ── resumo por quarto (Análises) ── */
+function renderPorQuarto() {
+  const card = document.getElementById('card-por-quarto');
+  const tb = document.getElementById('por-quarto-tbody');
+  if (!card || !tb) return;
+  const qs = quartosAtivos();
+  if (qs.length < 2) { card.style.display = 'none'; return; }
+  card.style.display = '';
+  const recsAno = load('rec');
+  const despAno = load('desp');
+  const gerais = despAno.filter(d => !d.quarto).reduce((a, d) => a + d.valor, 0);
+  const diariasTotais = diasOcupadosPorMes('').reduce((a, b) => a + b, 0);
+  const dispPorQuarto = MONTHS.reduce((a, _, i) => a + diasNoMes(YEAR, i + 1), 0);
+  let linhas = '';
+  const tot = { rec: 0, liq: 0, dir: 0, rat: 0, dias: 0, res: 0 };
+  qs.forEach(q => {
+    const rr = recsAno.filter(r => r.quarto === q.id);
+    const bruto = rr.reduce((a, r) => a + r.valor, 0);
+    const liq = rr.reduce((a, r) => a + r.liquido, 0);
+    const dias = diasOcupadosPorMes(q.id).reduce((a, b) => a + b, 0);
+    const dir = despAno.filter(d => d.quarto === q.id).reduce((a, d) => a + d.valor, 0);
+    const rat = diariasTotais > 0 ? gerais * (dias / diariasTotais) : gerais / qs.length;
+    const lucro = liq - dir - rat;
+    tot.rec += bruto; tot.liq += liq; tot.dir += dir; tot.rat += rat; tot.dias += dias; tot.res += rr.length;
+    linhas += '<tr>' +
+      '<td class="td-left" style="background:#d6e4f0;font-weight:600">' + esc(q.nome) + '</td>' +
+      '<td class="td-orange">' + fmt(bruto) + '</td>' +
+      '<td class="td-green">' + fmt(liq) + '</td>' +
+      '<td>' + rr.length + '</td>' +
+      '<td>' + dias + '</td>' +
+      '<td>' + (dispPorQuarto > 0 ? pct(dias / dispPorQuarto) : '0%') + '</td>' +
+      '<td class="td-red">' + (dir > 0 ? fmt(dir) : '-') + '</td>' +
+      '<td class="td-red">' + fmt(rat) + '</td>' +
+      '<td class="' + (lucro >= 0 ? 'td-green' : 'td-red') + '"><strong>' + fmt(lucro) + '</strong></td>' +
+      '<td>' + (dias > 0 ? fmt(bruto / dias) : '-') + '</td>' +
+    '</tr>';
+  });
+  const lucroTot = tot.liq - tot.dir - tot.rat;
+  tb.innerHTML = linhas + '<tr>' +
+    '<td class="td-navy">📌 TOTAL</td><td class="td-navy">' + fmt(tot.rec) + '</td><td class="td-navy">' + fmt(tot.liq) + '</td>' +
+    '<td class="td-navy">' + tot.res + '</td><td class="td-navy">' + tot.dias + '</td>' +
+    '<td class="td-navy">' + (dispPorQuarto * qs.length > 0 ? pct(tot.dias / (dispPorQuarto * qs.length)) : '0%') + '</td>' +
+    '<td class="td-navy">' + fmt(tot.dir) + '</td><td class="td-navy">' + fmt(tot.rat) + '</td>' +
+    '<td class="td-navy">' + fmt(lucroTot) + '</td><td class="td-navy">' + (tot.dias > 0 ? fmt(tot.rec / tot.dias) : '-') + '</td></tr>';
+}
+
+/* ── calendário: mapa quartos × dias ── */
+function showSubCal(id, btn) {
+  SUB_CAL = id;
+  document.querySelectorAll('#tab-calendario .subtab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('#tab-calendario .subtab-btn').forEach(b => b.classList.remove('active'));
+  const pan = document.getElementById('scal-' + id); if (pan) pan.classList.add('active');
+  if (!btn) btn = document.getElementById('sc-' + id);
+  if (btn) btn.classList.add('active');
+  if (id === 'mapa') renderMapa();
+  if (id === 'buracos') renderBuracos();
+  if (id === 'ano') { renderCalendario(); scrollCalendarioParaMes(mesDoMapa()); }
+  window.scrollTo(0, 0);
+}
+function mesDoMapa() { return MES_SEL || (new Date()).getMonth() + 1; }
+function renderMapa() {
+  const wrap = document.getElementById('mapa-wrap'); if (!wrap) return;
+  const m = mesDoMapa();
+  const t = document.getElementById('mapa-titulo'); if (t) t.textContent = MONTHS[m - 1] + ' ' + YEAR;
+  const qs = QUARTO_SEL ? quartosAtivos().filter(q => q.id === QUARTO_SEL) : quartosAtivos();
+  const nd = diasNoMes(YEAR, m);
+  const hoje = todayStr();
+  const DOW = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
+
+  let head = '<tr><th class="mp-q">Quarto</th>';
+  for (let d = 1; d <= nd; d++) {
+    const dow = new Date(YEAR, m - 1, d).getDay();
+    head += '<th class="' + (dow === 0 || dow === 6 ? 'wknd' : '') + '">' + d + '<small>' + DOW[dow] + '</small></th>';
+  }
+  head += '</tr>';
+
+  let body = '';
+  qs.forEach(q => {
+    body += '<tr><td class="mp-q" onclick="verAnoDoQuarto(\'' + q.id + '\')">' + esc(q.nome) + '</td>';
+    for (let d = 1; d <= nd; d++) {
+      const data = YEAR + '-' + String(m).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+      const info = calInfo(q.id, data);
+      const dow = new Date(YEAR, m - 1, d).getDay();
+      let cls = 'mp-d';
+      if (dow === 0 || dow === 6) cls += ' wknd';
+      if (data === hoje) cls += ' hoje';
+      let nome = '';
+      if (info && diaOcupado(info)) {
+        if (info.autoFilled || info.status === 'occupied') cls += ' ocup' + (info.pago === 'Pago' ? '' : ' pend');
+        else if (info.status === 'reserved') cls += ' reserved';
+        else if (info.status === 'blocked') cls += ' blocked';
+        const ant = calInfo(q.id, addDias(data, -1));
+        const prox = calInfo(q.id, addDias(data, 1));
+        const mesmoAnt = ant && diaOcupado(ant) && (ant.recId || '') === (info.recId || '') && ant.hospede === info.hospede;
+        const mesmoProx = prox && diaOcupado(prox) && (prox.recId || '') === (info.recId || '') && prox.hospede === info.hospede;
+        if (!mesmoAnt) { cls += ' ini'; if (info.hospede) nome = '<span class="mp-nome">' + esc(String(info.hospede).split(/\s+/)[0]) + '</span>'; }
+        if (!mesmoProx) cls += ' fim';
+      }
+      body += '<td class="' + cls + '" onclick="openCalDay(\'' + q.id + '\',\'' + data + '\')" title="' +
+              esc(quartoNome(q.id)) + ' · ' + br(data) + (info && info.hospede ? ' · ' + esc(info.hospede) : ' · livre') + '">' + nome + '</td>';
+    }
+    body += '</tr>';
+  });
+
+  wrap.innerHTML = '<table class="mapa"><thead>' + head + '</thead><tbody>' + body + '</tbody></table>';
+  const hoy = wrap.querySelector('.mp-d.hoje');
+  if (hoy) setTimeout(() => { wrap.scrollLeft = Math.max(0, hoy.offsetLeft - wrap.clientWidth / 2); }, 40);
+}
+function addDias(iso, n) {
+  const d = new Date(iso + 'T00:00:00');
+  d.setDate(d.getDate() + n);
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+function verAnoDoQuarto(q) {
+  QUARTO_SEL = q; montarQuartoSel();
+  showSubCal('ano');
+  renderCalendario();
+  toast('📅 Ano inteiro · ' + quartoNome(q));
+}
+
+/* ── buracos na agenda ── */
+function calcularBuracos(dias) {
+  const qs = QUARTO_SEL ? quartosAtivos().filter(q => q.id === QUARTO_SEL) : quartosAtivos();
+  const hoje = todayStr();
+  const out = [];
+  qs.forEach(q => {
+    let corrente = null;
+    for (let i = 0; i < dias; i++) {
+      const data = addDias(hoje, i);
+      const livre = !diaOcupado(calInfo(q.id, data));
+      if (livre) {
+        if (!corrente) corrente = { quarto: q.id, nome: q.nome, ini: data, fim: data, noites: 1 };
+        else { corrente.fim = data; corrente.noites++; }
+      } else if (corrente) { out.push(corrente); corrente = null; }
+    }
+    if (corrente) { corrente.aberto = true; out.push(corrente); }
+  });
+  out.forEach(b => {
+    const antes = calInfo(b.quarto, addDias(b.ini, -1));
+    const depois = calInfo(b.quarto, addDias(b.fim, 1));
+    b.entre = !!(antes && diaOcupado(antes)) && !!(depois && diaOcupado(depois));
+    b.antes = antes && antes.hospede ? antes.hospede : '';
+    b.depois = depois && depois.hospede ? depois.hospede : '';
+  });
+  return out.sort((a, b) => a.ini.localeCompare(b.ini) || a.noites - b.noites);
+}
+function renderBuracos() {
+  const box = document.getElementById('bur-list'); if (!box) return;
+  const dias = parseInt((document.getElementById('bur-dias') || {}).value || 60);
+  const tipo = (document.getElementById('bur-tipo') || {}).value || '';
+  const h = document.getElementById('bur-horizonte'); if (h) h.textContent = dias;
+
+  let bur = calcularBuracos(dias);
+  const totalLivres = bur.reduce((a, b) => a + b.noites, 0);
+  const curtos = bur.filter(b => b.noites <= 2 && b.entre);
+  const nQ = (QUARTO_SEL ? 1 : Math.max(1, quartosAtivos().length));
+  const totalNoites = dias * nQ;
+
+  const resumo = document.getElementById('bur-resumo');
+  if (resumo) {
+    resumo.innerHTML =
+      '<div class="bur-kpi"><b>' + totalLivres + '</b><span>noites livres</span></div>' +
+      '<div class="bur-kpi"><b>' + (totalNoites > 0 ? Math.round((1 - totalLivres / totalNoites) * 100) : 0) + '%</b><span>já ocupado</span></div>' +
+      '<div class="bur-kpi"><b>' + curtos.length + '</b><span>vãos curtos</span></div>';
+  }
+  if (tipo === 'curto') bur = bur.filter(b => b.noites <= 2 && b.entre);
+
+  /* quarto livre o período inteiro não merece um cartão — vira uma linha só */
+  const vazios = bur.filter(b => b.noites >= dias);
+  bur = bur.filter(b => b.noites < dias);
+  let cabecalho = '';
+  if (vazios.length) {
+    cabecalho = '<div class="bur-card" style="border-left-color:var(--silver);cursor:default">' +
+      '<div class="bur-top"><span class="bur-q">🛏️ ' + vazios.length + ' quarto' + (vazios.length > 1 ? 's' : '') + ' sem nenhuma reserva no período</span>' +
+      '<span class="bur-n">' + dias + ' noites cada</span></div>' +
+      '<div class="bur-ctx">' + vazios.map(v => esc(v.nome)).join(' · ') + '</div></div>';
+  }
+
+  if (!bur.length && !cabecalho) {
+    box.innerHTML = '<div class="empty-state"><div class="icon">🎉</div><p>' +
+      (tipo === 'curto' ? 'Nenhum vão curto espremido entre reservas.' : 'Sem noites livres no período — lotado!') + '</p></div>';
+    return;
+  }
+  box.innerHTML = cabecalho + bur.map(b => {
+    const curto = b.noites <= 2 && b.entre;
+    const longo = b.noites >= 10;
+    const ctx = b.entre
+      ? 'entre ' + esc(String(b.antes).split(/\s+/)[0] || 'uma reserva') + ' e ' + esc(String(b.depois).split(/\s+/)[0] || 'outra')
+      : (b.antes ? 'logo depois de ' + esc(String(b.antes).split(/\s+/)[0]) : (b.depois ? 'logo antes de ' + esc(String(b.depois).split(/\s+/)[0]) : 'sem reserva por perto'));
+    return '<div class="bur-card' + (curto ? ' curto' : (longo ? ' longo' : '')) + '" onclick="criarNoBuraco(\'' + b.quarto + '\',\'' + b.ini + '\',\'' + addDias(b.fim, 1) + '\')">' +
+      '<div class="bur-top"><span class="bur-q">🛏️ ' + esc(b.nome) + '</span>' +
+        '<span class="bur-n' + (curto ? ' curto' : '') + '">' + b.noites + (b.noites === 1 ? ' noite' : ' noites') + '</span></div>' +
+      '<div class="bur-datas">' + br(b.ini) + (b.noites > 1 ? ' → ' + br(b.fim) : '') + '</div>' +
+      '<div class="bur-ctx">' + (curto ? '⚡ vão curto · ' : '') + ctx + ' · toque para criar reserva</div>' +
+    '</div>';
+  }).join('');
+}
+function criarNoBuraco(q, ini, fimExclusivo) {
+  abrirNovaReserva();
+  const sel = document.getElementById('r-quarto'); if (sel) sel.value = q;
+  PERIODOS = [{ inicio: ini, fim: fimExclusivo }];
+  renderPeriodos();
+}
+
+/* ═══════ v5.0 · integrações finais do multi-quartos ═══════ */
+
+/* apagar reserva limpa só os dias daquele quarto */
+function clearCalendar(recId) {
+  Object.keys(_cache).forEach(yk => {
+    const yr = parseInt(yk); if (isNaN(yr)) return;
+    const cal = _cache[yr].cal || {};
+    let mudou = false;
+    Object.keys(cal).forEach(k => { if (cal[k] && cal[k].recId === recId) { delete cal[k]; mudou = true; } });
+    if (mudou) {
+      _cache[yr].cal = cal;
+      try { localStorage.setItem('rl_cal_' + yr, JSON.stringify(cal)); } catch (e) {}
+      _pushToFirestore('cal_' + yr, cal);
+    }
+  });
+}
+
+/* conflito de datas dentro do quarto escolhido */
+function verificarConflito() {
+  const box = document.getElementById('conflito-box');
+  const btn = document.getElementById('btn-salvar-rec');
+  if (!box || !btn) return;
+  const q = (document.getElementById('r-quarto') || {}).value || primeiroQuarto();
+  const problemas = [];
+  const vistos = {};
+  PERIODOS.forEach((p, i) => {
+    if (!p.inicio) return;
+    if (p.fim && p.fim < p.inicio) { problemas.push('Período ' + (i + 1) + ': check-out antes do check-in.'); return; }
+    getDatesInRange(p.inicio, p.fim).forEach(d => {
+      if (vistos[d]) problemas.push('Os períodos ' + vistos[d] + ' e ' + (i + 1) + ' se sobrepõem em ' + br(d) + '.');
+      vistos[d] = (i + 1);
+      const info = calInfo(q, d);
+      if (info && diaOcupado(info)) {
+        const dono = info.hospede ? ' (' + info.hospede + ')' : '';
+        problemas.push(quartoNome(q) + ' já está ocupado em ' + br(d) + dono + '.');
+      }
+    });
+  });
+  const uniq = [...new Set(problemas)];
+  if (uniq.length) {
+    box.style.display = 'block';
+    box.innerHTML = '⚠️ <strong>Atenção:</strong><br>' + uniq.slice(0, 6).map(x => '• ' + esc(x)).join('<br>') +
+      (uniq.length > 6 ? '<br>…e mais ' + (uniq.length - 6) : '') +
+      '<br><small>Você ainda pode salvar, mas confira as datas e o quarto.</small>';
+  } else box.style.display = 'none';
+  btn.disabled = false; btn.style.opacity = '1';
+}
+
+/* reserva de um dia, dentro do quarto */
+function reservaDoDia(q, key) {
+  const info = calInfo(q, key);
+  if (info && info.recId) {
+    const r = load('rec').find(x => x.id === info.recId);
+    if (r) return r;
+  }
+  return load('rec').find(r => {
+    if (!r.data || (r.quarto || primeiroQuarto()) !== q) return false;
+    const fim = r.checkout && r.checkout > r.data ? r.checkout : r.data;
+    return key >= r.data && (key < fim || key === r.data);
+  }) || null;
+}
+function openCalDay(q, key, label) {
+  if (!key) { key = q; q = QUARTO_SEL || primeiroQuarto(); }      /* compatibilidade */
+  const info = calInfo(q, key) || {};
+  const r = reservaDoDia(q, key);
+  const d = new Date(key + 'T00:00:00');
+  document.getElementById('cal-modal-title').textContent = '📅 ' + d.getDate() + ' de ' + MONTHS[d.getMonth()] +
+    (temVariosQuartos() ? ' · ' + quartoNome(q) : '');
+  document.getElementById('cal-date-key').value = calKey(q, key);
+  document.getElementById('cal-status').value = info.status || '';
+  document.getElementById('cal-hospede').value = info.hospede || '';
+  document.getElementById('cal-pessoas').value = info.pessoas || '';
+  document.getElementById('cal-valor').value = numberToBRLInput(info.valor);
+  const ai = document.getElementById('cal-auto-info');
+  const acao = document.getElementById('cal-acao');
+  const det = document.getElementById('cal-manual'); if (det) det.open = false;
+  if (r) {
+    const pago = r.pago === 'Pago';
+    ai.style.display = 'block';
+    ai.innerHTML = '<strong>👤 ' + esc(r.hospede) + '</strong> · ' + esc(r.plat || '') +
+      (temVariosQuartos() ? ' · 🛏️ ' + esc(quartoNome(r.quarto)) : '') + '<br>' +
+      '📅 ' + br(r.data) + (r.checkout ? ' → ' + br(r.checkout) : '') + ' · ' + (r.dias || 1) + ' noite(s) · 👥 ' + (r.pessoas || 1) + '<br>' +
+      '💰 ' + fmt(r.liquido) + ' · ' + (pago ? '✅ pago' : '⏳ a receber');
+    acao.innerHTML =
+      '<button class="btn btn-navy btn-full" onclick="closeModal(\'modal-cal\');editReceita(\'' + r.id + '\')">✏️ Editar esta reserva</button>' +
+      '<button class="btn btn-green btn-full" onclick="closeModal(\'modal-cal\');abrirMsg(\'' + r.id + '\',' + YEAR + ',\'checkin\')">💬 Mandar mensagem</button>' +
+      '<button class="btn btn-terra btn-full" onclick="closeModal(\'modal-cal\');novaReservaNaData(\'' + q + '\',\'' + key + '\')">➕ Nova reserva a partir deste dia</button>';
+  } else {
+    ai.style.display = 'none';
+    acao.innerHTML = '<button class="btn btn-green btn-full" onclick="closeModal(\'modal-cal\');novaReservaNaData(\'' + q + '\',\'' + key + '\')">➕ Criar reserva em ' +
+      (temVariosQuartos() ? esc(quartoNome(q)) + ' · ' : '') + br(key) + '</button>';
+  }
+  openModal('modal-cal');
+}
+function novaReservaNaData(q, key) {
+  if (!key) { key = q; q = QUARTO_SEL || primeiroQuarto(); }
+  abrirNovaReserva();
+  const sel = document.getElementById('r-quarto'); if (sel) sel.value = q;
+  PERIODOS = [{ inicio: key, fim: '' }];
+  renderPeriodos();
+}
+function saveCalDay() {
+  const key = document.getElementById('cal-date-key').value;
+  const cal = loadCal();
+  const ex = cal[key] || {};
+  const entry = { ...ex,
+    status: document.getElementById('cal-status').value,
+    hospede: document.getElementById('cal-hospede').value,
+    pessoas: document.getElementById('cal-pessoas').value,
+    valor: parseBRL(document.getElementById('cal-valor').value),
+    autoFilled: false };
+  if (!entry.status && !entry.hospede && !entry.valor) delete cal[key]; else cal[key] = entry;
+  saveCal(cal);
+  closeModal('modal-cal');
+  renderCalendario(); renderMapa();
+  toast('✅ Dia atualizado!');
+}
+
+/* calendário anual: agora é de UM quarto */
+function renderCalendario() {
+  const q = QUARTO_SEL || primeiroQuarto();
+  const cn = document.getElementById('cal-year-num');
+  if (cn) cn.textContent = YEAR + (temVariosQuartos() ? ' · ' + quartoNome(q) : '');
+  const container = document.getElementById('cal-container'); if (!container) return;
+  container.innerHTML = MONTHS.map((mn, m) => {
+    const firstDay = new Date(YEAR, m, 1).getDay();
+    const daysInMonth = new Date(YEAR, m + 1, 0).getDate();
+    let h = '<div class="cal-month card"><div class="cal-month-title">📅 ' + mn.toUpperCase() + ' ' + YEAR + '</div><div class="cal-grid">';
+    ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].forEach((d, i) => h += '<div class="cal-weekday' + (i===0||i===6?' wknd':'') + '">' + d + '</div>');
+    for (let e = 0; e < firstDay; e++) h += '<div class="cal-day empty"></div>';
+    for (let day = 1; day <= daysInMonth; day++) {
+      const key = YEAR + '-' + String(m+1).padStart(2,'0') + '-' + String(day).padStart(2,'0');
+      const info = calInfo(q, key) || {};
+      const status = info.status || '';
+      const dow = (firstDay + day - 1) % 7;
+      const isAuto = info.autoFilled, isPago = info.pago === 'Pago', isPend = info.pago === 'Pendente';
+      h += '<div class="cal-day ' + (isAuto ? 'auto-filled' : status) + (dow===0||dow===6 ? ' wknd' : '') + '" onclick="openCalDay(\'' + q + '\',\'' + key + '\')">' +
+        (isAuto ? '<div class="cal-auto-badge">AUTO</div>' : '') +
+        (isAuto && isPago ? '<div class="cal-pago-badge">PAGO</div>' : '') +
+        (isAuto && isPend ? '<div class="cal-pendente-badge">A REC.</div>' : '') +
+        '<div class="cal-day-num">' + day + '</div><div class="cal-day-info">' +
+        (info.hospede ? '👤 ' + esc(info.hospede) : '') +
+        (info.pessoas ? '<br>👥 ' + esc(info.pessoas) : '') +
+        (info.valor ? '<br>' + fmt(info.valor) : '') + '</div></div>';
+    }
+    return h + '</div></div>';
+  }).join('');
+}
+
+/* duplicar: mesma pessoa, mesmas datas, outro quarto */
+function duplicarReceita(id) {
+  const rec = load('rec').find(r => r.id === id);
+  if (!rec) return;
+  abrirNovaReserva();
+  document.getElementById('r-hospede').value = rec.hospede || '';
+  preencherTel('r', rec.telefone, rec.ddi);
+  document.getElementById('r-plat').value = rec.plat || '';
+  document.getElementById('r-pessoas').value = rec.pessoas || '';
+  document.getElementById('r-valor').value = numberToBRLInput(rec.valor);
+  document.getElementById('r-pgto').value = rec.pgto || '';
+  updateTaxaPreview();
+  const qs = quartosAtivos();
+  const sel = document.getElementById('r-quarto');
+  const outro = qs.find(x => x.id !== rec.quarto);
+  if (sel) sel.value = (temVariosQuartos() && outro) ? outro.id : (rec.quarto || primeiroQuarto());
+  PERIODOS = [{ inicio: rec.data || '', fim: rec.checkout || '' }];
+  renderPeriodos();
+  const hint = document.getElementById('hospede-hint');
+  if (hint) {
+    hint.style.display = 'block';
+    hint.innerHTML = temVariosQuartos()
+      ? '📋 Cópia de <strong>' + esc(rec.hospede) + '</strong> com as <strong>mesmas datas</strong>. Confira o quarto e o valor.'
+      : '📋 Cópia de <strong>' + esc(rec.hospede) + '</strong>. Ajuste as datas e o valor.';
+  }
+  toast(temVariosQuartos() ? '📋 Mesmas datas — escolha o quarto' : '📋 Dados copiados');
+}
+
+/* listas mostram o quarto quando há mais de um */
+function tagQuarto(q, geralSeVazio) {
+  if (!temVariosQuartos()) return '';
+  if (!q) return geralSeVazio ? ' <span class="q-tag geral">🏠 Geral</span>' : '';
+  return ' <span class="q-tag">' + esc(quartoNome(q)) + '</span>';
+}
+
+/* navegação e boot */
+function showTab(id, btn) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  const alvo = document.getElementById('tab-' + id); if (!alvo) return;
+  alvo.classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  if (!btn && TABS_BARRA.includes(id)) {
+    document.querySelectorAll('.tab-btn').forEach(b => { if ((b.getAttribute('onclick') || '').includes("'" + id + "'")) btn = b; });
+  }
+  if (btn) btn.classList.add('active');
+  window.scrollTo(0, 0);
+  if (id === 'hoje') renderHoje();
+  if (id === 'calendario') showSubCal(SUB_CAL);
+  if (id === 'financeiro') { renderReceitas(); renderDespesas(); renderDespFixas(); }
+  if (id === 'analises') renderAnalises();
+  if (id === 'hospedes') renderHospedes();
+  if (id === 'config') { renderConfig(); renderMsgsConfig(); renderQuartos(); }
+  if (id === 'lembretes') renderLembretes();
+  updateFab(id);
+}
+function rerenderAll() {
+  migrarQuartos();
+  montarQuartoSel(); montarQuartoSelects();
+  updatePeriodoUI();
+  renderDashboard(); ajustarResumoPeriodo();
+  renderReceitas(); renderDespesas(); renderConfig(); renderQuartos();
+  renderHospedes(); renderDespFixas();
+  renderResumoRec(); renderResumoDesp(); renderPorQuarto();
+  renderMapa(); renderBuracos();
+  if (document.getElementById('scal-ano') && document.getElementById('scal-ano').classList.contains('active')) renderCalendario();
+  renderLembretes(); renderLembretesHoje();
+  atualizarAvisos(); updateYearLabel();
+}
+function renderAnalises() {
+  renderDashboard(); ajustarResumoPeriodo();
+  renderResumoRec(); renderResumoDesp(); renderPorQuarto();
+  const pa = document.getElementById('pq-ano'); if (pa) pa.textContent = YEAR;
+  if (typeof applyTableLabels === 'function') applyTableLabels();
+}
+
 /* ───────── BOOT v4 ───────── */
 setPago('Pago');
 montarDDISelects();
+migrarQuartos();
+montarQuartoSel();
+montarQuartoSelects();
+renderQuartos();
 MES_SEL = (new Date()).getMonth() + 1;
 updatePeriodoUI();
 renderPeriodos();
@@ -5345,6 +6171,9 @@ renderResumoRec();
 renderResumoDesp();
 renderLembretes();
 renderLembretesHoje();
+renderPorQuarto();
+renderMapa();
+renderBuracos();
 renderLembreteBackup();
 renderBannerDespFixas();
 atualizarAvisos();
