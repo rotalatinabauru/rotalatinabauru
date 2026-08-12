@@ -1,0 +1,17 @@
+{
+  "name": "Rota Latina — Guia do Hóspede",
+  "short_name": "Guia do Hóspede",
+  "description": "Tudo sobre o apartamento e dicas de Bauru para a sua estadia.",
+  "lang": "pt-BR",
+  "start_url": "index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1a2744",
+  "theme_color": "#1a2744",
+  "icons": [
+    { "src": "guia-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "guia-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "guia-icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
