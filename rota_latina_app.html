@@ -463,6 +463,32 @@ details#cal-manual summary::-webkit-details-marker{display:none}
 .tel-hint{font-size:0.7rem;color:var(--silver);margin-top:4px;display:block}
 .tel-full{font-size:0.72rem;color:var(--navy);font-weight:600;margin-top:4px;display:block}
 @media(max-width:430px){ .tel-row{flex-wrap:wrap} .tel-row .ddi-sel{flex:1 1 100%} .tel-row .ddi-outro{flex:0 0 84px} .tel-row .tel-num{flex:1 1 0;min-width:0;width:auto} .tel-row .btn{flex:0 0 54px;padding:0} }
+
+/* ── v4.5 · gráficos legíveis: o valor sai de dentro da barra ── */
+.chart-bar-row{display:flex;align-items:center;gap:8px;margin-bottom:9px}
+.chart-bar-label{font-size:0.72rem;width:74px;text-align:right;color:#555;font-weight:600;flex-shrink:0;line-height:1.15}
+.chart-bar-bg{flex:1;min-width:40px;background:#eceef3;border-radius:5px;height:15px;overflow:visible}
+.chart-bar-fill{height:100%;border-radius:5px;min-width:3px;transition:width .5s ease;padding:0;display:block}
+.chart-bar-val{flex-shrink:0;width:88px;text-align:right;font-size:0.75rem;font-weight:700;color:var(--text);
+  font-variant-numeric:tabular-nums;text-shadow:none;letter-spacing:-0.01em}
+.chart-bar-val.zero{color:var(--gray2);font-weight:500}
+
+.rd-month-row{display:flex;align-items:center;gap:9px;margin-bottom:9px;padding-bottom:8px;border-bottom:1px solid rgba(0,0,0,0.05)}
+.rd-label{font-size:0.76rem;width:32px;text-align:right;color:var(--navy);font-weight:700;flex-shrink:0}
+.rd-bars{flex:1;display:flex;flex-direction:column;gap:5px;min-width:0}
+.rd-line{display:flex;align-items:center;gap:8px}
+.rd-bar-bg{flex:1;min-width:30px;background:#eceef3;border-radius:5px;height:13px;overflow:visible}
+.rd-bar-fill{height:100%;border-radius:5px;min-width:3px;transition:width .5s ease;display:block}
+.rd-val{flex-shrink:0;width:88px;text-align:right;font-size:0.74rem;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-0.01em}
+.rd-val.rec{color:#1e7a48}
+.rd-val.desp{color:#b8352a}
+.rd-val.vazio{color:var(--gray2);font-weight:500}
+@media(max-width:430px){
+  .chart-bar-label{width:64px;font-size:0.68rem}
+  .chart-bar-val{width:78px;font-size:0.72rem}
+  .rd-val{width:78px;font-size:0.71rem}
+}
+.chart-vazio{text-align:center;color:var(--silver);font-size:0.84rem;padding:18px 8px}
 </style>
 </head>
 <body>
@@ -3307,7 +3333,9 @@ function renderDashboard() {
       ...md.map(d => d.total || 0),
       1
     );
-    elChartRD.innerHTML = '<div class="chart-bar-wrap">' +
+    const temMov = mr.some((r,i) => (r.tb||0) > 0 || (md[i].total||0) > 0);
+    elChartRD.innerHTML = !temMov ? '<div class="chart-vazio">Sem lançamentos em ' + YEAR + ' ainda.</div>' :
+      '<div class="chart-bar-wrap">' +
       mr.map((r, i) => {
         const desp = md[i].total || 0;
         const rec = r.tb || 0;
@@ -3318,8 +3346,14 @@ function renderDashboard() {
         return `<div class="rd-month-row">
           <div class="rd-label">${MONTHS[i].slice(0,3)}</div>
           <div class="rd-bars">
-            <div class="rd-bar-bg"><div class="rd-bar-fill rd-rec" style="width:${recPct}%"><span class="chart-bar-val">${rec > 0 ? fmt(rec) : ''}</span></div></div>
-            <div class="rd-bar-bg"><div class="rd-bar-fill rd-desp" style="width:${despPct}%"><span class="chart-bar-val">${desp > 0 ? fmt(desp) : ''}</span></div></div>
+            <div class="rd-line">
+              <div class="rd-bar-bg">${rec > 0 ? `<div class="rd-bar-fill rd-rec" style="width:${recPct}%"></div>` : ''}</div>
+              <span class="rd-val rec${rec > 0 ? '' : ' vazio'}">${rec > 0 ? fmt(rec) : '—'}</span>
+            </div>
+            <div class="rd-line">
+              <div class="rd-bar-bg">${desp > 0 ? `<div class="rd-bar-fill rd-desp" style="width:${despPct}%"></div>` : ''}</div>
+              <span class="rd-val desp${desp > 0 ? '' : ' vazio'}">${desp > 0 ? fmt(desp) : '—'}</span>
+            </div>
           </div>
         </div>`;
       }).join('') + '</div>' +
@@ -3334,9 +3368,8 @@ function renderDashboard() {
     Object.entries(pd).map(([k,v]) => `
       <div class="chart-bar-row">
         <div class="chart-bar-label">${k}</div>
-        <div class="chart-bar-bg"><div class="chart-bar-fill" style="width:${(v/maxP*100).toFixed(1)}%;background:${pc[k]}">
-          <span class="chart-bar-val">${v > 0 ? fmt(v) : ''}</span>
-        </div></div>
+        <div class="chart-bar-bg">${v > 0 ? `<div class="chart-bar-fill" style="width:${(v/maxP*100).toFixed(1)}%;background:${pc[k]}"></div>` : ''}</div>
+        <span class="chart-bar-val${v > 0 ? '' : ' zero'}">${v > 0 ? fmt(v) : '—'}</span>
       </div>`).join('') + '</div>';
 
   const totC = {}; CATS.forEach(c => { totC[c] = md.reduce((a,d) => a+d.cats[c], 0); });
@@ -3345,10 +3378,9 @@ function renderDashboard() {
   document.getElementById('chart-desp').innerHTML = '<div class="chart-bar-wrap">' +
     CATS.map((c,i) => `
       <div class="chart-bar-row">
-        <div class="chart-bar-label" style="font-size:0.64rem">${c.replace(' Elétrica','').replace(' e Impostos','').replace(' de Reposição','')}</div>
-        <div class="chart-bar-bg"><div class="chart-bar-fill" style="width:${(totC[c]/maxD*100).toFixed(1)}%;background:${dc[i]}">
-          <span class="chart-bar-val">${totC[c] > 0 ? fmt(totC[c]) : ''}</span>
-        </div></div>
+        <div class="chart-bar-label">${c.replace(' Elétrica','').replace(' e Impostos','').replace(' de Reposição','')}</div>
+        <div class="chart-bar-bg">${totC[c] > 0 ? `<div class="chart-bar-fill" style="width:${(totC[c]/maxD*100).toFixed(1)}%;background:${dc[i]}"></div>` : ''}</div>
+        <span class="chart-bar-val${totC[c] > 0 ? '' : ' zero'}">${totC[c] > 0 ? fmt(totC[c]) : '—'}</span>
       </div>`).join('') + '</div>';
 }
 
