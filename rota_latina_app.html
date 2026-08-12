@@ -2,8 +2,16 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Rota Latina — Gestão Financeira</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1a2744">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Rota Latina">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -548,6 +556,20 @@ details#cal-manual summary::-webkit-details-marker{display:none}
 .q-row .q-info{font-size:0.7rem;color:var(--silver)}
 .q-row button{background:none;border:none;cursor:pointer;font-size:0.9rem;padding:3px 5px}
 @media(max-width:430px){ .quarto-sel{max-width:118px;font-size:0.74rem} }
+
+/* instalado na tela de início: respeita o entalhe e a barra de gestos */
+@supports(padding:max(0px)){
+  .topo-fixo{padding-top:env(safe-area-inset-top)}
+  @media(max-width:640px){
+    .tab-bar{padding-bottom:env(safe-area-inset-bottom)}
+    body{padding-bottom:calc(70px + env(safe-area-inset-bottom))}
+    .fab{bottom:calc(86px + env(safe-area-inset-bottom))}
+  }
+}
+.inst-box{border:1px solid var(--gray2);border-radius:10px;padding:12px 13px;font-size:0.83rem;line-height:1.5;color:#444}
+.inst-box ol{margin:8px 0 0 18px}
+.inst-box li{margin-bottom:4px}
+.inst-ok{background:var(--green-l);border-color:#a5d6a7;color:#1e6b40;font-weight:600}
 </style>
 </head>
 <body>
@@ -995,6 +1017,11 @@ details#cal-manual summary::-webkit-details-marker{display:none}
       <input type="file" id="importFile" accept=".json" style="display:none" onchange="importarBackup(event)">
     </div>
   </div>
+  <div class="card">
+    <div class="card-header bg-terra">📲 Instalar na tela de início</div>
+    <div class="card-body" id="inst-body"></div>
+  </div>
+
   <div class="card">
     <div class="card-header bg-navy">🛏️ Quartos</div>
     <div class="card-body">
@@ -6124,7 +6151,7 @@ function showTab(id, btn) {
   if (id === 'financeiro') { renderReceitas(); renderDespesas(); renderDespFixas(); }
   if (id === 'analises') renderAnalises();
   if (id === 'hospedes') renderHospedes();
-  if (id === 'config') { renderConfig(); renderMsgsConfig(); renderQuartos(); }
+  if (id === 'config') { renderConfig(); renderMsgsConfig(); renderQuartos(); renderInstalar(); }
   if (id === 'lembretes') renderLembretes();
   updateFab(id);
 }
@@ -6148,6 +6175,62 @@ function renderAnalises() {
   if (typeof applyTableLabels === 'function') applyTableLabels();
 }
 
+/* ═══════════ INSTALAR NA TELA DE INÍCIO (PWA) ═══════════ */
+var _promptInstalar = null;
+var _swAtivo = false;
+
+function estaInstalado() {
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+}
+function ehIOS() {
+  return /iphone|ipad|ipod/i.test(navigator.userAgent) ||
+         (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+function renderInstalar() {
+  const box = document.getElementById('inst-body'); if (!box) return;
+  if (estaInstalado()) {
+    box.innerHTML = '<div class="inst-box inst-ok">✅ Tudo certo — você já está usando o app instalado.' +
+      (_swAtivo ? '<br><span style="font-weight:400">Ele também abre sem internet: os dados ficam no aparelho e sincronizam quando a conexão voltar.</span>' : '') + '</div>';
+    return;
+  }
+  let h = '<div class="info-box info-blue">💡 Instalando, o app ganha ícone próprio, abre em tela cheia (sem a barra do navegador) e carrega na hora — inclusive sem internet.</div>';
+  if (_promptInstalar) {
+    h += '<button class="btn btn-green btn-full" onclick="instalarApp()">📲 Instalar agora</button>';
+  } else if (ehIOS()) {
+    h += '<div class="inst-box"><strong>No iPhone/iPad</strong>, é pelo Safari:<ol>' +
+         '<li>Toque em <strong>Compartilhar</strong> (o quadradinho com a seta para cima, embaixo).</li>' +
+         '<li>Role e escolha <strong>Adicionar à Tela de Início</strong>.</li>' +
+         '<li>Confirme em <strong>Adicionar</strong>.</li></ol></div>';
+  } else {
+    h += '<div class="inst-box"><strong>No Chrome do Android</strong>:<ol>' +
+         '<li>Toque nos <strong>três pontinhos</strong> no canto do navegador.</li>' +
+         '<li>Escolha <strong>Instalar app</strong> (ou "Adicionar à tela inicial").</li>' +
+         '<li>Confirme em <strong>Instalar</strong>.</li></ol>' +
+         '<div style="margin-top:8px;color:var(--silver);font-size:0.76rem">No computador, o ícone de instalar aparece do lado direito da barra de endereço.</div></div>';
+  }
+  box.innerHTML = h;
+}
+async function instalarApp() {
+  if (!_promptInstalar) { toast('Use o menu do navegador para instalar'); return; }
+  _promptInstalar.prompt();
+  try {
+    const r = await _promptInstalar.userChoice;
+    if (r && r.outcome === 'accepted') toast('📲 Instalado! Procure o ícone Rota Latina.', 3500);
+  } catch (e) {}
+  _promptInstalar = null;
+  renderInstalar();
+}
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); _promptInstalar = e; renderInstalar(); });
+window.addEventListener('appinstalled', () => { _promptInstalar = null; renderInstalar(); });
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js')
+      .then(() => { _swAtivo = true; renderInstalar(); })
+      .catch(err => console.warn('SW não registrado:', err));
+  });
+}
+
 /* ───────── BOOT v4 ───────── */
 setPago('Pago');
 montarDDISelects();
@@ -6155,6 +6238,7 @@ migrarQuartos();
 montarQuartoSel();
 montarQuartoSelects();
 renderQuartos();
+renderInstalar();
 MES_SEL = (new Date()).getMonth() + 1;
 updatePeriodoUI();
 renderPeriodos();
