@@ -5019,8 +5019,8 @@ var MSG_TIPOS = [
 ];
 var MSGS_PADRAO = {
   boasvindas: {
-    pt: 'Olá {primeiroNome}, aqui é o Érico, do Rota Latina! 😊\n\nSua reserva está confirmada:\n📅 Entrada {checkin} · Saída {checkout}\n🛏️ {dias} noite(s) · 👥 {pessoas} pessoa(s)\n\nEnquanto a data não chega, dá uma espiada no nosso site: {site}\nLá você vê como é o apartamento, o que tem no quarto e um monte de dica da cidade — onde comer, mercados, farmácias, passeios e o que fazer em Bauru. É só entrar quando quiser. 🙂\n\nUns dias antes da sua chegada eu te mando todas as instruções de acesso ao prédio e ao apartamento.\n\nFico à disposição para o que precisar. Seja muito bem-vindo!',
-    es: '¡Hola {primeiroNome}! Soy Érico, de Rota Latina 😊\n\nTu reserva está confirmada:\n📅 Entrada {checkin} · Salida {checkout}\n🛏️ {dias} noche(s) · 👥 {pessoas} persona(s)\n\nMientras llega la fecha, échale un vistazo a nuestro sitio: {site}\nAhí ves cómo es el apartamento, qué tiene la habitación y un montón de consejos de la ciudad — dónde comer, supermercados, farmacias, paseos y qué hacer en Bauru. Entra cuando quieras. 🙂\n\nUnos días antes de tu llegada te envío todas las instrucciones de acceso al edificio y al apartamento.\n\nQuedo a tu disposición para lo que necesites. ¡Bienvenido!'
+    pt: 'Olá {primeiroNome}, aqui é o Érico, do Rota Latina! 😊\n\nSua reserva está confirmada:\n📅 Entrada {checkin} · Saída {checkout}\n🛏️ {dias} noite(s) · 👥 {pessoas} pessoa(s)\n\nEnquanto a data não chega, dá uma espiada no nosso site: {site}\nLá você vê como é o apartamento, o que tem no quarto e um monte de dica da cidade — onde comer, mercados, farmácias, passeios e o que fazer em Bauru. É só entrar quando quiser. 🙂\n\nUns dias antes da sua chegada eu te mando todas as instruções de acesso ao prédio e ao apartamento.\n\nAh, e um pedido: os móveis do apartamento não podem ser mudados de lugar sem falar comigo antes. Se precisar reorganizar alguma coisa, é só me chamar que a gente vê juntos. 🙂\n\nFico à disposição para o que precisar. Seja muito bem-vindo!',
+    es: '¡Hola {primeiroNome}! Soy Érico, de Rota Latina 😊\n\nTu reserva está confirmada:\n📅 Entrada {checkin} · Salida {checkout}\n🛏️ {dias} noche(s) · 👥 {pessoas} persona(s)\n\nMientras llega la fecha, échale un vistazo a nuestro sitio: {site}\nAhí ves cómo es el apartamento, qué tiene la habitación y un montón de consejos de la ciudad — dónde comer, supermercados, farmacias, paseos y qué hacer en Bauru. Entra cuando quieras. 🙂\n\nUnos días antes de tu llegada te envío todas las instrucciones de acceso al edificio y al apartamento.\n\nAh, y un pedido: los muebles del apartamento no se pueden cambiar de lugar sin hablar conmigo antes. Si necesitas reorganizar algo, escríbeme y lo vemos juntos. 🙂\n\nQuedo a tu disposición para lo que necesites. ¡Bienvenido!'
   },
   checkin: {
     pt: 'Oi {primeiroNome}, está tudo pronto para a sua chegada em {checkin}! 🔑\n\n📍 City Residencial — Bauru/SP\n🏢 Apartamento 608, 6º andar\n🕒 Check-in a partir das 15h\n\n🎥 Vou te mandar também um vídeo curtinho mostrando como entrar no prédio e no apartamento, passo a passo. É bem simples, mas assim você chega tranquilo, mesmo que seja de noite.\n\nResumindo: até o elevador são duas portas, a primeira de vidro e a segunda uma grade. Aponte a câmera do celular no QR Code do link que te enviei e elas destravam. Se não abrir, é só chamar no interfone — a portaria funciona 24 horas.\n\n🔐 A fechadura do apartamento é eletrônica e a senha são os 4 últimos dígitos do seu celular — no seu caso, {senha}. Encoste a mão no teclado que ele acende, digite a senha e confirme.\n\n⚠️ Importante: a porta não tranca sozinha. Ao entrar, trave pelo botão de dentro; ao sair, passe a mão no teclado e confira se ficou fechada.\n\nQualquer coisa me chama por aqui. Boa viagem!',
@@ -5121,7 +5121,9 @@ function renderMsgsConfig() {
   if (st) st.value = loadConfig().site || 'https://rotalatina.netlify.app';
   const m = getMsgs();
   box.innerHTML = MSG_TIPOS.map(t =>
-    '<div class="tpl-box"><h4>' + t.nome + '</h4>' +
+    '<div class="tpl-box"><h4 style="display:flex;justify-content:space-between;align-items:center;gap:8px">' +
+    '<span>' + t.nome + '</span>' +
+    '<button class="print-btn" onclick="restaurarUmaMsg(\'' + t.id + '\')" title="Voltar esta mensagem ao texto padrão">↺ padrão</button></h4>' +
     '<div style="font-size:0.72rem;color:var(--silver);margin-bottom:6px">' + t.desc + '</div>' +
     '<label>🇧🇷 Português</label><textarea id="msgc-' + t.id + '-pt">' + esc(m[t.id].pt) + '</textarea>' +
     '<label>🇪🇸 Español</label><textarea id="msgc-' + t.id + '-es">' + esc(m[t.id].es) + '</textarea></div>').join('');
@@ -5140,6 +5142,14 @@ function salvarMsgs() {
   saveConfig(c);
   toast('✅ Mensagens salvas');
   renderMsgsConfig();
+}
+function restaurarUmaMsg(id) {
+  const t = MSG_TIPOS.find(x => x.id === id); if (!t) return;
+  if (!confirmar('Voltar a mensagem "' + t.nome + '" para o texto padrão?\n\nO que você escreveu nela será perdido. As outras mensagens não mudam.')) return;
+  const c = loadConfig();
+  if (c.msgs) { delete c.msgs[id]; saveConfig(c); }
+  renderMsgsConfig();
+  toast('↺ "' + t.nome + '" voltou ao padrão');
 }
 function restaurarMsgs() {
   if (!confirmar('Voltar as três mensagens para os textos padrão? Os seus textos atuais serão perdidos.')) return;
