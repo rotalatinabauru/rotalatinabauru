@@ -6231,6 +6231,45 @@ if ('serviceWorker' in navigator) {
   });
 }
 
+/* ═══════ v5.2 · corrige o "Hoje" e as setas do calendário ═══════ */
+/* setMes não redesenhava o mapa: trocar de mês (ou tocar em Hoje) mudava
+   o resto do app e deixava o calendário parado no mês antigo. */
+function setMes(m) {
+  if (isNaN(m) || m < 0 || m > 12) return;
+  MES_SEL = m;
+  updatePeriodoUI();
+  renderHoje(); renderReceitas(); renderDespesas(); renderAnalises();
+  renderMapa();
+  if (document.getElementById('scal-ano') && document.getElementById('scal-ano').classList.contains('active')) {
+    renderCalendario(); scrollCalendarioParaMes(mesDoMapa());
+  }
+}
+function irParaMesAtual() {
+  const h = new Date(), a = h.getFullYear(), m = h.getMonth() + 1;
+  if (YEAR !== a && a >= 2026 && a <= 2099) { YEAR = a; _ensureYear(YEAR); MES_SEL = m; rerenderAll(); }
+  else { MES_SEL = m; setMes(m); }
+  /* leva o olho até o dia de hoje, seja no mapa ou no calendário do ano */
+  if (SUB_CAL === 'ano') scrollCalendarioParaMes(m);
+  else scrollMapaParaHoje();
+  toast('📌 ' + MONTHS[m - 1] + '/' + YEAR);
+}
+function scrollMapaParaHoje() {
+  setTimeout(() => {
+    const wrap = document.getElementById('mapa-wrap'); if (!wrap) return;
+    const hoje = wrap.querySelector('.mp-d.hoje');
+    if (hoje) wrap.scrollLeft = Math.max(0, hoje.offsetLeft - wrap.clientWidth / 2 + hoje.offsetWidth / 2);
+    else wrap.scrollLeft = 0;
+    const painel = document.getElementById('scal-mapa');
+    if (painel && painel.classList.contains('active')) wrap.scrollIntoView({ block: 'nearest' });
+  }, 60);
+}
+/* o botão Hoje do ano também troca o mês do período, pra tudo ficar sincronizado */
+function scrollCalendarioParaHoje() {
+  const h = new Date(), a = h.getFullYear();
+  if (YEAR !== a && a >= 2026 && a <= 2099) { YEAR = a; _ensureYear(YEAR); rerenderAll(); }
+  scrollCalendarioParaMes(h.getMonth() + 1);
+}
+
 /* ───────── BOOT v4 ───────── */
 setPago('Pago');
 montarDDISelects();
