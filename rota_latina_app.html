@@ -6155,7 +6155,7 @@ function showTab(id, btn) {
   if (btn) btn.classList.add('active');
   window.scrollTo(0, 0);
   if (id === 'hoje') renderHoje();
-  if (id === 'calendario') showSubCal(SUB_CAL);
+  if (id === 'calendario') showSubCal(SUB_CAL || subCalPadrao());
   if (id === 'financeiro') { renderReceitas(); renderDespesas(); renderDespFixas(); }
   if (id === 'analises') renderAnalises();
   if (id === 'hospedes') renderHospedes();
@@ -6165,6 +6165,7 @@ function showTab(id, btn) {
 }
 function rerenderAll() {
   migrarQuartos();
+  ordenarSubCal();
   montarQuartoSel(); montarQuartoSelects();
   updatePeriodoUI();
   renderDashboard(); ajustarResumoPeriodo();
@@ -6298,6 +6299,39 @@ function irParaTela(tab, sub, focoId) {
 function irParaFixas() { irParaTela('financeiro', 'fixas', 'df-list'); }
 function irParaTaxas() { irParaTela('config', null, 'cfg-preview-tbody'); }
 
+/* ═══════ v5.5 · o calendário abre no formato que faz sentido ═══════ */
+/* Com um quarto só, o calendário do ano é mais fácil de ler que o mapa.
+   Com vários, o mapa é o único que dá visão geral. Então a ordem e a aba
+   inicial se adaptam — e, acima disso, vale a última escolha do usuário. */
+function ordenarSubCal() {
+  const varios = temVariosQuartos();
+  const ordem = varios ? { mapa: 1, buracos: 2, ano: 3 } : { ano: 1, buracos: 2, mapa: 3 };
+  Object.keys(ordem).forEach(id => {
+    const b = document.getElementById('sc-' + id);
+    if (b) b.style.order = ordem[id];
+  });
+}
+function subCalPadrao() {
+  const c = loadConfig();
+  if (c.abaCalendario && ['mapa','buracos','ano'].indexOf(c.abaCalendario) >= 0) return c.abaCalendario;
+  return temVariosQuartos() ? 'mapa' : 'ano';
+}
+function showSubCal(id, btn) {
+  SUB_CAL = id;
+  const c = loadConfig();
+  if (c.abaCalendario !== id) { c.abaCalendario = id; saveConfig(c); }
+  ordenarSubCal();
+  document.querySelectorAll('#tab-calendario .subtab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('#tab-calendario .subtab-btn').forEach(b => b.classList.remove('active'));
+  const pan = document.getElementById('scal-' + id); if (pan) pan.classList.add('active');
+  if (!btn) btn = document.getElementById('sc-' + id);
+  if (btn) btn.classList.add('active');
+  if (id === 'mapa') renderMapa();
+  if (id === 'buracos') renderBuracos();
+  if (id === 'ano') { renderCalendario(); scrollCalendarioParaMes(mesDoMapa()); }
+  window.scrollTo(0, 0);
+}
+
 /* ───────── BOOT v4 ───────── */
 setPago('Pago');
 montarDDISelects();
@@ -6306,6 +6340,8 @@ montarQuartoSel();
 montarQuartoSelects();
 renderQuartos();
 renderInstalar();
+SUB_CAL = subCalPadrao();
+ordenarSubCal();
 MES_SEL = (new Date()).getMonth() + 1;
 updatePeriodoUI();
 renderPeriodos();
