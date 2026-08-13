@@ -1317,6 +1317,14 @@ details#cal-manual summary::-webkit-details-marker{display:none}
       <textarea class="form-control" id="colar-txt" rows="6" placeholder="Cole aqui o texto do e-mail…" style="font-size:0.8rem;line-height:1.4"></textarea>
     </div>
     <button class="btn btn-green btn-full" onclick="lerColado()">🔎 Ler o e-mail</button>
+    <div style="display:flex;align-items:center;gap:10px;margin:12px 0 8px">
+      <div style="flex:1;height:1px;background:#ddd"></div>
+      <span style="color:#999;font-size:0.72rem">ou</span>
+      <div style="flex:1;height:1px;background:#ddd"></div>
+    </div>
+    <button class="btn btn-navy btn-full" onclick="document.getElementById('colar-pdf').click()">📄 Abrir o PDF da reserva</button>
+    <input type="file" id="colar-pdf" accept="application/pdf,.pdf" style="display:none" onchange="lerPDF(event)">
+    <small style="color:#888;font-size:0.7rem;display:block;margin-top:6px">O Booking compartilha a reserva como PDF — ele traz hóspede, datas, valor e comissão.</small>
     <div id="colar-result" style="margin-top:12px"></div>
   </div>
 </div>
@@ -6451,7 +6459,7 @@ function _limpaNome(n) {
   return n;
 }
 
-function parseReservaEmail(txt) {
+function _parseBasico(txt) {
   if (!txt || txt.trim().length < 15) return null;
   var s = txt.replace(/\r/g, '');
   var r = { plat: '', hospede: '', inicio: '', fim: '', pessoas: 0, valor: 0, taxa: 0, liquido: 0, codigo: '', faltou: [] };
@@ -6605,7 +6613,7 @@ function updateTaxaPreview() {
   var tx = calcTaxa(plat, valor);
   var liq = valor - tx;
   if (_taxaEmailVale(valor)) {
-    el.innerHTML = '\ud83d\udce7 Taxa do e-mail do ' + plat + ' (' + (tx / valor * 100).toFixed(1).replace('.', ',') + '%): <strong>' + fmt(tx) +
+    el.innerHTML = '\ud83d\udd12 Taxa informada pelo ' + plat + ' (' + (tx / valor * 100).toFixed(1).replace('.', ',') + '%): <strong>' + fmt(tx) +
       '</strong> &nbsp;\u2192&nbsp; \u2705 L\u00edquido: <strong style="color:var(--green)">' + fmt(liq) + '</strong>';
   } else if (tx > 0) {
     el.innerHTML = '\ud83d\udcb8 Taxa ' + plat + ' (' + getTaxa(plat) + '%): <strong>' + fmt(tx) +
@@ -6644,6 +6652,202 @@ function _checarCompartilhado() {
     history.replaceState(null, '', location.pathname);
     setTimeout(function () { abrirColar(junto); }, 600);
   } catch (e) {}
+}
+
+
+/* ═══════════ v5.7 · LER O PDF DA RESERVA (Booking) ═══════════ */
+var PDFJS_BASE = './';           /* pdf.js mora no mesmo repositório */
+var _pdfjs = null;
+async function _carregarPdfJs() {
+  if (_pdfjs) return _pdfjs;
+  var lib = await import(PDFJS_BASE + 'pdf.min.mjs');
+  lib.GlobalWorkerOptions.workerSrc = PDFJS_BASE + 'pdf.worker.min.mjs';
+  _pdfjs = lib;
+  return lib;
+}
+/* extrai o texto mantendo as quebras de linha do documento */
+async function textoDoPDF(file) {
+  var lib = await _carregarPdfJs();
+  var buf = await file.arrayBuffer();
+  var doc = await lib.getDocument({ data: new Uint8Array(buf) }).promise;
+  var full = '';
+  for (var i = 1; i <= doc.numPages; i++) {
+    var pg = await doc.getPage(i);
+    var tc = await pg.getTextContent();
+    var linhas = [], linha = '', ultY = null;
+    tc.items.forEach(function (it) {
+      if (!it.str) return;
+      var y = it.transform[5];
+      if (ultY !== null && Math.abs(y - ultY) > 3) { linhas.push(linha.trim()); linha = ''; }
+      linha += it.str + (it.hasEOL ? '' : ' ');
+      ultY = y;
+    });
+    if (linha.trim()) linhas.push(linha.trim());
+    full += linhas.join('\n') + '\n';
+  }
+  return full;
+}
+async function lerPDF(ev) {
+  var f = ev && ev.target && ev.target.files && ev.target.files[0];
+  if (!f) return;
+  var box = document.getElementById('colar-result');
+  if (box) box.innerHTML = '<div class="info-box info-blue">\u23f3 Lendo o PDF\u2026</div>';
+  try {
+    var txt = await textoDoPDF(f);
+    var ta = document.getElementById('colar-txt');
+    if (ta) ta.value = txt;
+    lerColado();
+  } catch (e) {
+    if (box) box.innerHTML = '<div class="info-box info-red">N\u00e3o consegui ler esse PDF (' + (e && e.message ? e.message : e) +
+      ').<br>Se ele for s\u00f3 uma imagem digitalizada, n\u00e3o tem texto para ler.</div>';
+  }
+  ev.target.value = '';
+}
+
+/* ── leitura por rótulo: o PDF do Booking vem "rótulo numa linha, valor na seguinte" ── */
+function _linhasLimpas(s) {
+  return s.replace(/\u00a0/g, ' ').split('\n')
+    .map(function (l) { return l.replace(/\s+/g, ' ').trim(); })
+    .filter(function (l) { return l.length > 0; });
+}
+function _aposRotulo(linhas, re) {
+  for (var i = 0; i < linhas.length; i++) {
+    var l = linhas[i];
+    if (!re.test(l)) continue;
+    var resto = l.replace(re, '').replace(/^[:\s]+/, '').trim();
+    if (resto) return resto;
+    if (linhas[i + 1]) return linhas[i + 1];
+  }
+  return '';
+}
+function _dataDoTexto(txt) {
+  var d = _acharDatas(txt || '');
+  return d.length ? d[0] : '';
+}
+
+/* parser do PDF do Booking — roda depois do parser de e-mail e complementa o que faltou */
+function _complementarPDF(s, r) {
+  var L = _linhasLimpas(s);
+  var juntos = L.join('\n');
+  /* o PDF do Booking sempre tem "Comissão" e "Número da reserva" */
+  var ehPdfBooking = /comiss[\u00e3a]o/i.test(juntos) && /n[\u00fau]mero da reserva/i.test(juntos);
+  if (!ehPdfBooking) return r;
+
+  r.plat = 'Booking';
+  var nome = _aposRotulo(L, /informa[\u00e7c][\u00f5o]es\s+do\s+h[\u00f3o]spede\s*:?/i);
+  nome = _limpaNome(nome);
+  if (nome) r.hospede = nome;
+
+  var ci = _dataDoTexto(_aposRotulo(L, /check\s*-?\s*in\s*:?/i));
+  var co = _dataDoTexto(_aposRotulo(L, /check\s*-?\s*out\s*:?/i));
+  if (ci) r.inicio = ci;
+  if (co) r.fim = co;
+
+  var pes = _aposRotulo(L, /total\s+de\s+h[\u00f3o]spedes\s*:?/i);
+  var mp = pes && pes.match(/(\d+)/);
+  if (mp) r.pessoas = parseInt(mp[1], 10);
+
+  var num = _aposRotulo(L, /n[\u00fau]mero\s+da\s+reserva\s*:?/i);
+  var mn = num && num.match(/(\d{6,})/);
+  if (mn) r.codigo = mn[1];
+
+  var tot = _aposRotulo(L, /pre[\u00e7c]o\s+total\s*:?/i);
+  if (tot && /R\$/.test(tot)) r.valor = _numBR(tot);
+  var com = _aposRotulo(L, /comiss[\u00e3a]o\s*:?/i);
+  if (com && /R\$/.test(com)) r.taxa = _numBR(com);
+  if (r.valor && r.taxa) r.liquido = Math.round((r.valor - r.taxa) * 100) / 100;
+
+  /* extras que o PDF traz e que valem uma anotação */
+  var imp = '';
+  for (var i = 0; i < L.length; i++) {
+    if (/imposto\s+municipal/i.test(L[i])) {
+      for (var j = i; j < Math.min(i + 3, L.length); j++) {
+        var mi = L[j].match(/R\$\s*([\d.,]+)/);
+        if (mi) { imp = _numBR(mi[1]); break; }
+      }
+      break;
+    }
+  }
+  if (imp) r.imposto = imp;
+  var cheg = _aposRotulo(L, /hor[\u00e1a]rio\s+aproximado\s+de\s+chegada\s*:?/i);
+  if (cheg && /\d/.test(cheg)) r.chegada = cheg;
+
+  r.faltou = [];
+  if (!r.hospede) r.faltou.push('nome do h\u00f3spede');
+  if (!r.inicio) r.faltou.push('check-in');
+  if (!r.fim) r.faltou.push('check-out');
+  if (!r.valor) r.faltou.push('valor');
+  return r;
+}
+
+/* redefine o parser: e-mail primeiro, PDF complementa */
+var _parseEmailBase = null;
+function parseReservaEmail(txt) {
+  var r = _parseBasico(txt);
+  if (!r) return null;
+  return _complementarPDF(txt, r);
+}
+
+/* mostra também imposto municipal e horário de chegada quando o PDF traz */
+function lerColado() {
+  var ta = document.getElementById('colar-txt');
+  var box = document.getElementById('colar-result');
+  if (!ta || !box) return;
+  var r = parseReservaEmail(ta.value);
+  if (!r) { box.innerHTML = '<div class="info-box info-red">Cole o texto do e-mail ou escolha o PDF antes.</div>'; return; }
+  _colado = r;
+  var h = '<div class="card" style="margin:0"><div class="card-header bg-navy">\ud83d\udd0e Entendi assim</div><div class="card-body">';
+  h += _linhaConf('Plataforma', r.plat || 'n\u00e3o achei', !!r.plat);
+  h += _linhaConf('H\u00f3spede', r.hospede || 'n\u00e3o achei', !!r.hospede);
+  h += _linhaConf('Check-in', r.inicio ? _dataBR(r.inicio) : 'n\u00e3o achei', !!r.inicio);
+  h += _linhaConf('Check-out', r.fim ? _dataBR(r.fim) : 'n\u00e3o achei', !!r.fim);
+  if (r.inicio && r.fim) {
+    var noites = Math.round((new Date(r.fim + 'T00:00:00') - new Date(r.inicio + 'T00:00:00')) / 86400000);
+    h += _linhaConf('Noites', noites, true);
+  }
+  if (r.pessoas) h += _linhaConf('Pessoas', r.pessoas, true);
+  if (r.chegada) h += _linhaConf('Chegada prevista', r.chegada, true);
+  if (r.codigo) h += _linhaConf('C\u00f3digo', r.codigo, true);
+  if (r.valor) h += _linhaConf('Valor bruto', fmt(r.valor), true);
+  if (r.taxa) h += _linhaConf(r.plat === 'Booking' ? 'Comiss\u00e3o Booking' : 'Taxa da plataforma',
+    fmt(r.taxa) + (r.valor ? ' (' + (r.taxa / r.valor * 100).toFixed(1).replace('.', ',') + '%)' : ''), true);
+  if (r.liquido) h += _linhaConf('Voc\u00ea recebe', fmt(r.liquido), true);
+  h += '</div></div>';
+  if (r.imposto) {
+    h += '<div class="info-box" style="margin-top:10px;background:rgba(212,168,83,0.14);border-left:3px solid var(--gold);color:#6b5418">' +
+      '\ud83c\udfdb\ufe0f O PDF menciona <strong>imposto municipal de ' + fmt(r.imposto) + '</strong>, j\u00e1 embutido no valor bruto. ' +
+      'N\u00e3o desconto ele sozinho \u2014 se voc\u00ea recolhe esse imposto, lance como despesa.</div>';
+  }
+  if (r.faltou.length) {
+    h += '<div class="info-box" style="margin-top:10px;background:rgba(212,168,83,0.14);border-left:3px solid var(--gold);color:#6b5418">' +
+      '\u26a0\ufe0f N\u00e3o achei: <strong>' + r.faltou.join(', ') + '</strong>. Voc\u00ea completa na tela seguinte.</div>';
+  }
+  h += '<button class="btn btn-green btn-full" style="margin-top:10px" onclick="usarColado()">\u27a1\ufe0f Abrir a reserva preenchida</button>';
+  box.innerHTML = h;
+}
+function usarColado() {
+  if (!_colado) return;
+  var r = _colado;
+  closeModal('modal-colar');
+  abrirNovaReserva();
+  var set = function (id, v) { var e = document.getElementById(id); if (e && v) e.value = v; };
+  set('r-hospede', r.hospede);
+  set('r-plat', r.plat);
+  if (r.pessoas) set('r-pessoas', r.pessoas);
+  if (r.valor) {
+    var ev = document.getElementById('r-valor');
+    if (ev) { ev.value = String(Math.round(r.valor * 100)); formatCurrencyInput(ev); }
+  }
+  var obs = [];
+  if (r.codigo) obs.push(r.plat + ' ' + r.codigo);
+  if (r.chegada) obs.push('chegada ' + r.chegada.toLowerCase());
+  if (obs.length) set('r-obs', obs.join(' \u00b7 '));
+  PERIODOS = [{ inicio: r.inicio || '', fim: r.fim || '' }];
+  renderPeriodos();
+  if (r.taxa > 0 && r.valor > 0) { _taxaDoEmail = r.taxa; _taxaDoEmailValor = r.valor; }
+  updateTaxaPreview();
+  var falta = r.faltou.filter(function (x) { return x !== 'plataforma'; });
+  toast(falta.length ? '\ud83d\udccb Preenchido \u2014 falta conferir: ' + falta.join(', ') : '\ud83d\udccb Preenchido! Confira e salve', 4000);
 }
 
 </script>

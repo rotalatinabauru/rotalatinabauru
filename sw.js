@@ -39,7 +39,7 @@ self.addEventListener('fetch', e => {
   /* mesma origem: rede primeiro, cache se estiver sem sinal */
   e.respondWith(
     fetch(req).then(res => {
-      if (res && res.ok && (req.destination === 'document' || url.pathname.endsWith('.html') || url.pathname.endsWith('.png') || url.pathname.endsWith('.json'))) {
+      if (res && res.ok && (req.destination === 'document' || url.pathname.endsWith('.html') || url.pathname.endsWith('.png') || url.pathname.endsWith('.json') || url.pathname.endsWith('.mjs'))) {
         const copia = res.clone();
         caches.open(CACHE).then(c => c.put(req, copia)).catch(() => {});
       }
