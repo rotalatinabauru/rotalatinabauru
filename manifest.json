@@ -15,6 +15,15 @@
     "finance",
     "productivity"
   ],
+  "share_target": {
+    "action": "rota_latina_app.html",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
   "icons": [
     {
       "src": "icon-192.png",

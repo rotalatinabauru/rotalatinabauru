@@ -763,6 +763,7 @@ details#cal-manual summary::-webkit-details-marker{display:none}
 
   <div class="subtab-panel active" id="sub-receitas">
     <button class="btn btn-green btn-full" onclick="abrirNovaReserva()">➕ Nova Hospedagem</button>
+    <button class="btn btn-navy btn-full" style="margin-top:8px" onclick="abrirColar()">📋 Colar reserva do e-mail</button>
     <div class="filters" style="margin-top:10px">
       <select class="form-control" id="filtro-rec-plat" onchange="renderReceitas()">
         <option value="">Todas plataformas</option>
@@ -1301,6 +1302,22 @@ details#cal-manual summary::-webkit-details-marker{display:none}
     <div class="info-box info-blue">📅 Os dias entre check-in e check-out serão marcados no calendário automaticamente.</div>
     <button class="btn btn-green btn-full" id="btn-salvar-rec" onclick="saveReceita()">✅ Salvar Hospedagem</button>
     <button class="btn btn-full btn-cancel" onclick="closeModal('modal-rec')">Cancelar</button>
+  </div>
+</div>
+
+<!-- ═══════════ MODAL COLAR RESERVA ═══════════ -->
+<div class="modal-backdrop" id="modal-colar" onclick="closeModalOutside(event,'modal-colar')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">📋 Colar reserva do e-mail</div>
+    <div class="info-box info-blue" id="colar-ajuda">
+      💡 Abra o e-mail de confirmação do <strong>Airbnb</strong> ou do <strong>Booking</strong>, copie o texto e cole aqui. Eu leio e preencho a reserva — você só confere.
+    </div>
+    <div class="form-group">
+      <textarea class="form-control" id="colar-txt" rows="6" placeholder="Cole aqui o texto do e-mail…" style="font-size:0.8rem;line-height:1.4"></textarea>
+    </div>
+    <button class="btn btn-green btn-full" onclick="lerColado()">🔎 Ler o e-mail</button>
+    <div id="colar-result" style="margin-top:12px"></div>
   </div>
 </div>
 
@@ -4044,6 +4061,7 @@ function _showUserBar(email, uid) {
   document.getElementById('userEmail').textContent = email || '';
   document.getElementById('userUid').textContent = uid || '';
   ajustarTabBarTop();
+  _checarCompartilhado();
 }
 
 // Calcula a altura real do header + userBar e ajusta o top sticky da tab-bar
@@ -6367,6 +6385,267 @@ atualizarAvisos();
 updateFab('hoje');
 
 _initFirebase();
+
+/* ═══════════ v5.6 · COLAR RESERVA DO E-MAIL ═══════════ */
+var MES_NUM = {
+  jan:1, fev:2, mar:3, abr:4, mai:5, jun:6, jul:7, ago:8, set:9, out:10, nov:11, dez:12,
+  janeiro:1, fevereiro:2, marco:3, abril:4, maio:5, junho:6, julho:7, agosto:8,
+  setembro:9, outubro:10, novembro:11, dezembro:12
+};
+function _semAc(s) { return String(s).normalize('NFD').replace(/[\u0300-\u036f]/g, ''); }
+function _numBR(s) {
+  var x = String(s).replace(/[^\d.,]/g, '');
+  if (x.indexOf(',') >= 0) x = x.replace(/\./g, '').replace(',', '.');
+  var v = parseFloat(x);
+  return isNaN(v) ? 0 : Math.abs(v);
+}
+function _iso(y, m, d) { return y + '-' + String(m).padStart(2, '0') + '-' + String(d).padStart(2, '0'); }
+function _dataBR(iso) { return iso ? iso.split('-').reverse().join('/') : '\u2014'; }
+
+/* o e-mail quase nunca traz o ano: escolhe o que deixa a data perto de hoje */
+function _inferirAno(mes, dia) {
+  var h = new Date(); h.setHours(0, 0, 0, 0);
+  var y = h.getFullYear();
+  var d = new Date(y, mes - 1, dia);
+  if ((h - d) / 86400000 > 45) y += 1;
+  else if ((d - h) / 86400000 > 330) y -= 1;
+  return y;
+}
+function _acharDatas(txt) {
+  var s = _semAc(txt), out = [], m;
+  var re = /(\d{1,2})\s*(?:de\s+)?([a-zA-Z]{3,9})\.?(?:\s+de\s+(\d{4}))?/g;
+  while ((m = re.exec(s)) !== null) {
+    var mes = MES_NUM[m[2].toLowerCase()];
+    if (!mes) continue;
+    var dia = parseInt(m[1], 10);
+    if (dia < 1 || dia > 31) continue;
+    var ano = m[3] ? parseInt(m[3], 10) : _inferirAno(mes, dia);
+    out.push({ iso: _iso(ano, mes, dia), pos: m.index });
+  }
+  var re2 = /(\d{1,2})\/(\d{1,2})\/(\d{4})/g;
+  while ((m = re2.exec(s)) !== null) {
+    out.push({ iso: _iso(parseInt(m[3], 10), parseInt(m[2], 10), parseInt(m[1], 10)), pos: m.index });
+  }
+  out.sort(function (a, b) { return a.pos - b.pos; });
+  var lim = [];
+  out.forEach(function (d) { if (!lim.length || lim[lim.length - 1] !== d.iso) lim.push(d.iso); });
+  return lim;
+}
+function _parDatas(datas) {
+  if (!datas.length) return { inicio: '', fim: '' };
+  var ini = datas[0], fim = '';
+  for (var i = 1; i < datas.length; i++) {
+    var dif = (new Date(datas[i] + 'T00:00:00') - new Date(ini + 'T00:00:00')) / 86400000;
+    if (dif > 0 && dif <= 90) { fim = datas[i]; break; }
+  }
+  return { inicio: ini, fim: fim };
+}
+function _limpaNome(n) {
+  if (!n) return '';
+  n = String(n).replace(/\s+/g, ' ').replace(/[<>|\u00b7\u2022\[\]]/g, '').trim();
+  n = n.replace(/^(sr|sra|dr|dra)\.?\s+/i, '');
+  if (n.length < 2 || n.length > 60) return '';
+  if (/https?:|@|\d{3}/.test(n)) return '';
+  if (/^(check|hospede|h\u00f3spede|total|airbnb|booking|reserva|nova|voce|voc\u00ea|taxa|codigo|c\u00f3digo)/i.test(_semAc(n))) return '';
+  if (!/[A-Za-z\u00c0-\u00ff]{2}/.test(n)) return '';
+  return n;
+}
+
+function parseReservaEmail(txt) {
+  if (!txt || txt.trim().length < 15) return null;
+  var s = txt.replace(/\r/g, '');
+  var r = { plat: '', hospede: '', inicio: '', fim: '', pessoas: 0, valor: 0, taxa: 0, liquido: 0, codigo: '', faltou: [] };
+  var m, i, j;
+
+  var sinaisAir = /airbnb/i.test(s) || /taxa de servi[\u00e7c]o do anfitri[\u00e3a]o/i.test(s) ||
+                  /voc[\u00eae] recebe/i.test(s) || /identifica[\u00e7c][\u00e3a]o verificada/i.test(s) ||
+                  /c[\u00f3o]digo de confirma[\u00e7c][\u00e3a]o\s*\n?\s*HM[A-Z0-9]{6,}/i.test(s);
+  var sinaisBk  = /booking\.?com/i.test(s) || /admin\.booking/i.test(s) || /res_id=/i.test(s) ||
+                  /iata\/tids/i.test(s) || /n[\u00fau]mero de confirma[\u00e7c][\u00e3a]o/i.test(s);
+  r.plat = sinaisAir ? 'Airbnb' : (sinaisBk ? 'Booking' : '');
+
+  /* ── nome do hóspede: várias estratégias, fica com a primeira que faz sentido ── */
+  var cands = [];
+  if ((m = s.match(/Reserva confirmada\s*[-\u2013\u2014]\s*([^\n]+?)\s+chega em/i))) cands.push(m[1]);
+  if ((m = s.match(/A solicita[\u00e7c][\u00e3a]o de\s+([^\n]+?)\s+foi confirmada/i))) cands.push(m[1]);
+  var linhas = s.split('\n').map(function (x) { return x.trim(); });
+  for (i = 0; i < linhas.length; i++) {
+    if (/identifica[\u00e7c][\u00e3a]o verificada|no airbnb desde|coment[\u00e1a]rio/i.test(linhas[i])) {
+      for (j = i - 1; j >= 0 && j >= i - 3; j--) {
+        if (linhas[j] && !/^\[|^https?:/i.test(linhas[j])) {
+          cands.push(linhas[j].replace(/^.*details\/[A-Za-z0-9]+[^\s]*\s+/, ''));
+          break;
+        }
+      }
+    }
+  }
+  if ((m = s.match(/hosting\/reservations\/details\/[A-Za-z0-9]+[^\s]*\s+([^\n\[]+)/))) cands.push(m[1]);
+  if ((m = s.match(/^([^\n]+?)\s+disse:/im))) cands.push(m[1]);
+  for (i = 0; i < cands.length; i++) { var n = _limpaNome(cands[i]); if (n) { r.hospede = n; break; } }
+
+  /* ── datas ── */
+  var par = _parDatas(_acharDatas(s));
+  r.inicio = par.inicio; r.fim = par.fim;
+
+  /* ── pessoas ── */
+  var tot = 0;
+  var reP = /(\d+)\s*(adultos?|crian[\u00e7c]as?|h[\u00f3o]spedes?|pessoas?)/gi;
+  while ((m = reP.exec(s)) !== null) tot += parseInt(m[1], 10);
+  r.pessoas = tot;
+
+  /* ── código ── */
+  if ((m = s.match(/C[\u00d3O]DIGO DE CONFIRMA[\u00c7C][\u00c3A]O\s*\n?\s*([A-Z0-9]{6,14})/i))) r.codigo = m[1];
+  else if ((m = s.match(/reservations\/details\/([A-Z0-9]{6,14})/i))) r.codigo = m[1];
+  else if ((m = s.match(/res_id=(\d{6,})/i))) r.codigo = m[1];
+  else if ((m = s.match(/Nova reserva!\s*\((\d{6,})/i))) r.codigo = m[1];
+  else if ((m = s.match(/(?:confirma[\u00e7c][\u00e3a]o|confirmation)\s*(?:n[\u00ba\u00b0o]|\u2014|-|:)?\s*(\d{7,})/i))) r.codigo = m[1];
+
+  /* ── dinheiro (só o Airbnb manda) ── */
+  if ((m = s.match(/TOTAL\s*\(?\s*BRL\s*\)?\s*R\$\s*([\d.,]+)/i))) r.valor = _numBR(m[1]);
+  if (!r.valor && (m = s.match(/O H[\u00d3O]SPEDE PAGOU[\s\S]{0,220}?R\$\s*([\d.,]+)/i))) r.valor = _numBR(m[1]);
+  if ((m = s.match(/VOC[\u00caE] RECEBE\s*R\$\s*([\d.,]+)/i))) r.liquido = _numBR(m[1]);
+  if ((m = s.match(/Taxa de servi[\u00e7c]o do anfitri[\u00e3a]o[^\n]*?R\$\s*([\d.,]+)/i))) r.taxa = _numBR(m[1]);
+  if (r.valor && r.liquido) r.taxa = Math.round((r.valor - r.liquido) * 100) / 100;
+  else if (r.valor && r.taxa) r.liquido = Math.round((r.valor - r.taxa) * 100) / 100;
+  else if (!r.valor && r.liquido && r.taxa) r.valor = Math.round((r.liquido + r.taxa) * 100) / 100;
+
+  if (!r.plat) r.faltou.push('plataforma');
+  if (!r.hospede) r.faltou.push('nome do h\u00f3spede');
+  if (!r.inicio) r.faltou.push('check-in');
+  if (!r.fim) r.faltou.push('check-out');
+  if (!r.valor) r.faltou.push('valor');
+  return r;
+}
+
+/* ───── tela ───── */
+var _colado = null;
+function abrirColar(txtInicial) {
+  var ta = document.getElementById('colar-txt');
+  if (ta) ta.value = txtInicial || '';
+  var res = document.getElementById('colar-result'); if (res) res.innerHTML = '';
+  _colado = null;
+  openModal('modal-colar');
+  if (txtInicial) lerColado();
+  else if (ta) setTimeout(function () { try { ta.focus(); } catch (e) {} }, 250);
+}
+function _linhaConf(rot, val, ok) {
+  return '<div style="display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid #eee">' +
+    '<span style="color:#888;font-size:0.78rem">' + rot + '</span>' +
+    '<span style="font-weight:600;font-size:0.82rem;text-align:right;color:' + (ok ? '#1a2744' : '#c0392b') + '">' + val + '</span></div>';
+}
+function lerColado() {
+  var ta = document.getElementById('colar-txt');
+  var box = document.getElementById('colar-result');
+  if (!ta || !box) return;
+  var r = parseReservaEmail(ta.value);
+  if (!r) { box.innerHTML = '<div class="info-box info-red">Cole o texto do e-mail antes.</div>'; return; }
+  _colado = r;
+  var h = '<div class="card" style="margin:0"><div class="card-header bg-navy">\ud83d\udd0e Entendi assim</div><div class="card-body">';
+  h += _linhaConf('Plataforma', r.plat || 'n\u00e3o achei', !!r.plat);
+  h += _linhaConf('H\u00f3spede', r.hospede || 'n\u00e3o achei', !!r.hospede);
+  h += _linhaConf('Check-in', r.inicio ? _dataBR(r.inicio) : 'n\u00e3o achei', !!r.inicio);
+  h += _linhaConf('Check-out', r.fim ? _dataBR(r.fim) : 'n\u00e3o achei', !!r.fim);
+  if (r.inicio && r.fim) {
+    var noites = Math.round((new Date(r.fim + 'T00:00:00') - new Date(r.inicio + 'T00:00:00')) / 86400000);
+    h += _linhaConf('Noites', noites, true);
+  }
+  if (r.pessoas) h += _linhaConf('Pessoas', r.pessoas, true);
+  if (r.codigo) h += _linhaConf('C\u00f3digo', r.codigo, true);
+  if (r.valor) h += _linhaConf('Valor bruto', fmt(r.valor), true);
+  if (r.taxa) h += _linhaConf('Taxa da plataforma', fmt(r.taxa) + (r.valor ? ' (' + (r.taxa / r.valor * 100).toFixed(1).replace('.', ',') + '%)' : ''), true);
+  if (r.liquido) h += _linhaConf('Voc\u00ea recebe', fmt(r.liquido), true);
+  h += '</div></div>';
+  if (r.faltou.length) {
+    h += '<div class="info-box" style="margin-top:10px;background:rgba(212,168,83,0.14);border-left:3px solid var(--gold);color:#6b5418">' +
+         '\u26a0\ufe0f O e-mail n\u00e3o traz: <strong>' + r.faltou.join(', ') + '</strong>. Voc\u00ea completa na tela seguinte.</div>';
+  }
+  h += '<button class="btn btn-green btn-full" style="margin-top:10px" onclick="usarColado()">\u27a1\ufe0f Abrir a reserva preenchida</button>';
+  box.innerHTML = h;
+}
+function usarColado() {
+  if (!_colado) return;
+  var r = _colado;
+  closeModal('modal-colar');
+  abrirNovaReserva();
+  var set = function (id, v) { var e = document.getElementById(id); if (e && v) e.value = v; };
+  set('r-hospede', r.hospede);
+  set('r-plat', r.plat);
+  if (r.pessoas) set('r-pessoas', r.pessoas);
+  if (r.valor) {
+    var ev = document.getElementById('r-valor');
+    if (ev) { ev.value = String(Math.round(r.valor * 100)); formatCurrencyInput(ev); }
+  }
+  if (r.codigo) set('r-obs', r.plat + ' ' + r.codigo);
+  PERIODOS = [{ inicio: r.inicio || '', fim: r.fim || '' }];
+  renderPeriodos();
+  if (r.taxa > 0 && r.valor > 0) { _taxaDoEmail = r.taxa; _taxaDoEmailValor = r.valor; }
+  updateTaxaPreview();
+  var falta = r.faltou.filter(function (x) { return x !== 'plataforma'; });
+  toast(falta.length ? '\ud83d\udccb Preenchido \u2014 falta conferir: ' + falta.join(', ') : '\ud83d\udccb Preenchido! Confira e salve', 4000);
+}
+
+/* a taxa que veio do e-mail vale mais que o percentual do Config — mas só enquanto o valor não mudar */
+var _taxaDoEmail = 0, _taxaDoEmailValor = 0;
+function _taxaEmailVale(valor) {
+  return _taxaDoEmail > 0 && Math.abs(valor - _taxaDoEmailValor) < 0.01;
+}
+function calcTaxa(plat, valor) {
+  var v = parseFloat(valor || 0);
+  if (_taxaEmailVale(v)) return _taxaDoEmail;
+  var cfg = loadConfig();
+  var pct = cfg[plat] !== undefined ? cfg[plat] : (plat === 'Airbnb' || plat === 'Booking' ? 15 : 0);
+  return v * (pct / 100);
+}
+function updateTaxaPreview() {
+  var plat = (document.getElementById('r-plat') || {}).value || '';
+  var valor = parseBRL((document.getElementById('r-valor') || {}).value);
+  var el = document.getElementById('taxa-preview');
+  if (!el) return;
+  if (!plat || !valor) { el.textContent = '\ud83d\udca1 Preencha plataforma e valor para calcular a taxa'; return; }
+  var tx = calcTaxa(plat, valor);
+  var liq = valor - tx;
+  if (_taxaEmailVale(valor)) {
+    el.innerHTML = '\ud83d\udce7 Taxa do e-mail do ' + plat + ' (' + (tx / valor * 100).toFixed(1).replace('.', ',') + '%): <strong>' + fmt(tx) +
+      '</strong> &nbsp;\u2192&nbsp; \u2705 L\u00edquido: <strong style="color:var(--green)">' + fmt(liq) + '</strong>';
+  } else if (tx > 0) {
+    el.innerHTML = '\ud83d\udcb8 Taxa ' + plat + ' (' + getTaxa(plat) + '%): <strong>' + fmt(tx) +
+      '</strong> &nbsp;\u2192&nbsp; \u2705 Valor L\u00edquido: <strong style="color:var(--green)">' + fmt(liq) + '</strong>';
+  } else {
+    el.innerHTML = '\u2705 Sem taxa (Particular) \u2192 Valor L\u00edquido: <strong style="color:var(--green)">' + fmt(liq) + '</strong>';
+  }
+}
+/* toda reserva nova comum começa sem taxa travada */
+function abrirNovaReserva() {
+  ['r-hospede','r-telefone','r-plat','r-pessoas','r-valor','r-pgto','r-obs'].forEach(function (id) {
+    var e = document.getElementById(id); if (e) e.value = '';
+  });
+  _taxaDoEmail = 0; _taxaDoEmailValor = 0;
+  PERIODOS = [{ inicio: '', fim: '' }];
+  montarQuartoSelects();
+  var rq = document.getElementById('r-quarto'); if (rq) rq.value = QUARTO_SEL || primeiroQuarto();
+  renderPeriodos();
+  preencherTel('r', '', '55');
+  var tp = document.getElementById('taxa-preview'); if (tp) tp.textContent = '\ud83d\udca1 Preencha plataforma e valor para calcular a taxa';
+  var cb = document.getElementById('conflito-box'); if (cb) cb.style.display = 'none';
+  var bs = document.getElementById('btn-salvar-rec'); if (bs) { bs.disabled = false; bs.style.opacity = '1'; }
+  var hint = document.getElementById('hospede-hint'); if (hint) hint.style.display = 'none';
+  acFechar();
+  setPago('Pago');
+  openModal('modal-rec');
+}
+/* compartilhar do Gmail direto para o app (PWA share target) */
+function _checarCompartilhado() {
+  try {
+    var q = new URLSearchParams(location.search);
+    var txt = q.get('text') || q.get('body') || '';
+    var tit = q.get('title') || '';
+    if (!txt && !tit) return;
+    var junto = (tit ? tit + '\n' : '') + txt;
+    history.replaceState(null, '', location.pathname);
+    setTimeout(function () { abrirColar(junto); }, 600);
+  } catch (e) {}
+}
+
 </script>
 </body>
 </html>
