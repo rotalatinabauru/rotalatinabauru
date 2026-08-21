@@ -1052,11 +1052,21 @@ details#cal-manual summary::-webkit-details-marker{display:none}
         💡 Estes são os textos que aparecem no botão 💬 do <strong>Próximos 7 dias</strong> e das reservas.
         Use as variáveis: <code>{nome}</code> <code>{primeiroNome}</code> <code>{checkin}</code>
         <code>{checkout}</code> <code>{dias}</code> <code>{pessoas}</code> <code>{plataforma}</code>
-        <code>{valor}</code> <code>{site}</code> <code>{senha}</code> (4 últimos dígitos do celular do hóspede).
+        <code>{valor}</code> <code>{site}</code> <code>{senha}</code> (4 últimos dígitos do celular do hóspede)
+        <code>{endereco}</code> <code>{mapa}</code>.
       </div>
       <div class="form-group">
         <label class="form-label">🌐 Site do apartamento (a variável {site} usa este endereço)</label>
         <input type="text" class="form-control" id="cfg-site" placeholder="https://rotalatina.netlify.app">
+      </div>
+      <div class="form-group">
+        <label class="form-label">📍 Endereço do prédio (a variável {endereco})</label>
+        <input type="text" class="form-control" id="cfg-endereco" placeholder="Rua, número — bairro, cidade/UF, CEP">
+      </div>
+      <div class="form-group">
+        <label class="form-label">🗺️ Link do Google Maps (a variável {mapa})</label>
+        <input type="text" class="form-control" id="cfg-mapa" placeholder="https://maps.google.com/...">
+        <div style="font-size:0.72rem;color:var(--silver);margin-top:4px">Dica: no app do Maps, Compartilhar → Copiar link dá um endereço curtinho.</div>
       </div>
       <div id="cfg-msgs"></div>
       <button class="btn btn-green btn-full" onclick="salvarMsgs()">✅ Salvar mensagens</button>
@@ -1092,7 +1102,7 @@ details#cal-manual summary::-webkit-details-marker{display:none}
         </div>
       </div>
       <button class="btn btn-green btn-full" onclick="salvarConfig()">✅ Salvar Configurações</button>
-      <div style="margin-top:14px;text-align:center;font-size:0.75rem;color:var(--silver)">Rota Latina — versão 5.7.2</div>
+      <div style="margin-top:14px;text-align:center;font-size:0.75rem;color:var(--silver)">Rota Latina — versão 5.8</div>
     </div>
   </div>
 
@@ -5240,18 +5250,20 @@ var MSG_TIPOS = [
   { id: 'chegou',     nome: '🏡 Chegou',      desc: 'Assim que o hóspede entra no apartamento — combinados da casa' },
   { id: 'checkout',   nome: '🛫 Check-out',   desc: 'Véspera da saída — horário e despedida' }
 ];
+var ENDERECO_PADRAO = 'R. Henrique Savi, 2-63 — Vila Nova Cidade Universitária, Bauru/SP, 17012-205';
+var MAPA_PADRAO = 'https://maps.google.com/?cid=8651253917106213331';
 var MSGS_PADRAO = {
   boasvindas: {
-    pt: 'Olá {primeiroNome}, aqui é o Érico, do Rota Latina! 😊\n\nSua reserva está confirmada:\n📅 Entrada {checkin} · Saída {checkout}\n🛏️ {dias} noite(s) · 👥 {pessoas} pessoa(s)\n\nEnquanto a data não chega, dá uma espiada no nosso site: {site}\nLá você vê como é o apartamento, o que tem no quarto e um monte de dica da cidade — onde comer, mercados, farmácias, passeios e o que fazer em Bauru. É só entrar quando quiser. 🙂\n\nUns dias antes da sua chegada eu te mando todas as instruções de acesso ao prédio e ao apartamento.\n\nAh, e um pedido: os móveis do apartamento não podem ser mudados de lugar sem falar comigo antes. Se precisar reorganizar alguma coisa, é só me chamar que a gente vê juntos. 🙂\n\nFico à disposição para o que precisar. Seja muito bem-vindo!',
-    es: '¡Hola {primeiroNome}! Soy Érico, de Rota Latina 😊\n\nTu reserva está confirmada:\n📅 Entrada {checkin} · Salida {checkout}\n🛏️ {dias} noche(s) · 👥 {pessoas} persona(s)\n\nMientras llega la fecha, échale un vistazo a nuestro sitio: {site}\nAhí ves cómo es el apartamento, qué tiene la habitación y un montón de consejos de la ciudad — dónde comer, supermercados, farmacias, paseos y qué hacer en Bauru. Entra cuando quieras. 🙂\n\nUnos días antes de tu llegada te envío todas las instrucciones de acceso al edificio y al apartamento.\n\nAh, y un pedido: los muebles del apartamento no se pueden cambiar de lugar sin hablar conmigo antes. Si necesitas reorganizar algo, escríbeme y lo vemos juntos. 🙂\n\nQuedo a tu disposición para lo que necesites. ¡Bienvenido!'
+    pt: 'Olá {primeiroNome}, aqui é o Érico, do Rota Latina! 😊\n\nSua reserva está confirmada:\n📅 Entrada {checkin} · Saída {checkout}\n🛏️ {dias} noite(s) · 👥 {pessoas} pessoa(s)\n\n📍 {endereco}\n🗺️ {mapa}\n\nEnquanto a data não chega, dá uma espiada no nosso site: {site}\nLá você vê como é o apartamento, o que tem no quarto e um monte de dica da cidade — onde comer, mercados, farmácias, passeios e o que fazer em Bauru. É só entrar quando quiser. 🙂\n\nUns dias antes da sua chegada eu te mando todas as instruções de acesso ao prédio e ao apartamento.\n\nFico à disposição para o que precisar. Seja muito bem-vindo!',
+    es: '¡Hola {primeiroNome}! Soy Érico, de Rota Latina 😊\n\nTu reserva está confirmada:\n📅 Entrada {checkin} · Salida {checkout}\n🛏️ {dias} noche(s) · 👥 {pessoas} persona(s)\n\n📍 {endereco}\n🗺️ {mapa}\n\nMientras llega la fecha, échale un vistazo a nuestro sitio: {site}\nAhí ves cómo es el apartamento, qué tiene la habitación y un montón de consejos de la ciudad — dónde comer, supermercados, farmacias, paseos y qué hacer en Bauru. Entra cuando quieras. 🙂\n\nUnos días antes de tu llegada te envío todas las instrucciones de acceso al edificio y al apartamento.\n\nQuedo a tu disposición para lo que necesites. ¡Bienvenido!'
   },
   checkin: {
-    pt: 'Oi {primeiroNome}, está tudo pronto para a sua chegada em {checkin}! 🔑\n\n📍 City Residencial — Bauru/SP\n🏢 Apartamento 608, 6º andar\n🕒 Check-in a partir das 15h\n\n🎥 Vou te mandar também um vídeo curtinho mostrando como entrar no prédio e no apartamento, passo a passo. É bem simples, mas assim você chega tranquilo, mesmo que seja de noite.\n\nResumindo: até o elevador são duas portas, a primeira de vidro e a segunda uma grade. Aponte a câmera do celular no QR Code do link que te enviei e elas destravam. Se não abrir, é só chamar no interfone — a portaria funciona 24 horas.\n\n🔐 A fechadura do apartamento é eletrônica e a senha são os 4 últimos dígitos do seu celular — no seu caso, {senha}. Encoste a mão no teclado que ele acende, digite a senha e confirme.\n\n⚠️ Importante: a porta não tranca sozinha. Ao entrar, trave pelo botão de dentro; ao sair, passe a mão no teclado e confira se ficou fechada.\n\nQualquer coisa me chama por aqui. Boa viagem!',
-    es: '¡Hola {primeiroNome}! Todo listo para tu llegada el {checkin} 🔑\n\n📍 City Residencial — Bauru/SP\n🏢 Apartamento 608, sexto piso\n🕒 Check-in a partir de las 15h\n\n🎥 Te voy a enviar también un video cortito mostrando cómo entrar al edificio y al apartamento, paso a paso. Es muy simple, pero así llegas tranquilo, aunque sea de noche.\n\nEn resumen: hasta el elevador hay dos puertas, la primera de vidrio y la segunda una reja. Apunta la cámara de tu celular al código QR del enlace que te envié y se destraban. Si no abre, llama por el intercomunicador — la portería funciona 24 horas.\n\n🔐 La cerradura del apartamento es electrónica y la contraseña son los 4 últimos dígitos de tu celular — en tu caso, {senha}. Toca el teclado para que se ilumine, escribe la contraseña y confirma.\n\n⚠️ Importante: la puerta no se traba sola. Al entrar, trábala con el botón de adentro; al salir, pasa la mano por el teclado y confirma que quedó cerrada.\n\nCualquier cosa me escribes por aquí. ¡Buen viaje!'
+    pt: 'Oi {primeiroNome}, está tudo pronto para a sua chegada em {checkin}! 🔑\n\n📍 {endereco}\n🗺️ {mapa}\n🏢 Apartamento 608, 6º andar\n🕒 Check-in a partir das 15h\n\n🎥 Vou te mandar também um vídeo curtinho mostrando como entrar no prédio e no apartamento, passo a passo. É bem simples, mas assim você chega tranquilo, mesmo que seja de noite.\n\nResumindo: até o elevador são duas portas, a primeira de vidro e a segunda uma grade. Aponte a câmera do celular no QR Code do link que te enviei e elas destravam. Se não abrir, é só chamar no interfone — a portaria funciona 24 horas.\n\n🔐 A fechadura do apartamento é eletrônica e a senha são os 4 últimos dígitos do seu celular — no seu caso, {senha}. Encoste a mão no teclado que ele acende, digite a senha e confirme.\n\n⚠️ Importante: a porta não tranca sozinha. Ao entrar, trave pelo botão de dentro; ao sair, passe a mão no teclado e confira se ficou fechada.\n\nQualquer coisa me chama por aqui. Boa viagem!',
+    es: '¡Hola {primeiroNome}! Todo listo para tu llegada el {checkin} 🔑\n\n📍 {endereco}\n🗺️ {mapa}\n🏢 Apartamento 608, sexto piso\n🕒 Check-in a partir de las 15h\n\n🎥 Te voy a enviar también un video cortito mostrando cómo entrar al edificio y al apartamento, paso a paso. Es muy simple, pero así llegas tranquilo, aunque sea de noche.\n\nEn resumen: hasta el elevador hay dos puertas, la primera de vidrio y la segunda una reja. Apunta la cámara de tu celular al código QR del enlace que te envié y se destraban. Si no abre, llama por el intercomunicador — la portería funciona 24 horas.\n\n🔐 La cerradura del apartamento es electrónica y la contraseña son los 4 últimos dígitos de tu celular — en tu caso, {senha}. Toca el teclado para que se ilumine, escribe la contraseña y confirma.\n\n⚠️ Importante: la puerta no se traba sola. Al entrar, trábala con el botón de adentro; al salir, pasa la mano por el teclado y confirma que quedó cerrada.\n\nCualquier cosa me escribes por aquí. ¡Buen viaje!'
   },
   chegou: {
-    pt: 'Oi {primeiroNome}, que bom que você chegou! 🏡\n\nEspero que se sinta em casa e aproveite bastante. Qualquer coisa que precisar — de uma dúvida boba a um probleminha — me chama por aqui na hora que for, que eu dou um jeito.\n\nSó pra deixar combinado: como a gente não cobra taxa de limpeza, a estadia funciona no esquema de confiança. São pouquinhas coisas:\n\n🗑️ Levar o lixo até a lixeira antes de ir embora\n🍽️ Deixar a louça lavada\n🚭 Não fumar dentro do apartamento\n🤫 Silêncio depois das 22h (regra do prédio)\n🚪 Não receber visitas — só quem está na reserva pode entrar\n\nNada complicado, né? É isso que mantém o apartamento gostoso pra todo mundo e o preço justo. 🙂\n\nÓtima estadia!',
-    es: '¡Hola {primeiroNome}, qué bueno que llegaste! 🏡\n\nEspero que te sientas como en casa y lo disfrutes mucho. Cualquier cosa que necesites — desde una duda tonta hasta un problemita — escríbeme por aquí a la hora que sea, que lo resuelvo.\n\nSolo para dejarlo acordado: como no cobramos tarifa de limpieza, la estadía funciona en base a la confianza. Son poquitas cosas:\n\n🗑️ Llevar la basura al basurero antes de irte\n🍽️ Dejar los platos lavados\n🚭 No fumar dentro del apartamento\n🤫 Silencio después de las 22h (regla del edificio)\n🚪 No recibir visitas — solo quien está en la reserva puede entrar\n\nNada complicado, ¿verdad? Es lo que mantiene el apartamento lindo para todos y el precio justo. 🙂\n\n¡Que tengas una excelente estadía!'
+    pt: 'Oi {primeiroNome}, que bom que você chegou! 🏡\n\nEspero que se sinta em casa e aproveite bastante. Qualquer coisa que precisar — de uma dúvida boba a um probleminha — me chama por aqui na hora que for, que eu dou um jeito.\n\nSó pra deixar combinado: como a gente não cobra taxa de limpeza, a estadia funciona no esquema de confiança. São pouquinhas coisas:\n\n🗑️ Levar o lixo até a lixeira antes de ir embora\n🍽️ Deixar a louça lavada\n🛋️ Não mudar os móveis de lugar sem falar comigo antes\n🚭 Não fumar dentro do apartamento\n🤫 Silêncio depois das 22h (regra do prédio)\n🚪 Não receber visitas — só quem está na reserva pode entrar\n\nNada complicado, né? É isso que mantém o apartamento gostoso pra todo mundo e o preço justo. 🙂\n\nÓtima estadia!',
+    es: '¡Hola {primeiroNome}, qué bueno que llegaste! 🏡\n\nEspero que te sientas como en casa y lo disfrutes mucho. Cualquier cosa que necesites — desde una duda tonta hasta un problemita — escríbeme por aquí a la hora que sea, que lo resuelvo.\n\nSolo para dejarlo acordado: como no cobramos tarifa de limpieza, la estadía funciona en base a la confianza. Son poquitas cosas:\n\n🗑️ Llevar la basura al basurero antes de irte\n🍽️ Dejar los platos lavados\n🛋️ No cambiar los muebles de lugar sin hablar conmigo antes\n🚭 No fumar dentro del apartamento\n🤫 Silencio después de las 22h (regla del edificio)\n🚪 No recibir visitas — solo quien está en la reserva puede entrar\n\nNada complicado, ¿verdad? Es lo que mantiene el apartamento lindo para todos y el precio justo. 🙂\n\n¡Que tengas una excelente estadía!'
   },
   checkout: {
     pt: 'Oi {primeiroNome}! Passando só pra lembrar que seu check-out é {checkout}, até as 12h. 🛫\n\nAntes de sair: confira se não esqueceu nada, leve o lixo, deixe a louça lavada, feche as janelas e passe a mão no teclado da fechadura pra trancar a porta.\n\nFoi um prazer receber você! Se puder deixar uma avaliação, ajuda muito. Boa viagem e volte sempre! 🙏',
@@ -5285,7 +5297,9 @@ function preencherMsg(txt, r) {
     .replace(/\{plataforma\}/g, r.plat || '')
     .replace(/\{valor\}/g, fmt(r.valor))
     .replace(/\{senha\}/g, senha)
-    .replace(/\{site\}/g, (loadConfig().site || 'https://rotalatina.netlify.app'));
+    .replace(/\{site\}/g, (loadConfig().site || 'https://rotalatina.netlify.app'))
+    .replace(/\{endereco\}/g, (loadConfig().endereco || ENDERECO_PADRAO))
+    .replace(/\{mapa\}/g, (loadConfig().mapa || MAPA_PADRAO));
 }
 var MSG_REC = null, MSG_TIPO = 'checkin', MSG_LANG = 'pt';
 function abrirMsg(id, ano, tipo) {
@@ -5342,6 +5356,10 @@ function renderMsgsConfig() {
   const box = document.getElementById('cfg-msgs'); if (!box) return;
   const st = document.getElementById('cfg-site');
   if (st) st.value = loadConfig().site || 'https://rotalatina.netlify.app';
+  const en = document.getElementById('cfg-endereco');
+  if (en) en.value = loadConfig().endereco || ENDERECO_PADRAO;
+  const mp = document.getElementById('cfg-mapa');
+  if (mp) mp.value = loadConfig().mapa || MAPA_PADRAO;
   const m = getMsgs();
   box.innerHTML = MSG_TIPOS.map(t =>
     '<div class="tpl-box"><h4 style="display:flex;justify-content:space-between;align-items:center;gap:8px">' +
@@ -5355,6 +5373,10 @@ function salvarMsgs() {
   const c = loadConfig();
   const st = document.getElementById('cfg-site');
   if (st) c.site = (st.value || '').trim() || 'https://rotalatina.netlify.app';
+  const en = document.getElementById('cfg-endereco');
+  if (en) c.endereco = (en.value || '').trim() || ENDERECO_PADRAO;
+  const mp = document.getElementById('cfg-mapa');
+  if (mp) c.mapa = (mp.value || '').trim() || MAPA_PADRAO;
   c.msgs = c.msgs || {};
   MSG_TIPOS.forEach(t => {
     c.msgs[t.id] = {
