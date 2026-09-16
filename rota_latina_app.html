@@ -1102,7 +1102,7 @@ details#cal-manual summary::-webkit-details-marker{display:none}
         </div>
       </div>
       <button class="btn btn-green btn-full" onclick="salvarConfig()">✅ Salvar Configurações</button>
-      <div style="margin-top:14px;text-align:center;font-size:0.75rem;color:var(--silver)">Rota Latina — versão 5.8</div>
+      <div style="margin-top:14px;text-align:center;font-size:0.75rem;color:var(--silver)">Rota Latina — versão 5.9.1</div>
     </div>
   </div>
 
@@ -2691,7 +2691,10 @@ function salvarConfig() {
   const airbnb = parseFloat(document.getElementById('cfg-taxa-airbnb').value || 15);
   const booking = parseFloat(document.getElementById('cfg-taxa-booking').value || 15);
   const particular = parseFloat(document.getElementById('cfg-taxa-particular').value || 0);
-  saveConfig({ Airbnb: airbnb, Booking: booking, Particular: particular });
+  // v5.9.1: mescla com a config existente. Antes o objeto novo substituía a config
+  // inteira e apagava quartos, mensagens, site, endereço, mapa e abaCalendario.
+  const c = Object.assign({}, loadConfig(), { Airbnb: airbnb, Booking: booking, Particular: particular });
+  saveConfig(c);
   renderConfig();
   toast('✅ Taxas salvas!');
 }
