@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0f172a">
+<title>Minhas Milhas</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--tx:#14181f;--mut:#667085;--bd:#e4e7ec;--ac:#2563eb;--ok:#16a34a;--warn:#d97706;--bad:#dc2626;--chip:#eef2ff}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b1220;--card:#131c2e;--tx:#e6eaf2;--mut:#93a0b8;--bd:#243049;--ac:#60a5fa;--chip:#1e293b}}
+:root[data-theme="dark"]{--bg:#0b1220;--card:#131c2e;--tx:#e6eaf2;--mut:#93a0b8;--bd:#243049;--ac:#60a5fa;--chip:#1e293b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;padding-bottom:80px}
+header{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--bd);padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
+h1{font-size:18px;margin:0}
+h2{font-size:16px;margin:0 0 10px}
+main{max-width:760px;margin:0 auto;padding:12px 16px}
+nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--bd);display:flex;z-index:6}
+nav button{flex:1;border:0;background:none;color:var(--mut);padding:10px 2px 12px;font-size:11px}
+nav button b{display:block;font-size:18px;font-weight:400}
+nav button.on{color:var(--ac)}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:12px}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.kpi{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px}
+.kpi small{color:var(--mut);display:block;font-size:12px}
+.kpi strong{font-size:20px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--bd)}
+.row:last-child{border-bottom:0}
+.mut{color:var(--mut);font-size:13px}
+.chip{display:inline-block;background:var(--chip);border-radius:99px;padding:2px 8px;font-size:12px}
+.ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+label{display:block;font-size:12px;color:var(--mut);margin:8px 0 3px}
+input,select,textarea{width:100%;padding:9px 10px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);font-size:15px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.btn{border:0;border-radius:8px;padding:9px 14px;background:var(--ac);color:#fff;font-size:14px;cursor:pointer}
+.btn.sec{background:var(--chip);color:var(--tx)}
+.btn.sm{padding:5px 9px;font-size:12px}
+.btn.del{background:none;color:var(--bad);padding:4px 6px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.verdict{border-radius:10px;padding:12px;margin-top:10px;font-weight:600}
+.verdict.ok{background:rgba(22,163,74,.12)}.verdict.bad{background:rgba(220,38,38,.12)}.verdict.warn{background:rgba(217,119,6,.12)}
+.bar{height:6px;background:var(--chip);border-radius:6px;overflow:hidden;margin-top:6px}.bar i{display:block;height:100%;background:var(--ac)}
+details summary{cursor:pointer;color:var(--ac);font-size:13px;margin-top:6px}
+.hidden{display:none}
+#toast{position:fixed;bottom:76px;left:50%;transform:translateX(-50%);background:#111827;color:#fff;padding:8px 14px;border-radius:8px;font-size:13px;opacity:0;transition:.3s;pointer-events:none}
+#toast.on{opacity:1}
+</style>
+</head>
+<body>
+<header><h1>✈️ Minhas Milhas</h1><button class="btn sec sm" onclick="toggleTheme()">◐</button></header>
+<main>
+<section id="t-saldos"></section>
+<section id="t-cartoes" class="hidden"></section>
+<section id="t-viagem" class="hidden"></section>
+<section id="t-transf" class="hidden"></section>
+<section id="t-config" class="hidden"></section>
+</main>
+<nav>
+<button data-t="saldos" class="on"><b>💼</b>Saldos</button>
+<button data-t="cartoes"><b>💳</b>Cartões</button>
+<button data-t="viagem"><b>🧭</b>Viagem</button>
+<button data-t="transf"><b>🔁</b>Transferir</button>
+<button data-t="config"><b>⚙️</b>Ajustes</button>
+</nav>
+<div id="toast"></div>
+<script>
+const KEY='milhas_v1';
+const uid=()=>Math.random().toString(36).slice(2,9);
+const fmt=n=>Math.round(n||0).toLocaleString('pt-BR');
+const brl=n=>(n||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const num=v=>parseFloat(String(v).replace(/\./g,'').replace(',','.'))||0;
+const today=()=>new Date().toISOString().slice(0,10);
+const daysTo=d=>d?Math.ceil((new Date(d+'T12:00')-new Date())/864e5):null;
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+// Valores de referência do milheiro são estimativas editáveis em Ajustes.
+const DEFAULT={
+ programs:[
+  {id:'itau',nome:'Pontos Itaú',tipo:'banco',valorRef:20,lotes:[]},
+  {id:'atomos',nome:'C6 Átomos',tipo:'banco',valorRef:25,lotes:[]},
+  {id:'loop',nome:'Inter Loop',tipo:'banco',valorRef:25,lotes:[]},
+  {id:'livelo',nome:'Livelo',tipo:'banco',valorRef:30,lotes:[]},
+  {id:'esfera',nome:'Esfera',tipo:'banco',valorRef:30,lotes:[]},
+  {id:'azul',nome:'TudoAzul',tipo:'aerea',valorRef:18,lotes:[]},
+  {id:'smiles',nome:'Smiles',tipo:'aerea',valorRef:16,lotes:[]},
+  {id:'latam',nome:'LATAM Pass',tipo:'aerea',valorRef:25,lotes:[]}
+ ],
+ cards:[
+  {id:'c1',nome:'Azul Itaú Visa Infinite',tipo:'pontos',taxa:3,unidade:'usd',programaId:'azul',anuidade:1356,gastoMensal:0},
+  {id:'c2',nome:'C6 Carbon (Airbnb)',tipo:'pontos',taxa:2.5,unidade:'usd',programaId:'atomos',anuidade:0,gastoMensal:0},
+  {id:'c3',nome:'Inter Prime',tipo:'pontos',taxa:0.4,unidade:'brl',programaId:'loop',anuidade:0,gastoMensal:0}
+ ],
+ beneficios:[],
+ transfers:[],
+ trips:[],
+ settings:{dolar:5.4,alertaDias:90,gistToken:'',gistId:''}
+};
+let S;
+try{S=JSON.parse(localStorage.getItem(KEY))||structuredClone(DEFAULT)}catch(e){S=structuredClone(DEFAULT)}
+if(!S.beneficios)S.beneficios=[];
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){};S._ts=Date.now()}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),1800)}
+const P=id=>S.programs.find(p=>p.id===id);
+const saldo=p=>p.lotes.reduce((a,l)=>a+l.qtd,0);
+const progOpts=(sel,filtro)=>S.programs.filter(p=>!filtro||p.tipo===filtro).map(p=>`<option value="${p.id}" ${p.id===sel?'selected':''}>${esc(p.nome)}</option>`).join('');
+
+/* ---------- SALDOS ---------- */
+function rSaldos(){
+ const total=S.programs.reduce((a,p)=>a+saldo(p),0);
+ const valor=S.programs.reduce((a,p)=>a+saldo(p)/1000*p.valorRef,0);
+ const venc=[];S.programs.forEach(p=>p.lotes.forEach(l=>{const d=daysTo(l.validade);if(d!==null&&d<=S.settings.alertaDias)venc.push({p,l,d})}));
+ (S.beneficios||[]).forEach(b=>{const d=daysTo(b.validade);if(d!==null&&d<=S.settings.alertaDias&&b.qtd-b.usados>0)venc.push({p:{nome:b.nome},l:{qtd:b.qtd-b.usados},d})});
+ venc.sort((a,b)=>a.d-b.d);
+ let h=`<div class="kpis"><div class="kpi"><small>Total de pontos/milhas</small><strong>${fmt(total)}</strong></div><div class="kpi"><small>Valor estimado</small><strong>${brl(valor)}</strong></div></div>`;
+ if(venc.length)h+=`<div class="card"><h2>⏰ Vencendo em até ${S.settings.alertaDias} dias</h2>${venc.map(v=>`<div class="row"><span>${esc(v.p.nome)} <span class="mut">${fmt(v.l.qtd)}</span></span><span class="${v.d<=30?'bad':'warn'}">${v.d<0?'vencido':v.d+' dias'}</span></div>`).join('')}</div>`;
+ ['banco','aerea'].forEach(tp=>{
+  h+=`<div class="card"><h2>${tp==='banco'?'🏦 Pontos de banco':'✈️ Companhias aéreas'}</h2>`;
+  S.programs.filter(p=>p.tipo===tp).forEach(p=>{
+   const s=saldo(p);
+   h+=`<div class="row"><div><strong>${esc(p.nome)}</strong><div class="mut">≈ ${brl(s/1000*p.valorRef)} · milheiro ref. ${brl(p.valorRef)}</div></div><div style="text-align:right"><strong>${fmt(s)}</strong><br><button class="btn sec sm" onclick="openProg('${p.id}')">editar</button></div></div><div id="pe-${p.id}"></div>`;
+  });
+  h+=`</div>`;
+ });
+ h+=`<div class="card"><h2>🎟️ Benefícios dos cartões</h2>${(S.beneficios||[]).map(b=>{const rest=b.qtd-b.usados,d=daysTo(b.validade);return`<div class="row"><div><strong>${esc(b.nome)}</strong><div class="mut">${b.validade?'válido até '+b.validade.split('-').reverse().join('/')+(d!==null?` · <span class="${d<=60?'bad':d<=S.settings.alertaDias?'warn':''}">${d<0?'vencido':d+' dias'}</span>`:''):'sem validade informada'}${b.obs?'<br>'+esc(b.obs):''}</div></div><div style="text-align:right;white-space:nowrap"><strong>${rest}/${b.qtd}</strong><br><button class="btn sec sm" onclick="usarBen('${b.id}',1)">usei 1</button> <button class="btn del" onclick="usarBen('${b.id}',-1)" title="desfazer">↺</button> <button class="btn del" onclick="delBen('${b.id}')">✕</button></div></div>`}).join('')||'<p class="mut">Nenhum benefício cadastrado.</p>'}
+ <details><summary>+ Adicionar benefício</summary><label>Nome</label><input id="bn-nome" placeholder="ex.: acesso sala VIP"><div class="g2"><div><label>Quantidade</label><input id="bn-qtd" inputmode="numeric"></div><div><label>Validade</label><input id="bn-val" type="date"></div></div><label>Observação</label><input id="bn-obs"><div class="actions"><button class="btn" onclick="addBen()">Adicionar</button></div></details></div>`;
+ document.getElementById('t-saldos').innerHTML=h;
+}
+function usarBen(id,n){const b=S.beneficios.find(x=>x.id===id);b.usados=Math.min(b.qtd,Math.max(0,b.usados+n));save();rSaldos()}
+function delBen(id){if(!confirm('Remover benefício?'))return;S.beneficios=S.beneficios.filter(b=>b.id!==id);save();rSaldos()}
+function addBen(){const n=v('bn-nome'),q=num(v('bn-qtd'));if(!n||!q)return toast('Preencha nome e quantidade');S.beneficios.push({id:uid(),nome:n,qtd:q,usados:0,validade:v('bn-val'),obs:v('bn-obs')});save();rSaldos();toast('Benefício adicionado')}
+function openProg(id){
+ const box=document.getElementById('pe-'+id);
+ if(box.innerHTML){box.innerHTML='';return}
+ const p=P(id);
+ box.innerHTML=`<div class="card" style="margin-top:8px">
+ ${p.lotes.length?p.lotes.map(l=>`<div class="row"><span>${fmt(l.qtd)} <span class="mut">${l.validade?'vence '+l.validade.split('-').reverse().join('/'):'sem validade'}${l.obs?' · '+esc(l.obs):''}</span></span><button class="btn del" onclick="delLote('${id}','${l.id}')">✕</button></div>`).join(''):'<p class="mut">Nenhum lote ainda. Cadastre o saldo separado por data de validade.</p>'}
+ <div class="g2"><div><label>Quantidade</label><input id="lq-${id}" inputmode="numeric"></div><div><label>Validade</label><input id="lv-${id}" type="date"></div></div>
+ <label>Observação</label><input id="lo-${id}" placeholder="ex.: bônus de transferência">
+ <div class="actions"><button class="btn" onclick="addLote('${id}')">Adicionar lote</button><button class="btn sec" onclick="setSaldo('${id}')">Definir saldo total</button></div></div>`;
+}
+function addLote(id){const q=num(document.getElementById('lq-'+id).value);if(!q)return toast('Informe a quantidade');P(id).lotes.push({id:uid(),qtd:q,validade:document.getElementById('lv-'+id).value,obs:document.getElementById('lo-'+id).value});save();rSaldos();openProg(id);toast('Lote adicionado')}
+function setSaldo(id){const q=num(document.getElementById('lq-'+id).value);if(!confirm('Substituir todos os lotes por um saldo único de '+fmt(q)+'?'))return;P(id).lotes=q?[{id:uid(),qtd:q,validade:document.getElementById('lv-'+id).value,obs:''}]:[];save();rSaldos();openProg(id)}
+function delLote(id,lid){const p=P(id);p.lotes=p.lotes.filter(l=>l.id!==lid);save();rSaldos();openProg(id)}
+
+/* ---------- CARTÕES ---------- */
+function cardCalc(c){
+ const g=c.gastoMensal||0;let pts=0,val=0;
+ if(c.tipo==='cashback'){val=g*c.taxa/100}
+ else{pts=c.unidade==='usd'?g/S.settings.dolar*c.taxa:g*c.taxa;const p=P(c.programaId);val=pts/1000*(p?p.valorRef:0)}
+ const liq=val*12-(c.anuidade||0);
+ const ret=g?liq/(g*12)*100:0;
+ const porReal=c.tipo==='cashback'?c.taxa/100:(c.unidade==='usd'?c.taxa/S.settings.dolar:c.taxa)/1000*(P(c.programaId)?.valorRef||0);
+ return{pts,val,liq,ret,porReal};
+}
+function rCartoes(){
+ const list=S.cards.map(c=>({c,k:cardCalc(c)})).sort((a,b)=>b.k.porReal-a.k.porReal);
+ const best=list[0];
+ let h='';
+ if(best&&best.k.porReal>0)h+=`<div class="card"><h2>🏆 Melhor cartão por real gasto</h2><p><strong>${esc(best.c.nome)}</strong> devolve cerca de <strong>${(best.k.porReal*100).toFixed(2)}%</strong> de cada compra em valor de pontos.</p><p class="mut">Comparação sem anuidade. O retorno líquido de cada cartão (com anuidade e seu gasto) está abaixo.</p></div>`;
+ else h+=`<div class="card"><p class="mut">Preencha a pontuação de cada cartão (está na fatura ou no app do banco) para ver o ranking.</p></div>`;
+ list.forEach(({c,k})=>{
+  h+=`<div class="card"><div class="row" style="border:0;padding:0"><strong>${esc(c.nome)}</strong><button class="btn del" onclick="delCard('${c.id}')">✕</button></div>
+  <div class="g2"><div><label>Tipo</label><select onchange="upCard('${c.id}','tipo',this.value)"><option value="pontos" ${c.tipo==='pontos'?'selected':''}>Pontos</option><option value="cashback" ${c.tipo==='cashback'?'selected':''}>Cashback</option></select></div>
+  <div><label>${c.tipo==='cashback'?'Cashback (%)':'Pontos por'}</label>${c.tipo==='cashback'?`<input value="${c.taxa}" inputmode="decimal" onchange="upCard('${c.id}','taxa',num(this.value))">`:`<div style="display:flex;gap:6px"><input value="${c.taxa}" inputmode="decimal" onchange="upCard('${c.id}','taxa',num(this.value))"><select onchange="upCard('${c.id}','unidade',this.value)" style="width:80px"><option value="usd" ${c.unidade==='usd'?'selected':''}>US$</option><option value="brl" ${c.unidade==='brl'?'selected':''}>R$</option></select></div>`}</div></div>
+  ${c.tipo==='pontos'?`<label>Os pontos caem em</label><select onchange="upCard('${c.id}','programaId',this.value)">${progOpts(c.programaId)}</select>`:''}
+  <div class="g2"><div><label>Anuidade/ano (R$)</label><input value="${c.anuidade}" inputmode="decimal" onchange="upCard('${c.id}','anuidade',num(this.value))"></div><div><label>Gasto mensal médio (R$)</label><input value="${c.gastoMensal}" inputmode="decimal" onchange="upCard('${c.id}','gastoMensal',num(this.value))"></div></div>
+  <div class="mut" style="margin-top:10px">${c.tipo==='pontos'?fmt(k.pts)+' pontos/mês · ':''}${brl(k.val)}/mês em valor · líquido no ano <strong class="${k.liq>=0?'ok':'bad'}">${brl(k.liq)}</strong> (${k.ret.toFixed(2)}% do gasto)</div></div>`;
+ });
+ h+=`<button class="btn sec" onclick="addCard()">+ Adicionar cartão</button>`;
+ document.getElementById('t-cartoes').innerHTML=h;
+}
+function upCard(id,f,v){const c=S.cards.find(x=>x.id===id);c[f]=v;save();rCartoes()}
+function addCard(){const n=prompt('Nome do cartão');if(!n)return;S.cards.push({id:uid(),nome:n,tipo:'pontos',taxa:0,unidade:'usd',programaId:'livelo',anuidade:0,gastoMensal:0});save();rCartoes()}
+function delCard(id){if(!confirm('Remover cartão?'))return;S.cards=S.cards.filter(c=>c.id!==id);save();rCartoes()}
+
+/* ---------- VIAGEM ---------- */
+function rViagem(){
+ let h=`<div class="card"><h2>🧭 Pagar em dinheiro ou em milhas?</h2>
+ <label>Destino / trecho</label><input id="v-dest" placeholder="ex.: GRU → LIS, ida e volta">
+ <div class="g2"><div><label>Preço em dinheiro (R$)</label><input id="v-preco" inputmode="decimal" oninput="calcV()"></div><div><label>Programa</label><select id="v-prog" onchange="calcV()">${progOpts('smiles','aerea')}</select></div></div>
+ <div class="g2"><div><label>Milhas pedidas</label><input id="v-mil" inputmode="numeric" oninput="calcV()"></div><div><label>Taxas em R$ (no resgate)</label><input id="v-tax" inputmode="decimal" oninput="calcV()"></div></div>
+ <div id="v-out"></div>
+ <div class="actions"><button class="btn" onclick="saveTrip()">Salvar comparação</button></div></div>
+ <div class="card"><h2>🛒 Vale comprar milhas?</h2><p class="mut">Para quando faltar saldo ou aparecer promoção de compra.</p>
+ <div class="g2"><div><label>Milhas oferecidas</label><input id="c-mil" inputmode="numeric" oninput="calcC()"></div><div><label>Preço total (R$)</label><input id="c-preco" inputmode="decimal" oninput="calcC()"></div></div>
+ <label>Programa</label><select id="c-prog" onchange="calcC()">${progOpts('smiles')}</select><div id="c-out"></div></div>`;
+ if(S.trips.length){h+=`<div class="card"><h2>Comparações salvas</h2>${S.trips.slice().reverse().map(t=>{const p=P(t.programaId);const vm=t.milhas?(t.preco-t.taxas)/t.milhas*1000:0;const good=p&&vm>=p.valorRef;return`<div class="row"><div><strong>${esc(t.destino||'Sem nome')}</strong><div class="mut">${t.data.split('-').reverse().join('/')} · ${brl(t.preco)} ou ${fmt(t.milhas)} ${esc(p?.nome||'')} + ${brl(t.taxas)}</div></div><div style="text-align:right"><span class="${good?'ok':'bad'}">${brl(vm)}/mil</span><br><button class="btn del" onclick="delTrip('${t.id}')">✕</button></div></div>`}).join('')}</div>`}
+ document.getElementById('t-viagem').innerHTML=h;
+}
+function calcV(){
+ const preco=num(v('v-preco')),mil=num(v('v-mil')),tax=num(v('v-tax')),p=P(v('v-prog'));const o=document.getElementById('v-out');
+ if(!preco||!mil){o.innerHTML='';return}
+ const vm=(preco-tax)/mil*1000,custo=mil/1000*p.valorRef+tax,s=saldo(p),falta=Math.max(0,mil-s);
+ const r=vm/p.valorRef;let cls,msg;
+ if(r>=1.15){cls='ok';msg='✅ Use as milhas — você está tirando mais do que o valor de referência.'}
+ else if(r>=0.95){cls='warn';msg='⚖️ Empate técnico — tanto faz; decida pela flexibilidade (reembolso, remarcação).'}
+ else{cls='bad';msg='💵 Pague em dinheiro — as milhas valem mais guardadas para outra viagem.'}
+ o.innerHTML=`<div class="verdict ${cls}">${msg}</div><div class="mut" style="margin-top:8px">Você estaria tirando <strong>${brl(vm)}</strong> por milheiro (referência ${esc(p.nome)}: ${brl(p.valorRef)}).<br>Custo da opção em milhas: ${brl(custo)} contra ${brl(preco)} em dinheiro.<br>${falta?`<span class="warn">Faltam ${fmt(falta)} milhas no saldo atual (${fmt(s)}).</span>`:`<span class="ok">Saldo suficiente (${fmt(s)}).</span>`}</div>`;
+}
+function calcC(){
+ const mil=num(v('c-mil')),preco=num(v('c-preco')),p=P(v('c-prog'));const o=document.getElementById('c-out');
+ if(!mil||!preco){o.innerHTML='';return}
+ const pm=preco/mil*1000,r=pm/p.valorRef;
+ o.innerHTML=`<div class="verdict ${r<=0.9?'ok':r<=1.05?'warn':'bad'}">${brl(pm)} por milheiro — ${r<=0.9?'abaixo da sua referência, bom preço.':r<=1.05?'na faixa da referência; só compre com viagem em vista.':'acima da referência; melhor esperar promoção.'}</div>`;
+}
+const v=id=>document.getElementById(id).value;
+function saveTrip(){const preco=num(v('v-preco')),mil=num(v('v-mil'));if(!preco||!mil)return toast('Preencha preço e milhas');S.trips.push({id:uid(),data:today(),destino:v('v-dest'),preco,milhas:mil,taxas:num(v('v-tax')),programaId:v('v-prog')});save();rViagem();toast('Salvo')}
+function delTrip(id){S.trips=S.trips.filter(t=>t.id!==id);save();rViagem()}
+
+/* ---------- TRANSFERÊNCIAS ---------- */
+function rTransf(){
+ let h=`<div class="card"><h2>🔁 Transferência banco → companhia</h2>
+ <div class="g2"><div><label>De</label><select id="tr-de" onchange="calcT()">${progOpts('livelo','banco')}</select></div><div><label>Para</label><select id="tr-para" onchange="calcT()">${progOpts('smiles','aerea')}</select></div></div>
+ <div class="g2"><div><label>Pontos a transferir</label><input id="tr-pts" inputmode="numeric" oninput="calcT()"></div><div><label>Bônus da campanha (%)</label><input id="tr-bon" inputmode="decimal" value="0" oninput="calcT()"></div></div>
+ <div class="g2"><div><label>Paridade (pontos por milha)</label><input id="tr-par" inputmode="decimal" value="1" oninput="calcT()"></div><div><label>Validade das milhas</label><input id="tr-val" type="date"></div></div>
+ <div id="tr-out"></div>
+ <div class="actions"><button class="btn" onclick="doTransf()">Registrar e atualizar saldos</button></div></div>`;
+ if(S.transfers.length)h+=`<div class="card"><h2>Histórico</h2>${S.transfers.slice().reverse().map(t=>`<div class="row"><div>${esc(P(t.deId)?.nome)} → ${esc(P(t.paraId)?.nome)}<div class="mut">${t.data.split('-').reverse().join('/')} · bônus ${t.bonus}%</div></div><div style="text-align:right">${fmt(t.pontos)} → <strong>${fmt(t.recebidos)}</strong></div></div>`).join('')}</div>`;
+ document.getElementById('t-transf').innerHTML=h;
+}
+function calcT(){
+ const pts=num(v('tr-pts')),bon=num(v('tr-bon')),par=num(v('tr-par'))||1,de=P(v('tr-de')),para=P(v('tr-para'));const o=document.getElementById('tr-out');
+ if(!pts){o.innerHTML='';return}
+ const rec=pts/par*(1+bon/100),custo=pts/1000*de.valorRef/(rec/1000);
+ const ok=custo<=para.valorRef;
+ o.innerHTML=`<div class="verdict ${ok?'ok':'bad'}">Você recebe ${fmt(rec)} milhas ${esc(para.nome)}. Custo efetivo: ${brl(custo)} por milheiro ${ok?'— vale a pena':'— acima da referência da companhia; espere um bônus maior'}.</div>${pts>saldo(de)?`<p class="warn">Saldo de ${esc(de.nome)} insuficiente (${fmt(saldo(de))}).</p>`:''}`;
+}
+function takeFrom(p,q){p.lotes.sort((a,b)=>(a.validade||'9999')<(b.validade||'9999')?-1:1);for(const l of p.lotes){const t=Math.min(l.qtd,q);l.qtd-=t;q-=t;if(!q)break}p.lotes=p.lotes.filter(l=>l.qtd>0)}
+function doTransf(){
+ const pts=num(v('tr-pts')),bon=num(v('tr-bon')),par=num(v('tr-par'))||1,de=P(v('tr-de')),para=P(v('tr-para'));
+ if(!pts)return toast('Informe os pontos');if(pts>saldo(de)&&!confirm('Saldo de origem menor que o valor. Registrar mesmo assim?'))return;
+ const rec=Math.round(pts/par*(1+bon/100));
+ takeFrom(de,pts);para.lotes.push({id:uid(),qtd:rec,validade:v('tr-val'),obs:'transferência de '+de.nome});
+ S.transfers.push({id:uid(),data:today(),deId:de.id,paraId:para.id,pontos:pts,bonus:bon,recebidos:rec});save();rTransf();toast('Saldos atualizados')
+}
+
+/* ---------- AJUSTES ---------- */
+function rConfig(){
+ document.getElementById('t-config').innerHTML=`<div class="card"><h2>Valor de referência do milheiro</h2><p class="mut">É quanto você considera que mil pontos valem. Os números iniciais são estimativas — ajuste conforme o mercado e sua experiência. Tudo no app depende disso.</p>
+ ${S.programs.map(p=>`<div class="row"><span>${esc(p.nome)}</span><input style="width:110px" value="${p.valorRef}" inputmode="decimal" onchange="P('${p.id}').valorRef=num(this.value);save();toast('Atualizado')"></div>`).join('')}</div>
+ <div class="card"><h2>Geral</h2><div class="g2"><div><label>Dólar (R$)</label><input value="${S.settings.dolar}" inputmode="decimal" onchange="S.settings.dolar=num(this.value);save()"></div><div><label>Alerta de vencimento (dias)</label><input value="${S.settings.alertaDias}" inputmode="numeric" onchange="S.settings.alertaDias=num(this.value);save()"></div></div></div>
+ <div class="card"><h2>Sincronização (GitHub Gist)</h2><p class="mut">Mesmo esquema do app de gastos: token com permissão <em>gist</em>. Deixe o ID vazio na primeira vez — o app cria o Gist.</p>
+ <label>Token</label><input id="g-tok" type="password" value="${esc(S.settings.gistToken)}"><label>ID do Gist</label><input id="g-id" value="${esc(S.settings.gistId)}">
+ <div class="actions"><button class="btn" onclick="gistPush()">Enviar</button><button class="btn sec" onclick="gistPull()">Baixar</button></div></div>
+ <div class="card"><h2>Backup</h2><div class="actions"><button class="btn sec" onclick="exportJ()">Exportar JSON</button><button class="btn sec" onclick="document.getElementById('imp').click()">Importar JSON</button><input id="imp" type="file" accept=".json" class="hidden" onchange="importJ(this)"></div></div>`;
+}
+function gCfg(){S.settings.gistToken=v('g-tok').trim();S.settings.gistId=v('g-id').trim();save()}
+async function gistPush(){
+ gCfg();const {gistToken:t,gistId:id}=S.settings;if(!t)return toast('Informe o token');
+ const body={files:{'milhas.json':{content:JSON.stringify({...S,settings:{...S.settings,gistToken:''}})}}};
+ try{const r=await fetch('https://api.github.com/gists'+(id?'/'+id:''),{method:id?'PATCH':'POST',headers:{Authorization:'token '+t,'Content-Type':'application/json'},body:JSON.stringify(id?body:{...body,public:false,description:'Minhas Milhas'})});
+ const j=await r.json();if(!r.ok)throw j.message;if(!id){S.settings.gistId=j.id;save();rConfig()}toast('Enviado')}catch(e){toast('Erro: '+e)}
+}
+async function gistPull(){
+ gCfg();const {gistToken:t,gistId:id}=S.settings;if(!t||!id)return toast('Token e ID necessários');
+ try{const r=await fetch('https://api.github.com/gists/'+id,{headers:{Authorization:'token '+t}});const j=await r.json();if(!r.ok)throw j.message;
+ const d=JSON.parse(j.files['milhas.json'].content);d.settings.gistToken=t;d.settings.gistId=id;S=d;save();renderAll();toast('Baixado')}catch(e){toast('Erro: '+e)}
+}
+function exportJ(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify({...S,settings:{...S.settings,gistToken:''}},null,1)],{type:'application/json'}));a.download='milhas-'+today()+'.json';a.click()}
+function importJ(inp){const f=inp.files[0];if(!f)return;f.text().then(t=>{try{const d=JSON.parse(t);d.settings.gistToken=S.settings.gistToken;S=d;save();renderAll();toast('Importado')}catch(e){toast('Arquivo inválido')}})}
+
+/* ---------- NAV / TEMA ---------- */
+const R={saldos:rSaldos,cartoes:rCartoes,viagem:rViagem,transf:rTransf,config:rConfig};
+function renderAll(){Object.values(R).forEach(f=>f())}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));document.querySelectorAll('main section').forEach(s=>s.classList.toggle('hidden',s.id!=='t-'+b.dataset.t));R[b.dataset.t]();scrollTo(0,0)});
+function toggleTheme(){const r=document.documentElement,cur=r.dataset.theme||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');r.dataset.theme=cur==='dark'?'light':'dark';try{localStorage.setItem(KEY+'_theme',r.dataset.theme)}catch(e){}}
+try{const th=localStorage.getItem(KEY+'_theme');if(th)document.documentElement.dataset.theme=th}catch(e){}
+renderAll();
+</script>
+</body>
+</html>
