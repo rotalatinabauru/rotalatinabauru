@@ -1026,6 +1026,13 @@ details#cal-manual summary::-webkit-details-marker{display:none}
     </div>
   </div>
   <div class="card">
+    <div class="card-header bg-terra">🔧 Conferir calendário</div>
+    <div class="card-body">
+      <div class="info-box info-blue">💡 Compara cada reserva lançada com os dias pintados no calendário e mostra o que estiver diferente. <strong>Nada é corrigido sozinho</strong> — você aplica um por um.</div>
+      <button class="btn btn-navy btn-full" onclick="abrirConferencia()">🔎 Conferir agora</button>
+    </div>
+  </div>
+  <div class="card">
     <div class="card-header bg-terra">📲 Instalar na tela de início</div>
     <div class="card-body" id="inst-body"></div>
   </div>
@@ -1102,7 +1109,7 @@ details#cal-manual summary::-webkit-details-marker{display:none}
         </div>
       </div>
       <button class="btn btn-green btn-full" onclick="salvarConfig()">✅ Salvar Configurações</button>
-      <div style="margin-top:14px;text-align:center;font-size:0.75rem;color:var(--silver)">Rota Latina — versão 5.9.1</div>
+      <div style="margin-top:14px;text-align:center;font-size:0.75rem;color:var(--silver)">Rota Latina — versão 5.9.2</div>
     </div>
   </div>
 
@@ -1616,6 +1623,15 @@ details#cal-manual summary::-webkit-details-marker{display:none}
 </div>
 
 <!-- ═══════════ MODAL CALENDÁRIO ═══════════ -->
+<div class="modal-backdrop" id="modal-conferir" onclick="closeModalOutside(event,'modal-conferir')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">🔧 Conferência do calendário</div>
+    <div id="conf-body"></div>
+    <button class="btn btn-full btn-cancel" style="margin-top:10px" onclick="closeModal('modal-conferir')">Fechar</button>
+  </div>
+</div>
+
 <div class="modal-backdrop" id="modal-cal" onclick="closeModalOutside(event,'modal-cal')">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -2829,7 +2845,9 @@ function getDatesInRange(d1Str, d2Str) {
   const end = d2Str ? new Date(d2Str + 'T00:00:00') : new Date(start);
   let cur = new Date(start);
   while (cur < end) {
-    dates.push(cur.toISOString().split('T')[0]);
+    // v5.9.2: montado a partir dos componentes locais. Antes usava toISOString(),
+    // que converte para UTC e devolvia o dia anterior em fusos a leste de Greenwich.
+    dates.push(cur.getFullYear() + '-' + String(cur.getMonth() + 1).padStart(2, '0') + '-' + String(cur.getDate()).padStart(2, '0'));
     cur.setDate(cur.getDate() + 1);
   }
   // Se não há checkout (hospedagem de 1 dia), inclui o próprio dia
@@ -3744,20 +3762,28 @@ function saveEditReceita() {
   if (checkout && checkout < data) { toast('⚠️ Check-out não pode ser antes do check-in'); return; }
 
   // Verifica conflito de datas IGNORANDO a própria reserva
+  // v5.9.2: as chaves do calendário são "quarto|AAAA-MM-DD" desde a v5.0. A comparação
+  // antiga usava só a data, nunca batia, e a checagem passava sempre batido.
   const datasNovas = getDatesInRange(data, checkout);
+  const quartoEdit = (document.getElementById('edit-r-quarto') || {}).value || recs[idx].quarto || primeiroQuarto();
+  const chavesNovas = datasNovas.map(d => quartoEdit + '|' + d);
   const conflitos = [];
   Object.values(_cache).forEach(yearData => {
     if (!yearData || !yearData.cal) return;
-    Object.entries(yearData.cal).forEach(([d, info]) => {
-      if (info.recId === id) return; // ignora a própria
-      if (info.recId && datasNovas.includes(d)) {
-        conflitos.push(d);
+    Object.entries(yearData.cal).forEach(([k, info]) => {
+      if (!info || info.recId === id) return; // ignora a própria
+      if (info.recId && chavesNovas.includes(k)) {
+        conflitos.push(br(calDataDaChave(k)) + (info.hospede ? ' (' + info.hospede + ')' : ''));
       }
     });
   });
+  // Aviso, não bloqueio: às vezes a sobreposição é proposital (hóspede remanejado de quarto).
   if (conflitos.length > 0) {
-    toast('⚠️ Conflito: período já ocupado por outra reserva (' + conflitos[0].split('-').reverse().join('/') + ')');
-    return;
+    const uniq = [...new Set(conflitos)];
+    if (!confirmar('⚠️ Este período já está ocupado por outra reserva em:\n\n' +
+        uniq.slice(0, 6).map(x => '• ' + x).join('\n') +
+        (uniq.length > 6 ? '\n…e mais ' + (uniq.length - 6) : '') +
+        '\n\nSalvar mesmo assim? O dia passa a mostrar esta reserva.')) return;
   }
 
   // Recalcula taxa e líquido
@@ -6876,6 +6902,136 @@ function usarColado() {
   updateTaxaPreview();
   var falta = r.faltou.filter(function (x) { return x !== 'plataforma'; });
   toast(falta.length ? '\ud83d\udccb Preenchido \u2014 falta conferir: ' + falta.join(', ') : '\ud83d\udccb Preenchido! Confira e salve', 4000);
+}
+
+
+/* ═══════ v5.9.2 · conferência do calendário ═══════ */
+function _anosNoCache() {
+  return Object.keys(_cache).map(function (k) { return parseInt(k); }).filter(function (y) { return !isNaN(y); }).sort();
+}
+function _reservasTodas() {
+  var out = [];
+  _anosNoCache().forEach(function (y) { (_cache[y].rec || []).forEach(function (r) { out.push(r); }); });
+  return out;
+}
+function _diasPintados(recId) {
+  var out = [];
+  _anosNoCache().forEach(function (y) {
+    var cal = _cache[y].cal || {};
+    Object.keys(cal).forEach(function (k) { if (cal[k] && cal[k].recId === recId) out.push(k); });
+  });
+  return out.sort();
+}
+function _chavesEsperadas(r) {
+  var q = r.quarto || primeiroQuarto();
+  return getDatesInRange(r.data, r.checkout || r.data).map(function (d) { return q + '|' + d; }).sort();
+}
+function _celula(chave) {
+  var y = parseInt(calDataDaChave(chave).slice(0, 4));
+  var cal = (_cache[y] && _cache[y].cal) || {};
+  return cal[chave] || null;
+}
+function conferirCalendario() {
+  var recs = _reservasTodas();
+  var ids = {}; recs.forEach(function (r) { ids[r.id] = r; });
+  var probs = [];
+  recs.forEach(function (r) {
+    if (!r.data) return;
+    var esp = _chavesEsperadas(r);
+    var real = _diasPintados(r.id);
+    if (JSON.stringify(esp) === JSON.stringify(real)) return;
+    var faltando = esp.filter(function (k) { return real.indexOf(k) < 0; });
+    var sobrando = real.filter(function (k) { return esp.indexOf(k) < 0; });
+    var ocupados = faltando.map(function (k) {
+      var c = _celula(k);
+      if (c && c.recId && c.recId !== r.id) {
+        return { chave: k, por: (ids[c.recId] ? ids[c.recId].hospede : (c.hospede || 'outra reserva')) };
+      }
+      return null;
+    }).filter(Boolean);
+    probs.push({ tipo: 'reserva', rec: r, faltando: faltando, sobrando: sobrando, ocupados: ocupados });
+  });
+  var orfas = [];
+  _anosNoCache().forEach(function (y) {
+    var cal = _cache[y].cal || {};
+    Object.keys(cal).forEach(function (k) {
+      var c = cal[k];
+      if (c && c.recId && !ids[c.recId]) orfas.push({ chave: k, hospede: c.hospede || '' });
+    });
+  });
+  if (orfas.length) probs.push({ tipo: 'orfas', itens: orfas.sort(function (a, b) { return a.chave < b.chave ? -1 : 1; }) });
+  return probs;
+}
+function abrirConferencia() { renderConferencia(); openModal('modal-conferir'); }
+function renderConferencia() {
+  var box = document.getElementById('conf-body'); if (!box) return;
+  var probs = conferirCalendario();
+  var doRec = probs.filter(function (p) { return p.tipo === 'reserva'; });
+  var orf = probs.filter(function (p) { return p.tipo === 'orfas'; })[0];
+  if (!doRec.length && !orf) {
+    box.innerHTML = '<div class="empty-state"><div class="icon">✅</div><p>Tudo certo! Todas as reservas estão pintadas nos dias certos.</p></div>';
+    return;
+  }
+  var h = '<div class="info-box info-blue">Encontrei ' + doRec.length + (doRec.length === 1 ? ' reserva' : ' reservas') +
+    ' com o calendário diferente do que está lançado' + (orf ? ' e ' + orf.itens.length + ' dia(s) de reserva já excluída' : '') +
+    '. Confira um por um — <strong>nada é corrigido sozinho</strong>.</div>';
+  doRec.forEach(function (p) {
+    var r = p.rec;
+    h += '<div class="card" style="margin:10px 0"><div class="card-body">' +
+      '<strong>' + esc(r.hospede || '(sem nome)') + '</strong>' + tagQuarto(r.quarto) + '<br>' +
+      '<span style="font-size:0.8rem;color:var(--silver)">Lançado: ' + br(r.data) + (r.checkout ? ' → ' + br(r.checkout) : '') + '</span>';
+    if (p.faltando.length) h += '<div style="font-size:0.82rem;margin-top:6px">❌ Falta pintar: <strong>' +
+      p.faltando.map(function (k) { return br(calDataDaChave(k)); }).join(', ') + '</strong></div>';
+    if (p.sobrando.length) h += '<div style="font-size:0.82rem;margin-top:4px">➖ Pintado a mais: <strong>' +
+      p.sobrando.map(function (k) { return br(calDataDaChave(k)); }).join(', ') + '</strong></div>';
+    if (p.ocupados.length) h += '<div class="info-box" style="margin-top:8px;background:rgba(212,168,83,0.14);border-left:3px solid var(--gold);color:#6b5418;font-size:0.78rem">⚠️ ' +
+      p.ocupados.map(function (o) { return br(calDataDaChave(o.chave)) + ' está com <strong>' + esc(o.por) + '</strong>'; }).join('<br>') +
+      '<br>Se a troca foi combinada de propósito, deixe como está.</div>';
+    h += '<button class="btn btn-navy btn-full" style="margin-top:8px" onclick="corrigirReservaCal(\'' + r.id + '\')">🔧 Corrigir esta reserva</button></div></div>';
+  });
+  if (orf) {
+    h += '<div class="card" style="margin:10px 0"><div class="card-body"><strong>🗑️ Dias de reservas que não existem mais</strong>' +
+      '<div style="font-size:0.82rem;margin-top:6px">' +
+      orf.itens.map(function (o) { return br(calDataDaChave(o.chave)) + (o.hospede ? ' · ' + esc(o.hospede) : ''); }).join('<br>') +
+      '</div><button class="btn btn-full btn-cancel" style="margin-top:8px" onclick="limparOrfas()">Limpar esses dias</button></div></div>';
+  }
+  box.innerHTML = h;
+}
+function corrigirReservaCal(id) {
+  var r = _reservasTodas().filter(function (x) { return x.id === id; })[0];
+  if (!r) { toast('⚠️ Reserva não encontrada'); return; }
+  var esp = _chavesEsperadas(r);
+  var conflitos = esp.map(function (k) {
+    var c = _celula(k);
+    return (c && c.recId && c.recId !== id) ? br(calDataDaChave(k)) + ' (' + (c.hospede || 'outra reserva') + ')' : null;
+  }).filter(Boolean);
+  if (conflitos.length && !confirmar('Estes dias estão com outra reserva:\n\n' +
+      conflitos.map(function (x) { return '• ' + x; }).join('\n') +
+      '\n\nCorrigir passa esses dias para ' + (r.hospede || 'esta reserva') + '. Continuar?')) return;
+  clearCalendar(id);
+  fillCalendar(r);
+  renderCalendario(); renderMapa(); renderConferencia();
+  toast('✅ Calendário de ' + (r.hospede || 'reserva') + ' corrigido');
+}
+function limparOrfas() {
+  var orf = conferirCalendario().filter(function (p) { return p.tipo === 'orfas'; })[0];
+  if (!orf) return;
+  if (!confirmar('Apagar ' + orf.itens.length + ' dia(s) do calendário que pertenciam a reservas já excluídas?\n\nIsso não mexe em nenhuma reserva.')) return;
+  var porAno = {};
+  orf.itens.forEach(function (o) {
+    var y = parseInt(calDataDaChave(o.chave).slice(0, 4));
+    (porAno[y] = porAno[y] || []).push(o.chave);
+  });
+  Object.keys(porAno).forEach(function (y) {
+    var yr = parseInt(y); _ensureYear(yr);
+    var cal = Object.assign({}, _cache[yr].cal);
+    porAno[y].forEach(function (k) { delete cal[k]; });
+    _cache[yr].cal = cal;
+    try { localStorage.setItem('rl_cal_' + yr, JSON.stringify(cal)); } catch (e) {}
+    _pushToFirestore('cal_' + yr, cal);
+  });
+  renderCalendario(); renderMapa(); renderConferencia();
+  toast('🗑️ Dias soltos removidos');
 }
 
 </script>
